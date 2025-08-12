@@ -1,4 +1,4 @@
-# 🥭 MangoMoney v3.0
+# 🥭 MangoMoney
 
 **MangoMoney** è un portfolio tracker abbastanza completo e moderno, pensato per monitorare investimenti e patrimonio in modo (non)professionale, semplice e — soprattutto — senza che i tuoi dati vadano a spasso per Internet.
 
