@@ -618,6 +618,18 @@ const NetWorthManager = () => {
     return saved ? JSON.parse(saved) : 4.0;
   });
 
+  // Notification system
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+    visible: boolean;
+  }>({ message: '', type: 'info', visible: false });
+
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setNotification({ message, type, visible: true });
+    setTimeout(() => setNotification(prev => ({ ...prev, visible: false })), 5000);
+  };
+
 
 
   // Translation helper function
@@ -774,13 +786,14 @@ const NetWorthManager = () => {
       }
     });
     
-    // Normalize to 0-10 scale: (weighted risk / total allocation) * 10
+    // Normalize to 0-10 scale: (weighted risk / total allocation) * (10 / max_weight)
+    // Since max_weight = 5, we multiply by 2 to get 0-10 scale
     const riskScore = totalAllocation > 0 ? (totalWeightedRisk / totalAllocation) * 2 : 0;
 
     // Emergency Fund Analysis
     const emergencyMonths = emergencyFundValue > 0 && monthlyExpenses > 0 
       ? (emergencyFundValue / monthlyExpenses).toFixed(1) 
-      : '0';
+      : monthlyExpenses === 0 ? '0' : '0';
     
     const emergencyFundStatus = parseFloat(emergencyMonths) >= 6 ? 'Ottimale' :
                                parseFloat(emergencyMonths) >= 3 ? 'Adeguato' : 'Insufficiente';
@@ -1352,48 +1365,53 @@ const NetWorthManager = () => {
 
   // Export functionality
   const exportToJSON = () => {
-    // Calculate statistics for metadata
-    const totalItems = Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0);
-    const totalValue = Object.entries(totals).reduce((sum: number, [key, value]) => {
-      if (key === 'total') return sum;
-      return sum + Math.abs(value);
-    }, 0);
+    try {
+      // Calculate statistics for metadata
+      const totalItems = Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0);
+      const totalValue = Object.entries(totals).reduce((sum: number, [key, value]) => {
+        if (key === 'total') return sum;
+        return sum + Math.abs(value);
+      }, 0);
 
-    const exportData = {
-      assets,
-      metadata: {
-        exportDate: new Date().toISOString(),
-        version: '2.2',
-        appName: 'MangoMoney',
-        totalItems,
-        totalValue,
-        emergencyFundAccount,
-        monthlyExpenses,
-        exportInfo: {
-          totalAssets: Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0),
-          sections: Object.keys(assets).map(section => ({
-            name: section,
-            count: assets[section as keyof typeof assets].length
-          }))
+      const exportData = {
+        assets,
+        metadata: {
+          exportDate: new Date().toISOString(),
+          version: '2.2',
+          appName: 'MangoMoney',
+          totalItems,
+          totalValue,
+          emergencyFundAccount,
+          monthlyExpenses,
+          exportInfo: {
+            totalAssets: Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0),
+            sections: Object.keys(assets).map(section => ({
+              name: section,
+              count: assets[section as keyof typeof assets].length
+            }))
+          }
         }
-      }
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.2.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    
-    // Show success message
-    alert(`✅ Backup JSON esportato con successo!\n\n📊 Dati esportati:\n• ${totalItems} elementi totali\n• ${formatCurrency(totalValue)} valore totale\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.2.json`);
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.2.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      // Show success message
+      showNotification(`✅ Backup JSON esportato con successo!\n\n📊 Dati esportati:\n• ${totalItems} elementi totali\n• ${formatCurrency(totalValue)} valore totale\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.2.json`, 'success');
+    } catch (error) {
+      showNotification('❌ Errore durante l\'esportazione del backup. Riprova.', 'error');
+    }
   };
 
   const exportToCSV = () => {
-    const allData: any[] = [];
+    try {
+      const allData: any[] = [];
     
     // Add regular assets
     Object.entries(assets).forEach(([section, items]) => {
@@ -1500,11 +1518,15 @@ const NetWorthManager = () => {
     URL.revokeObjectURL(url);
     
     // Show success message
-    alert(`✅ CSV esportato con successo!\n\n📊 Dati esportati:\n• ${allData.length} elementi totali\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-dettagliato-${new Date().toISOString().split('T')[0]}.csv`);
+    showNotification(`✅ CSV esportato con successo!\n\n📊 Dati esportati:\n• ${allData.length} elementi totali\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-dettagliato-${new Date().toISOString().split('T')[0]}.csv`, 'success');
+    } catch (error) {
+      showNotification('❌ Errore durante l\'esportazione CSV. Riprova.', 'error');
+    }
   };
 
   const exportToExcel = () => {
-    const allData: any[] = [];
+    try {
+      const allData: any[] = [];
     
     // Add regular assets
     Object.entries(assets).forEach(([section, items]) => {
@@ -1612,7 +1634,10 @@ const NetWorthManager = () => {
     URL.revokeObjectURL(url);
     
     // Show success message
-    alert(`✅ Excel (CSV) esportato con successo!\n\n📊 Dati esportati:\n• ${allData.length} elementi totali\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-excel-${new Date().toISOString().split('T')[0]}.csv\n\n📝 Nota: Apri il file con Excel per una migliore visualizzazione.`);
+    showNotification(`✅ Excel (CSV) esportato con successo!\n\n📊 Dati esportati:\n• ${allData.length} elementi totali\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-excel-${new Date().toISOString().split('T')[0]}.csv\n\n📝 Nota: Apri il file con Excel per una migliore visualizzazione.`, 'success');
+    } catch (error) {
+      showNotification('❌ Errore durante l\'esportazione Excel. Riprova.', 'error');
+    }
   };
 
   const exportToPDF = () => {
@@ -1802,14 +1827,14 @@ const NetWorthManager = () => {
 
     // Check file type
     if (!file.name.toLowerCase().endsWith('.json')) {
-      alert('Per favore seleziona un file JSON valido.');
+      showNotification('Per favore seleziona un file JSON valido.', 'error');
       event.target.value = '';
       return;
     }
 
     // Check file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('Il file è troppo grande. Dimensione massima: 10MB');
+      showNotification('Il file è troppo grande. Dimensione massima: 10MB', 'error');
       event.target.value = '';
       return;
     }
@@ -1862,16 +1887,16 @@ const NetWorthManager = () => {
         const totalItems = Object.values(importedData.assets).reduce((sum: number, section: any) => sum + section.length, 0);
         const exportDate = importedData.metadata.exportDate ? new Date(importedData.metadata.exportDate).toLocaleDateString('it-IT') : 'Sconosciuta';
         
-        alert(`✅ Backup importato con successo!\n\n📊 Dati importati:\n• ${totalItems} elementi totali\n• Data backup: ${exportDate}\n• Versione: ${importedData.metadata.version || 'Sconosciuta'}\n\n💾 I dati sono stati sovrascritti e salvati automaticamente.`);
+        showNotification(`✅ Backup importato con successo!\n\n📊 Dati importati:\n• ${totalItems} elementi totali\n• Data backup: ${exportDate}\n• Versione: ${importedData.metadata.version || 'Sconosciuta'}\n\n💾 I dati sono stati sovrascritti e salvati automaticamente.`, 'success');
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
-        alert(`❌ Errore nell'importazione:\n\n${errorMessage}\n\nAssicurati di aver selezionato un file di backup JSON valido di MangoMoney.`);
+        showNotification(`❌ Errore nell'importazione:\n\n${errorMessage}\n\nAssicurati di aver selezionato un file di backup JSON valido di MangoMoney.`, 'error');
       }
     };
 
     reader.onerror = () => {
-      alert('❌ Errore nella lettura del file. Riprova.');
+      showNotification('❌ Errore nella lettura del file. Riprova.', 'error');
     };
 
     reader.readAsText(file);
@@ -1883,7 +1908,7 @@ const NetWorthManager = () => {
   const resetData = () => {
     if (window.confirm('Sei sicuro di voler ripristinare i dati originali?')) {
       setAssets(getInitialData());
-      alert('Dati ripristinati ai valori originali!');
+      showNotification('Dati ripristinati ai valori originali!', 'success');
     }
   };
 
@@ -1909,8 +1934,9 @@ const NetWorthManager = () => {
       const newErrors: { [key: string]: string } = {};
       if (!formData.name.trim()) newErrors.name = 'Il nome è obbligatorio';
       if (formData.amount === '') newErrors.amount = 'L\'importo è obbligatorio';
-      if (formData.amount !== '' && parseFloat(formData.amount) < 0 && section !== 'debts') newErrors.amount = 'L\'importo deve essere positivo';
+      if (formData.amount !== '' && (isNaN(parseFloat(formData.amount)) || parseFloat(formData.amount) < 0) && section !== 'debts') newErrors.amount = 'L\'importo deve essere un numero positivo';
       if (section === 'transactions' && formData.quantity === '') newErrors.quantity = 'La quantità è obbligatoria';
+      if (section === 'transactions' && formData.quantity !== '' && (isNaN(parseInt(formData.quantity)) || parseInt(formData.quantity) <= 0)) newErrors.quantity = 'La quantità deve essere un numero intero positivo';
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -2430,18 +2456,138 @@ const NetWorthManager = () => {
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-sm border-b`}>
         <div className="max-w-7xl mx-auto px-3 py-3">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
             <div>
-              <h1 className={`text-3xl md:text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>🥭 MangoMoney</h1>
-                              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
-                  {t('totalAssets')}: <span className={`text-xl md:text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrency(totals.total)}</span>
-                </p>
-                                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {t('lastSaved')}: {lastSaved.toLocaleTimeString()}
-                  </p>
+              <h1 className={`text-2xl md:text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>🥭 MangoMoney</h1>
+              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
+                {t('totalAssets')}: <span className={`text-lg md:text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrency(totals.total)}</span>
+              </p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                {t('lastSaved')}: {lastSaved.toLocaleTimeString()}
+              </p>
             </div>
             
-            <div className="flex gap-1 md:gap-2">
+            {/* Mobile: Compact button row */}
+            <div className="flex flex-wrap gap-1 md:hidden">
+              <button
+                onClick={toggleDarkMode}
+                className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'} p-2 rounded h-8 w-8 flex items-center justify-center`}
+              >
+                {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+              </button>
+              
+              <button
+                onClick={toggleMobileLayout}
+                className={`px-2 py-1 rounded text-xs transition-colors h-8 ${
+                  forceMobileLayout 
+                    ? 'bg-green-500 text-white hover:bg-green-600' 
+                    : (darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-blue-100 text-blue-800 hover:bg-blue-200')
+                }`}
+              >
+                {forceMobileLayout ? '📱' : (isMobileView ? '📱' : '💻')}
+              </button>
+              
+              {/* Currency Selector - Mobile */}
+              <div className="relative group">
+                <button className={`px-2 py-1 rounded text-xs transition-colors h-8 ${
+                  darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                }`}>
+                  {currencies[selectedCurrency as keyof typeof currencies].symbol}
+                </button>
+                <div className={`absolute right-0 mt-2 w-24 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <div className="py-1">
+                    {Object.entries(currencies).map(([code, currency]) => (
+                      <button
+                        key={code}
+                        onClick={() => setSelectedCurrency(code)}
+                        className={`block w-full text-left px-2 py-1 text-xs ${
+                          selectedCurrency === code 
+                            ? `${darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'}`
+                            : `${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`
+                        }`}
+                      >
+                        {currency.symbol} {code}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Language Selector - Mobile */}
+              <div className="relative group">
+                <button className={`px-2 py-1 rounded text-xs transition-colors h-8 ${
+                  darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-green-100 text-green-800 hover:bg-green-200'
+                }`}>
+                  {languages[selectedLanguage as keyof typeof languages].flag}
+                </button>
+                <div className={`absolute right-0 mt-2 w-24 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <div className="py-1">
+                    {Object.entries(languages).map(([code, language]) => (
+                      <button
+                        key={code}
+                        onClick={() => setSelectedLanguage(code)}
+                        className={`block w-full text-left px-2 py-1 text-xs ${
+                          selectedLanguage === code 
+                            ? `${darkMode ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800'}`
+                            : `${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`
+                        }`}
+                      >
+                        {language.flag} {code.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Import/Export - Mobile */}
+              <div className="relative">
+                <input
+                  type="file"
+                  id="import-file-mobile"
+                  accept=".json"
+                  onChange={importFromFile}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="import-file-mobile"
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 flex items-center justify-center cursor-pointer h-8 w-8"
+                  title="Importa backup JSON di MangoMoney"
+                >
+                  <Upload size={14} />
+                </label>
+              </div>
+              
+              <div className="relative group">
+                <button className="bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600 flex items-center justify-center h-8 w-8">
+                  <Download size={14} />
+                </button>
+                <div className={`absolute right-0 mt-2 w-32 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <div className="py-1">
+                    <button
+                      onClick={() => exportToJSON()}
+                      className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                      📄 {t('export')} JSON
+                    </button>
+                    <button
+                      onClick={() => exportToCSV()}
+                      className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                      📊 {t('export')} CSV
+                    </button>
+                    <button
+                      onClick={() => exportToPDF()}
+                      className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                      📋 {t('export')} PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Desktop: Full button row */}
+            <div className="hidden md:flex gap-1 md:gap-2">
               <button
                 onClick={toggleDarkMode}
                 className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'} p-2 rounded h-10 w-10 flex items-center justify-center`}
@@ -2576,7 +2722,7 @@ const NetWorthManager = () => {
                 className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 flex items-center gap-1 h-10"
               >
                 <RotateCcw size={16} />
-                                  <span className="hidden md:inline">{t('reset')}</span>
+                <span className="hidden md:inline">{t('reset')}</span>
               </button>
             </div>
           </div>
@@ -4536,6 +4682,35 @@ const NetWorthManager = () => {
           </div>
         )}
 
+        {/* Notification Toast */}
+        {notification.visible && (
+          <div className={`fixed top-4 right-4 z-50 max-w-sm ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 transition-all duration-300 ${
+            notification.type === 'success' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' :
+            notification.type === 'error' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
+            'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+          }`}>
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {notification.type === 'success' && <span className="text-green-500">✅</span>}
+                {notification.type === 'error' && <span className="text-red-500">❌</span>}
+                {notification.type === 'info' && <span className="text-blue-500">ℹ️</span>}
+              </div>
+              <div className="ml-3 flex-1">
+                <p className={`text-sm ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  {notification.message}
+                </p>
+              </div>
+              <div className="ml-4 flex-shrink-0">
+                <button
+                  onClick={() => setNotification(prev => ({ ...prev, visible: false }))}
+                  className={`text-sm ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </main>
     </div>
