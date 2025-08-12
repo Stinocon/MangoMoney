@@ -5,6 +5,7 @@
 [![Version](https://img.shields.io/badge/Version-3.0-orange?style=for-the-badge)](https://github.com/Stinocon/MangoMoney)
 
 **Portfolio tracker abbastanza completo e moderno, pensato per monitorare investimenti e patrimonio in modo (non)professionale, semplice e — soprattutto — senza che i tuoi dati vadano a spasso per Internet.**
+Gli utenti che potrebbero usarlo e trovarlo utile/comodo non sono sicuramente i pignolazzi, ma gli utenti che si sono appena affacciati al mondo della finanza personale e hanno quindi poche pretese.
 
 L'idea nasce perché per anni ho gestito il mio *Net Worth* su Excel... e diciamolo, gli Excel non brillano per estetica. Ho fatto largo uso di IA per costruirlo, quindi se pensi "questo pezzo sembra scritto da un'IA", probabilmente hai ragione.
 
@@ -122,12 +123,6 @@ Se MangoMoney ti è utile, offrimi un caffè ☕ (o una birra 🍺):
 
 ---
 
-## 📞 Contatti
-
-- **GitHub**: Issues e PR benvenute!
-- **LinkedIn**: [Stefano Conter](https://www.linkedin.com/in/stefanoconter/)
-
----
 
 <div align="center">
 
