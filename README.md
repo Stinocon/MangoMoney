@@ -1,22 +1,19 @@
 # 🥭 MangoMoney v3.0
 
-**MangoMoney** è un portfolio tracker completo e moderno, pensato per monitorare investimenti e patrimonio in modo professionale, semplice e — soprattutto — senza che i tuoi dati vadano a spasso per Internet.
+**MangoMoney** è un portfolio tracker abbastanza completo e moderno, pensato per monitorare investimenti e patrimonio in modo (non)professionale, semplice e — soprattutto — senza che i tuoi dati vadano a spasso per Internet.
 
 L'idea nasce perché per anni ho gestito il mio *Net Worth* su un foglio Excel… e, diciamolo, gli Excel non brillano per estetica o usabilità. Quindi ho provato a fare qualcosa di più comodo, professionale e accattivante.  
 
-**Nota di trasparenza**: non sono un programmatore provetto. Ho fatto largo uso di strumenti di intelligenza artificiale per costruirlo, quindi se pensi "questo pezzo sembra scritto da un'IA", probabilmente hai ragione. Le funzioni sono quelle che servivano a me, implementate però con metriche finanziarie serie e un'interfaccia che non fa schifo.
+**Nota di trasparenza**: non sono un programmatore provetto. Ho fatto largo uso di strumenti di intelligenza artificiale per costruirlo, quindi se pensi "questo pezzo sembra scritto da un'IA", probabilmente hai ragione. Le funzioni sono quelle che servivano a me, implementate però con metriche finanziarie che credo siano sensate e un'interfaccia che non fa schifo.
 
 L'ho condiviso per gentilezza e spirito divulgativo, non come prodotto commerciale finito. Eventuali *issue*? Potrei sistemarle… oppure no. Non garantisco supporto, ma puoi sempre provarci.
 
 ## 📛 Origine del Nome
 
-Il nome **MangoMoney** nasce come un gioco di parole (e un po' anche come amara verità) dalla frase in italiano colloquiale:  
-> "Ma**g**ano i money" → *mancano i soldi*  
+Il nome **MangoMoney** nasce come un gioco di parole (e un po' anche come amara verità) dalla frase:  
+> "Man**g**ano i money" → *mancano i soldi*  
 
 L'idea era di creare qualcosa che suonasse simpatico e leggero, pur ricordando una realtà condivisa da molti: il portafoglio sembra sempre troppo vuoto.  
-
-La **g** in **Ma**<b>g</b>**ano** è diventata un piccolo omaggio all'ironia dietro il progetto, e il riferimento al mango — frutto tropicale, dolce e colorato — serve a bilanciare il tema economico con un tocco di freschezza e positività.  
-In pratica: sì, i soldi magari mancano… Ma almeno lo strumento ha un nome gustoso.
 
 ---
 
@@ -122,8 +119,6 @@ Basato su **Modern Portfolio Theory** con calcolo ponderato:
 - ✅ **Uso Offline**: Scaricalo e usalo senza internet  
 - ✅ **Auto-Save Locale**: Salvataggio automatico in localStorage
 - ✅ **Backup Manuale**: Export dei tuoi dati quando vuoi
-
-**Questa cosa diventa 100% vera quando esegui la pagina direttamente dal tuo PC, scaricandotela localmente.**
 
 ---
 
@@ -314,7 +309,7 @@ Se MangoMoney ti è utile e ti fa risparmiare tempo (o sanità mentale), puoi of
 
 ---
 
-## ⚠️ Disclaimer Legale
+## ⚠️ Disclaimer
 
 **MangoMoney è uno strumento di monitoraggio portfolio a scopo informativo.**
 
