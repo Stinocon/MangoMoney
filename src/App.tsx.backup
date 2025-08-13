@@ -2,23 +2,6 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { PlusCircle, Trash2, Download, Upload, RotateCcw, Moon, Sun, Calculator, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-// Custom debounce hook for performance optimization
-const useDebounce = (value: any, delay: number) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
-
 
 // Translation system
 const translations = {
@@ -723,10 +706,6 @@ const NetWorthManager = () => {
     ticker: '',
     isin: ''
   });
-  
-  // Debounced filters for performance optimization
-  const debouncedTransactionFilters = useDebounce(transactionFilters, 300);
-  
   const [currentTransactionPage, setCurrentTransactionPage] = useState(1);
   const transactionsPerPage = 10;
 
@@ -760,17 +739,6 @@ const NetWorthManager = () => {
     const saved = localStorage.getItem('mangomoney-deposit-account-stamp-duty');
     return saved ? JSON.parse(saved) : 0.20; // Default 0.20% for Italy
   });
-
-  // Emergency fund threshold settings
-  const [emergencyFundOptimalMonths, setEmergencyFundOptimalMonths] = useState(() => {
-    const saved = localStorage.getItem('mangomoney-emergency-fund-optimal-months');
-    return saved ? JSON.parse(saved) : 6; // Default 6 months for optimal
-  });
-
-  const [emergencyFundAdequateMonths, setEmergencyFundAdequateMonths] = useState(() => {
-    const saved = localStorage.getItem('mangomoney-emergency-fund-adequate-months');
-    return saved ? JSON.parse(saved) : 3; // Default 3 months for adequate
-  });
   
   // Currency definitions
   const currencies = {
@@ -780,6 +748,7 @@ const NetWorthManager = () => {
     CHF: { symbol: 'CHF', name: 'Swiss Franc', locale: 'de-CH' },
     JPY: { symbol: '¥', name: 'Japanese Yen', locale: 'ja-JP' }
   };
+  
   // Initial portfolio data - Empty data for production use
   function getInitialData(): Assets {
     return {
@@ -794,7 +763,412 @@ const NetWorthManager = () => {
       alternativeAssets: []
     };
   }
-
+      debts: [
+        {
+          id: 1,
+          name: 'Mutuo Casa',
+          amount: -250000,
+          description: 'Mutuo ipotecario per acquisto prima casa',
+          notes: 'Banca Unicredit - Tasso fisso 2.8% - Rata mensile €1,200',
+          fees: 1200,
+          quantity: 1,
+          avgPrice: 250000,
+          sector: 'MUTUI',
+          unitCost: 250000,
+          isin: '',
+          fee: 1200,
+          dataSource: 'manual',
+          ticker: 'UNICREDIT',
+          purchaseDate: '2021-03-15',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 250000,
+          lastPriceUpdate: '2024-01-15'
+        },
+        {
+          id: 2,
+          name: 'Carta di Credito',
+          amount: -3500,
+          description: 'Debito su carta di credito',
+          notes: 'American Express - Tasso 18% - Scadenza 15/02/2024',
+          fees: 0,
+          quantity: 1,
+          avgPrice: 3500,
+          sector: 'CREDITI',
+          unitCost: 3500,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'AMEX',
+          purchaseDate: '2024-01-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 3500,
+          lastPriceUpdate: '2024-01-15'
+        }
+      ],
+      investments: [
+        {
+          id: 1,
+          name: 'VWCE - Vanguard FTSE All-World UCITS ETF',
+          amount: 37500,
+          description: 'ETF globale per diversificazione internazionale',
+          notes: 'Acquistato su Degiro - Distributing - TER 0.22%',
+          fees: 0,
+          quantity: 600,
+          avgPrice: 62.50,
+          sector: 'VWCE',
+          unitCost: 62.50,
+          isin: 'IE00BK5BQT80',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'VWCE',
+          purchaseDate: '2022-01-15',
+          linkedToGlobalPosition: 1,
+          currentPrice: 65.20,
+          lastPriceUpdate: '2024-01-15'
+        },
+        {
+          id: 2,
+          name: 'AAPL - Apple Inc.',
+          amount: 18500,
+          description: 'Azione Apple per esposizione tech',
+          notes: 'Acquistata su Interactive Brokers - Dividend yield 0.5%',
+          fees: 0,
+          quantity: 100,
+          avgPrice: 185,
+          sector: 'AAPL',
+          unitCost: 185,
+          isin: 'US0378331005',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'AAPL',
+          purchaseDate: '2023-03-10',
+          linkedToGlobalPosition: 2,
+          currentPrice: 192.30,
+          lastPriceUpdate: '2024-01-15'
+        },
+        {
+          id: 3,
+          name: 'MSFT - Microsoft Corporation',
+          amount: 22800,
+          description: 'Azione Microsoft per esposizione software',
+          notes: 'Acquistata su Interactive Brokers - Dividend yield 0.8%',
+          fees: 0,
+          quantity: 120,
+          avgPrice: 190,
+          sector: 'MSFT',
+          unitCost: 190,
+          isin: 'US5949181045',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'MSFT',
+          purchaseDate: '2023-05-20',
+          linkedToGlobalPosition: 2,
+          currentPrice: 195.75,
+          lastPriceUpdate: '2024-01-15'
+        },
+        {
+          id: 4,
+          name: 'NVDA - NVIDIA Corporation',
+          amount: 12000,
+          description: 'Azione NVIDIA per esposizione AI/semiconductor',
+          notes: 'Acquistata su Interactive Brokers - Dividend yield 0.1%',
+          fees: 0,
+          quantity: 50,
+          avgPrice: 240,
+          sector: 'NVDA',
+          unitCost: 240,
+          isin: 'US67066G1040',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'NVDA',
+          purchaseDate: '2023-08-15',
+          linkedToGlobalPosition: 2,
+          currentPrice: 280.50,
+          lastPriceUpdate: '2024-01-15'
+        }
+      ],
+      investmentPositions: [
+        {
+          id: 1,
+          name: 'Portfolio Degiro',
+          ticker: 'DEGIRO',
+          isin: 'NL0012875911',
+          amount: 37500,
+          purchaseDate: '2022-01-15',
+          description: 'Portfolio principale su Degiro',
+          notes: 'Conto titoli per ETF e azioni europee'
+        },
+        {
+          id: 2,
+          name: 'Portfolio Interactive Brokers',
+          ticker: 'IBKR',
+          isin: 'US45841N1072',
+          amount: 53300,
+          purchaseDate: '2023-03-10',
+          description: 'Portfolio per azioni USA',
+          notes: 'Conto titoli per azioni americane'
+        }
+      ],
+      transactions: [
+        {
+          id: 1,
+          name: 'Acquisto VWCE',
+          ticker: 'VWCE',
+          isin: 'IE00BK5BQT80',
+          transactionType: 'purchase',
+          amount: 31250,
+          quantity: 500,
+          commissions: 2.50,
+          description: 'Acquisto iniziale ETF VWCE',
+          date: '2022-01-15',
+          linkedToAsset: 1
+        },
+        {
+          id: 2,
+          name: 'Acquisto VWCE',
+          ticker: 'VWCE',
+          isin: 'IE00BK5BQT80',
+          transactionType: 'purchase',
+          amount: 6250,
+          quantity: 100,
+          commissions: 2.50,
+          description: 'Acquisto aggiuntivo ETF VWCE',
+          date: '2023-06-15',
+          linkedToAsset: 1
+        },
+        {
+          id: 3,
+          name: 'Acquisto AAPL',
+          ticker: 'AAPL',
+          isin: 'US0378331005',
+          transactionType: 'purchase',
+          amount: 18500,
+          quantity: 100,
+          commissions: 1.00,
+          description: 'Acquisto azioni Apple',
+          date: '2023-03-10',
+          linkedToAsset: 2
+        },
+        {
+          id: 4,
+          name: 'Acquisto MSFT',
+          ticker: 'MSFT',
+          isin: 'US5949181045',
+          transactionType: 'purchase',
+          amount: 22800,
+          quantity: 120,
+          commissions: 1.00,
+          description: 'Acquisto azioni Microsoft',
+          date: '2023-05-20',
+          linkedToAsset: 3
+        },
+        {
+          id: 5,
+          name: 'Acquisto NVDA',
+          ticker: 'NVDA',
+          isin: 'US67066G1040',
+          transactionType: 'purchase',
+          amount: 12000,
+          quantity: 50,
+          commissions: 1.00,
+          description: 'Acquisto azioni NVIDIA',
+          date: '2023-08-15',
+          linkedToAsset: 4
+        }
+      ],
+      realEstate: [
+        {
+          id: 1,
+          name: 'Casa di Residenza',
+          description: 'Appartamento di proprietà - Residenza principale',
+          value: 350000,
+          type: 'primary',
+          address: 'Via Roma 123, Milano',
+          notes: 'Appartamento 3 locali, 80mq, acquistato nel 2021'
+        },
+        {
+          id: 2,
+          name: 'Appartamento in Affitto',
+          description: 'Appartamento in affitto - Rendita passiva',
+          value: 280000,
+          type: 'secondary',
+          address: 'Via Garibaldi 45, Milano',
+          notes: 'Appartamento 2 locali, 60mq, affitto €1,200/mese'
+        }
+      ],
+      pensionFunds: [
+        {
+          id: 1,
+          name: 'Fondo Pensione Cometa',
+          amount: 25000,
+          description: 'Fondo pensione negoziale metalmeccanici',
+          notes: 'Contributi dipendente + azienda - Rendimento 2023: 4.2%',
+          fees: 0,
+          quantity: 1,
+          avgPrice: 25000,
+          sector: 'PENSIONI',
+          unitCost: 25000,
+          isin: 'IT0001234567',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'COMETA',
+          purchaseDate: '2020-01-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 25000,
+          lastPriceUpdate: '2024-01-15'
+        }
+      ],
+      otherAccounts: [
+        {
+          id: 1,
+          name: 'Conto Trading',
+          amount: 15000,
+          description: 'Conto per trading attivo',
+          notes: 'Fineco - Per trading di opzioni e futures',
+          fees: 0,
+          quantity: 1,
+          avgPrice: 15000,
+          sector: 'TRADING',
+          unitCost: 15000,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'FINECO',
+          purchaseDate: '2023-01-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 15000,
+          lastPriceUpdate: '2024-01-15'
+        },
+        {
+          id: 2,
+          name: 'Conto Emergenza',
+          amount: 10000,
+          description: 'Fondo di emergenza',
+          notes: 'Conto dedicato per spese impreviste',
+          fees: 0,
+          quantity: 1,
+          avgPrice: 10000,
+          sector: 'EMERGENZA',
+          unitCost: 10000,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'EMERGENCY',
+          purchaseDate: '2022-01-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 10000,
+          lastPriceUpdate: '2024-01-15'
+        }
+      ],
+      alternativeAssets: [
+        {
+          id: 1,
+          name: 'Oro Fisico',
+          amount: 8500,
+          description: 'Monete d\'oro da investimento',
+          notes: '10 monete da 1 oz - Conservate in cassetta di sicurezza',
+          fees: 0,
+          quantity: 10,
+          avgPrice: 850,
+          sector: 'ORO',
+          unitCost: 850,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'GOLD',
+          purchaseDate: '2022-06-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 900,
+          lastPriceUpdate: '2024-01-15',
+          assetType: 'collectibles'
+        },
+        {
+          id: 2,
+          name: 'Crypto Portfolio',
+          amount: 5200,
+          description: 'Portfolio di criptovalute',
+          notes: 'Bitcoin 60%, Ethereum 30%, Altcoins 10%',
+          fees: 0,
+          quantity: 1,
+          avgPrice: 5200,
+          sector: 'CRYPTO',
+          unitCost: 5200,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'CRYPTO',
+          purchaseDate: '2023-01-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 5800,
+          lastPriceUpdate: '2024-01-15',
+          assetType: 'other'
+        },
+        {
+          id: 3,
+          name: 'Collezione Magic: The Gathering',
+          amount: 3000,
+          description: 'Carte da collezione MTG',
+          notes: 'Collezione di carte rare e mythic - Black Lotus, Mox Pearl, etc.',
+          fees: 0,
+          quantity: 150,
+          avgPrice: 20,
+          sector: 'TCG',
+          unitCost: 20,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'MTG',
+          purchaseDate: '2021-03-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 25,
+          lastPriceUpdate: '2024-01-15',
+          assetType: 'tcg'
+        },
+        {
+          id: 4,
+          name: 'Collezione Francobolli',
+          amount: 1200,
+          description: 'Francobolli da collezione',
+          notes: 'Collezione di francobolli storici italiani e internazionali',
+          fees: 0,
+          quantity: 500,
+          avgPrice: 2.4,
+          sector: 'STAMPS',
+          unitCost: 2.4,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'STAMPS',
+          purchaseDate: '2020-09-15',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 3.0,
+          lastPriceUpdate: '2024-01-15',
+          assetType: 'stamps'
+        },
+        {
+          id: 5,
+          name: 'Whisky Collection',
+          amount: 2500,
+          description: 'Collezione di whisky pregiati',
+          notes: 'Macallan 18, Glenfiddich 21, Lagavulin 16 - Conservati in cantina',
+          fees: 0,
+          quantity: 12,
+          avgPrice: 208.33,
+          sector: 'ALCOHOL',
+          unitCost: 208.33,
+          isin: '',
+          fee: 0,
+          dataSource: 'manual',
+          ticker: 'WHISKY',
+          purchaseDate: '2022-12-01',
+          linkedToGlobalPosition: undefined,
+          currentPrice: 250,
+          lastPriceUpdate: '2024-01-15',
+          assetType: 'alcohol'
+        }
+      ]
+    };
+  }
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -846,215 +1220,6 @@ const NetWorthManager = () => {
   useEffect(() => {
     localStorage.setItem('mangomoney-deposit-account-stamp-duty', JSON.stringify(depositAccountStampDutyRate));
   }, [depositAccountStampDutyRate]);
-
-  useEffect(() => {
-    localStorage.setItem('mangomoney-emergency-fund-optimal-months', JSON.stringify(emergencyFundOptimalMonths));
-  }, [emergencyFundOptimalMonths]);
-
-  useEffect(() => {
-    localStorage.setItem('mangomoney-emergency-fund-adequate-months', JSON.stringify(emergencyFundAdequateMonths));
-  }, [emergencyFundAdequateMonths]);
-
-  // Mobile card view component for transactions
-  const TransactionMobileCard = ({ item }: { item: Transaction }) => (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg p-4 mb-3 shadow-sm`}>
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex-1">
-          <h4 className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{item.name}</h4>
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-            {item.ticker} • {item.isin}
-          </div>
-        </div>
-        <span className={`px-2 py-1 rounded text-xs ml-2 ${item.transactionType === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-          {item.transactionType === 'purchase' ? 'Acquisto' : 'Vendita'}
-        </span>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        <div>
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quantità</div>
-          <div className={`font-mono text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity.toLocaleString()}</div>
-        </div>
-        <div>
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Importo</div>
-          <div className={`font-mono text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</div>
-        </div>
-        <div>
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Commissioni</div>
-          <div className={`font-mono text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.commissions)}</div>
-        </div>
-        <div>
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Data</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.date}</div>
-        </div>
-      </div>
-      
-      {item.description && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Descrizione</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</div>
-        </div>
-      )}
-      
-      {item.linkedToAsset && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Collegato a</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-            {assets.investments.find((asset: AssetItem) => asset.id === item.linkedToAsset)?.name || 'Asset non trovato'}
-          </div>
-        </div>
-      )}
-      
-      <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-        <button 
-          onClick={() => handleCopyRow('transactions', item.id)}
-          className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-          title="Copia riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-        <button 
-          onClick={() => handleEditRow('transactions', item.id)}
-          className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-          title="Modifica riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
-        </button>
-        <button
-          onClick={() => handleDeleteItem('transactions', item.id)}
-          className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-    </div>
-  );
-
-  // Mobile card view component for investment positions
-  const InvestmentPositionMobileCard = ({ item }: { item: InvestmentPosition }) => (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg p-4 mb-3 shadow-sm`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <h4 className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{item.name}</h4>
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-            {item.ticker} • {item.isin}
-          </div>
-        </div>
-        <div className={`font-mono text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-          {formatCurrency(item.amount)}
-        </div>
-      </div>
-      
-      {item.description && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Descrizione</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</div>
-        </div>
-      )}
-      
-      {item.notes && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Note</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.notes}</div>
-        </div>
-      )}
-      
-      <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-        <button 
-          onClick={() => handleEditRow('investmentPositions', item.id)}
-          className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-          title="Modifica riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
-        </button>
-        <button 
-          onClick={() => handleCopyRow('investmentPositions', item.id)}
-          className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-          title="Copia riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-        <button
-          onClick={() => handleDeleteItem('investmentPositions', item.id)}
-          className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-    </div>
-  );
-
-  // Mobile card view component for real estate
-  const RealEstateMobileCard = ({ item }: { item: RealEstate }) => (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg p-4 mb-3 shadow-sm`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <h4 className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{item.name}</h4>
-          <span className={`px-2 py-1 rounded text-xs mt-1 inline-block ${item.type === 'primary' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-            {item.type === 'primary' ? 'Principale' : 'Secondaria'}
-          </span>
-        </div>
-        <div className={`font-mono text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-          {formatCurrency(item.value)}
-        </div>
-      </div>
-      
-      {item.description && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Descrizione</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</div>
-        </div>
-      )}
-      
-      {item.address && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Indirizzo</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.address}</div>
-        </div>
-      )}
-      
-      <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-        <button 
-          onClick={() => handleEditRow('realEstate', item.id)}
-          className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-          title="Modifica riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
-        </button>
-        <button 
-          onClick={() => handleCopyRow('realEstate', item.id)}
-          className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-          title="Copia riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-        <button
-          onClick={() => handleDeleteItem('realEstate', item.id)}
-          className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-    </div>
-  );
 
   // Mobile detection hook
   useEffect(() => {
@@ -1122,8 +1287,8 @@ const NetWorthManager = () => {
       otherAccounts: 1.5, // Low-medium risk - various financial products
       pensionFunds: 2,   // Medium risk - long-term, regulated
       realEstate: 2,     // Medium risk - illiquid but stable
-      investments: 3,    // Medium-high risk - aggregated positions
-      investmentPositions: 4, // High risk - specific individual positions
+      investmentPositions: 3, // Medium-high risk - broker accounts
+      investments: 4,    // High risk - market volatility
       alternativeAssets: 5 // Highest risk - speculative assets
     };
     
@@ -1149,8 +1314,8 @@ const NetWorthManager = () => {
       ? (emergencyFundValue / monthlyExpenses).toFixed(1) 
       : monthlyExpenses === 0 ? '0' : '0';
     
-    const emergencyFundStatus = parseFloat(emergencyMonths) >= emergencyFundOptimalMonths ? 'Ottimale' :
-                               parseFloat(emergencyMonths) >= emergencyFundAdequateMonths ? 'Adeguato' : 'Insufficiente';
+    const emergencyFundStatus = parseFloat(emergencyMonths) >= 6 ? 'Ottimale' :
+                               parseFloat(emergencyMonths) >= 3 ? 'Adeguato' : 'Insufficiente';
 
 
     
@@ -1201,7 +1366,7 @@ const NetWorthManager = () => {
       liquidityHealth,
       investmentPercentage
     };
-  }, [totals, assets, emergencyFundAccount, monthlyExpenses, emergencyFundOptimalMonths, emergencyFundAdequateMonths]);
+  }, [totals, assets, emergencyFundAccount, monthlyExpenses]);
 
   // Chart data preparation with memoization for performance
   const pieData = useMemo(() => [
@@ -1238,8 +1403,8 @@ const NetWorthManager = () => {
     alternativeAssets: t('alternativeAssets')
   };
 
-  // Generate section-specific chart data - Optimized with memoization
-  const getSectionChartData = useCallback((section: string): ChartDataItem[] => {
+  // Generate section-specific chart data
+  const getSectionChartData = (section: string): ChartDataItem[] => {
     if (!assets[section as keyof typeof assets]) return [];
     
     const sectionAssets = assets[section as keyof typeof assets];
@@ -1280,10 +1445,7 @@ const NetWorthManager = () => {
           description: item.description
         }));
     }
-  }, [assets]);
-
-  // Note: Chart data is generated on-demand using getSectionChartData function
-  // Memoization is handled within the getSectionChartData useCallback
+  };
 
   // CRUD operations for portfolio items
   /*
@@ -1403,7 +1565,7 @@ const NetWorthManager = () => {
   };
   */
 
-  const handleDeleteItem = useCallback((section: string, id: number) => {
+  const handleDeleteItem = (section: string, id: number) => {
     if (window.confirm('Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.')) {
       if (section === 'investmentPositions') {
         setAssets({
@@ -1427,7 +1589,7 @@ const NetWorthManager = () => {
         });
       }
     }
-  }, [assets]);
+  };
 
   // Add missing functions
   const handleEditRow = (section: string, id: number) => {
@@ -1622,12 +1784,6 @@ const NetWorthManager = () => {
 
   // Constants
   const LINKING_TOLERANCE_PERCENTAGE = 0.05; // 5% tolerance for linking validation
-  // Minimum tolerance amount varies by currency to account for different monetary scales
-  const MIN_LINKING_TOLERANCE_AMOUNT = selectedCurrency === 'JPY' ? 1000 : // ¥1000 for JPY
-                                      selectedCurrency === 'USD' ? 10 : // $10 for USD
-                                      selectedCurrency === 'GBP' ? 8 : // £8 for GBP
-                                      selectedCurrency === 'CHF' ? 10 : // CHF 10 for CHF
-                                      10; // €10 default for EUR
 
   // Function to calculate linking validation
   const getLinkingValidation = () => {
@@ -1637,10 +1793,7 @@ const NetWorthManager = () => {
       const linkedAssets = assets.investments.filter((asset: AssetItem) => asset.linkedToGlobalPosition === globalPosition.id);
       const totalLinkedValue = linkedAssets.reduce((sum: number, asset: AssetItem) => sum + asset.amount, 0);
       const deviation = Math.abs(totalLinkedValue - globalPosition.amount);
-      // Variable tolerance: 5% of amount, but minimum amount for small positions
-      // This prevents overly strict validation for small amounts where percentage differences
-      // can be misleading due to rounding, fees, or timing differences
-      const tolerance = Math.max(globalPosition.amount * LINKING_TOLERANCE_PERCENTAGE, MIN_LINKING_TOLERANCE_AMOUNT);
+      const tolerance = globalPosition.amount * LINKING_TOLERANCE_PERCENTAGE;
       const isValid = deviation <= tolerance;
       
       validation[globalPosition.id] = {
@@ -1752,9 +1905,8 @@ const NetWorthManager = () => {
     if (costBasis > 0) {
       percentageReturn = (totalReturn / costBasis) * 100;
       // Cap percentage return to reasonable values to prevent extreme numbers
-      // Allow for realistic investment scenarios (crypto, startups, leveraged products)
-      if (percentageReturn > 10000) percentageReturn = 10000; // 100x return (10000%)
-      if (percentageReturn < -99.99) percentageReturn = -99.99; // Near total loss (-99.99%)
+      if (percentageReturn > 1000) percentageReturn = 1000;
+      if (percentageReturn < -100) percentageReturn = -100;
     }
 
     return {
@@ -1766,19 +1918,19 @@ const NetWorthManager = () => {
     };
   };
 
-  // Filter and paginate transactions - Optimized with debounced filters
+  // Filter and paginate transactions
   const filteredTransactions = useMemo(() => {
     return assets.transactions.filter((transaction: Transaction) => {
-      const matchesType = debouncedTransactionFilters.type === 'all' || 
-                         transaction.transactionType === debouncedTransactionFilters.type;
-      const matchesTicker = !debouncedTransactionFilters.ticker || 
-                           transaction.ticker.toLowerCase().includes(debouncedTransactionFilters.ticker.toLowerCase());
-      const matchesIsin = !debouncedTransactionFilters.isin || 
-                         transaction.isin.toLowerCase().includes(debouncedTransactionFilters.isin.toLowerCase());
+      const matchesType = transactionFilters.type === 'all' || 
+                         transaction.transactionType === transactionFilters.type;
+      const matchesTicker = !transactionFilters.ticker || 
+                           transaction.ticker.toLowerCase().includes(transactionFilters.ticker.toLowerCase());
+      const matchesIsin = !transactionFilters.isin || 
+                         transaction.isin.toLowerCase().includes(transactionFilters.isin.toLowerCase());
       
       return matchesType && matchesTicker && matchesIsin;
     });
-  }, [assets.transactions, debouncedTransactionFilters]);
+  }, [assets.transactions, transactionFilters]);
 
   const paginatedTransactions = useMemo(() => {
     const startIndex = (currentTransactionPage - 1) * transactionsPerPage;
@@ -1803,73 +1955,8 @@ const NetWorthManager = () => {
 
   const totalAlternativeAssetPages = Math.ceil(filteredAlternativeAssets.length / alternativeAssetsPerPage);
 
-  // Calculate annualized performance based on transaction history
-  // Edge case: For periods < 1 month, annualized returns become misleading and are set to 0
-  const calculateAnnualizedPerformance = () => {
-    if (assets.transactions.length === 0) {
-      return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
-    }
-
-    // Get all investment transactions
-    const investmentTransactions = assets.transactions.filter((t: Transaction) => 
-      t.transactionType === 'purchase' && t.linkedToAsset
-    );
-
-    if (investmentTransactions.length === 0) {
-      return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
-    }
-
-    // Find the earliest purchase date
-    const earliestDate = new Date(Math.min(...investmentTransactions.map((t: Transaction) => new Date(t.date).getTime())));
-    const currentDate = new Date();
-    
-    // Calculate time period in years
-    const timeInYears = (currentDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-    
-    // Handle edge cases for very short periods
-    // Less than 1 month (0.083 years) - annualizing such short periods is misleading
-    if (timeInYears <= 0.083) {
-      return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
-    }
-
-    // Calculate total invested and current value
-    const totalInvested = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
-    const totalCommissions = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.commissions, 0);
-    
-    // Get current portfolio value
-    const currentPortfolioValue = assets.investments.reduce((sum: number, asset: AssetItem) => {
-      if (asset.currentPrice && asset.quantity) {
-        return sum + (asset.currentPrice * asset.quantity);
-      }
-      return sum;
-    }, 0);
-
-    const totalCost = totalInvested + totalCommissions;
-    const totalReturn = currentPortfolioValue - totalCost;
-
-    // Calculate annualized return using the formula: (1 + total_return/total_invested)^(1/years) - 1
-    // Note: This formula works well for periods >= 1 month, but becomes misleading for very short periods
-    let annualizedReturnPercentage = 0;
-    if (totalCost > 0 && timeInYears > 0.083) { // Only calculate for periods >= 1 month
-      const totalReturnRatio = totalReturn / totalCost;
-      annualizedReturnPercentage = (Math.pow(1 + totalReturnRatio, 1 / timeInYears) - 1) * 100;
-      
-      // Cap extreme values to reasonable limits
-      // Allow for realistic investment scenarios (crypto, startups, leveraged products)
-      if (annualizedReturnPercentage > 10000) annualizedReturnPercentage = 10000; // 100x annualized return
-      if (annualizedReturnPercentage < -99.99) annualizedReturnPercentage = -99.99; // Near total annualized loss
-    }
-
-    const annualizedReturn = (totalCost * annualizedReturnPercentage) / 100;
-
-    return {
-      annualizedReturn,
-      annualizedReturnPercentage
-    };
-  };
-
-  // Calculate portfolio performance with annualized returns - Optimized with useMemo
-  const portfolioPerformance = useMemo(() => {
+  // Calculate portfolio performance with annualized returns
+  const calculatePortfolioPerformance = () => {
     const assetsWithPerformance = assets.investments.map((asset: AssetItem) => {
       const performance = calculateTransactionBasedPerformance(asset);
       return {
@@ -1901,7 +1988,67 @@ const NetWorthManager = () => {
       annualizedReturnPercentage: annualizedPerformance.annualizedReturnPercentage,
       assets: assetsWithPerformance
     };
-  }, [assets.investments, assets.transactions]);
+  };
+
+  // Calculate annualized performance based on transaction history
+  const calculateAnnualizedPerformance = () => {
+    if (assets.transactions.length === 0) {
+      return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
+    }
+
+    // Get all investment transactions
+    const investmentTransactions = assets.transactions.filter((t: Transaction) => 
+      t.transactionType === 'purchase' && t.linkedToAsset
+    );
+
+    if (investmentTransactions.length === 0) {
+      return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
+    }
+
+    // Find the earliest purchase date
+    const earliestDate = new Date(Math.min(...investmentTransactions.map((t: Transaction) => new Date(t.date).getTime())));
+    const currentDate = new Date();
+    
+    // Calculate time period in years
+    const timeInYears = (currentDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    
+    if (timeInYears <= 0) {
+      return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
+    }
+
+    // Calculate total invested and current value
+    const totalInvested = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
+    const totalCommissions = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.commissions, 0);
+    
+    // Get current portfolio value
+    const currentPortfolioValue = assets.investments.reduce((sum: number, asset: AssetItem) => {
+      if (asset.currentPrice && asset.quantity) {
+        return sum + (asset.currentPrice * asset.quantity);
+      }
+      return sum;
+    }, 0);
+
+    const totalCost = totalInvested + totalCommissions;
+    const totalReturn = currentPortfolioValue - totalCost;
+
+    // Calculate annualized return using the formula: (1 + total_return/total_invested)^(1/years) - 1
+    let annualizedReturnPercentage = 0;
+    if (totalCost > 0 && timeInYears > 0) {
+      const totalReturnRatio = totalReturn / totalCost;
+      annualizedReturnPercentage = (Math.pow(1 + totalReturnRatio, 1 / timeInYears) - 1) * 100;
+      
+      // Cap extreme values
+      if (annualizedReturnPercentage > 1000) annualizedReturnPercentage = 1000;
+      if (annualizedReturnPercentage < -100) annualizedReturnPercentage = -100;
+    }
+
+    const annualizedReturn = (totalCost * annualizedReturnPercentage) / 100;
+
+    return {
+      annualizedReturn,
+      annualizedReturnPercentage
+    };
+  };
 
   // Function to calculate Safe Withdrawal Rate simulation
   const calculateSWR = () => {
@@ -1914,12 +2061,8 @@ const NetWorthManager = () => {
     // Monthly withdrawal amount (what the SWR percentage provides monthly)
     const monthlyWithdrawal = annualWithdrawal / 12;
     
-    // Years of support based on monthly expenses and SWR rate
-    // Formula: years = netLiquidAssets / (monthlyExpenses * 12 * (swrRate/100))
-    // This calculates how long the assets would last if you withdraw the SWR percentage
-    // instead of withdrawing 100% of monthly expenses
-    const yearsOfSupport = monthlyExpenses > 0 ? 
-      netLiquidAssets / (monthlyExpenses * 12 * (swrRate / 100)) : 0;
+    // Years of support based on monthly expenses
+    const yearsOfSupport = monthlyExpenses > 0 ? netLiquidAssets / (monthlyExpenses * 12) : 0;
     
     return {
       netLiquidAssets,
@@ -1963,15 +2106,7 @@ const NetWorthManager = () => {
   const sanitizeDate = (input: string): string => {
     if (!input || typeof input !== 'string') return new Date().toISOString().split('T')[0];
     const date = new Date(input);
-    const today = new Date();
-    // Set today's time to end of day to allow same-day transactions
-    today.setHours(23, 59, 59, 999);
-    
-    // Validate: date must be valid and not in the future
-    if (isNaN(date.getTime()) || date > today) {
-      return new Date().toISOString().split('T')[0];
-    }
-    return input;
+    return isNaN(date.getTime()) ? new Date().toISOString().split('T')[0] : input;
   };
 
   const sanitizeTicker = (input: string): string => {
@@ -1994,53 +2129,35 @@ const NetWorthManager = () => {
 
     const exportData = {
       assets,
-      settings: {
-        // Tax and fee settings
-        capitalGainsTaxRate,
-        currentAccountStampDuty,
-        currentAccountStampDutyThreshold,
-        depositAccountStampDutyRate,
-        // Emergency fund settings
-        emergencyFundOptimalMonths,
-        emergencyFundAdequateMonths,
-        // Currency and language settings
-        selectedCurrency,
-        selectedLanguage,
-        // SWR settings
-        swrRate,
-        // UI settings
-        darkMode,
-        forceMobileLayout
-      },
       metadata: {
         exportDate: new Date().toISOString(),
-        version: '2.3',
-        appName: 'MangoMoney',
-        totalItems,
-        totalValue,
+          version: '2.2',
+          appName: 'MangoMoney',
+          totalItems,
+          totalValue,
         emergencyFundAccount,
-        monthlyExpenses,
-        exportInfo: {
-          totalAssets: Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0),
-          sections: Object.keys(assets).map(section => ({
-            name: section,
-            count: assets[section as keyof typeof assets].length
-          }))
+          monthlyExpenses,
+          exportInfo: {
+            totalAssets: Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0),
+            sections: Object.keys(assets).map(section => ({
+              name: section,
+              count: assets[section as keyof typeof assets].length
+            }))
+          }
         }
-      }
-    };
+      };
       
     const dataStr = JSON.stringify(exportData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-      link.download = `mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.3.json`;
+      link.download = `mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.2.json`;
     link.click();
     URL.revokeObjectURL(url);
       
       // Show success message
-      showNotification(`Backup esportato con successo! ${totalItems} elementi salvati.`, 'success');
+      showNotification(`Backup JSON esportato con successo!\n\n📊 Dati esportati:\n• ${totalItems} elementi totali\n• ${formatCurrency(totalValue)} valore totale\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.2.json`, 'success');
     } catch (error) {
       showNotification('Errore durante l\'esportazione del backup. Riprova.', 'error');
     }
@@ -2188,7 +2305,7 @@ const NetWorthManager = () => {
     URL.revokeObjectURL(url);
     
     // Show success message
-          showNotification(`CSV esportato con successo! ${allData.length} elementi salvati.`, 'success');
+    showNotification(`CSV esportato con successo!\n\n📊 Dati esportati:\n• ${allData.length} elementi totali\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-dettagliato-${new Date().toISOString().split('T')[0]}.csv`, 'success');
     } catch (error) {
       showNotification('Errore durante l\'esportazione CSV. Riprova.', 'error');
     }
@@ -2304,7 +2421,7 @@ const NetWorthManager = () => {
     URL.revokeObjectURL(url);
     
     // Show success message
-          showNotification(`Excel esportato con successo! ${allData.length} elementi salvati.`, 'success');
+    showNotification(`Excel (CSV) esportato con successo!\n\n📊 Dati esportati:\n• ${allData.length} elementi totali\n• Data: ${new Date().toLocaleDateString('it-IT')}\n\n💾 File salvato come: mangomoney-excel-${new Date().toISOString().split('T')[0]}.csv\n\n📝 Nota: Apri il file con Excel per una migliore visualizzazione.`, 'success');
     } catch (error) {
       showNotification('Errore durante l\'esportazione Excel. Riprova.', 'error');
     }
@@ -2497,14 +2614,14 @@ const NetWorthManager = () => {
 
     // Check file type
     if (!file.name.toLowerCase().endsWith('.json')) {
-              showNotification('Per favore seleziona un file JSON valido.', 'error');
+      showNotification('Per favore seleziona un file JSON valido.', 'error');
       event.target.value = '';
       return;
     }
 
     // Check file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-              showNotification('Il file è troppo grande. Dimensione massima: 10MB', 'error');
+      showNotification('Il file è troppo grande. Dimensione massima: 10MB', 'error');
       event.target.value = '';
       return;
     }
@@ -2543,71 +2660,25 @@ const NetWorthManager = () => {
         }
 
         // Import the data
-        setAssets(importedData.assets);
+          setAssets(importedData.assets);
         
-        // Import settings if available (backward compatibility)
-        if (importedData.settings) {
-          // Tax and fee settings
-          if (importedData.settings.capitalGainsTaxRate !== undefined) {
-            setCapitalGainsTaxRate(importedData.settings.capitalGainsTaxRate);
+        // Import settings
+          if (importedData.metadata.emergencyFundAccount) {
+            setEmergencyFundAccount(importedData.metadata.emergencyFundAccount);
           }
-          if (importedData.settings.currentAccountStampDuty !== undefined) {
-            setCurrentAccountStampDuty(importedData.settings.currentAccountStampDuty);
+          if (importedData.metadata.monthlyExpenses) {
+            setMonthlyExpenses(importedData.metadata.monthlyExpenses);
           }
-          if (importedData.settings.currentAccountStampDutyThreshold !== undefined) {
-            setCurrentAccountStampDutyThreshold(importedData.settings.currentAccountStampDutyThreshold);
-          }
-          if (importedData.settings.depositAccountStampDutyRate !== undefined) {
-            setDepositAccountStampDutyRate(importedData.settings.depositAccountStampDutyRate);
-          }
-          
-          // Emergency fund settings
-          if (importedData.settings.emergencyFundOptimalMonths !== undefined) {
-            setEmergencyFundOptimalMonths(importedData.settings.emergencyFundOptimalMonths);
-          }
-          if (importedData.settings.emergencyFundAdequateMonths !== undefined) {
-            setEmergencyFundAdequateMonths(importedData.settings.emergencyFundAdequateMonths);
-          }
-          
-          // Currency and language settings
-          if (importedData.settings.selectedCurrency) {
-            setSelectedCurrency(importedData.settings.selectedCurrency);
-          }
-          if (importedData.settings.selectedLanguage) {
-            setSelectedLanguage(importedData.settings.selectedLanguage);
-          }
-          
-          // SWR settings
-          if (importedData.settings.swrRate !== undefined) {
-            setSwrRate(importedData.settings.swrRate);
-          }
-          
-          // UI settings
-          if (importedData.settings.darkMode !== undefined) {
-            setDarkMode(importedData.settings.darkMode);
-          }
-          if (importedData.settings.forceMobileLayout !== undefined) {
-            setForceMobileLayout(importedData.settings.forceMobileLayout);
-          }
-        }
-        
-        // Import legacy settings from metadata (backward compatibility)
-        if (importedData.metadata.emergencyFundAccount) {
-          setEmergencyFundAccount(importedData.metadata.emergencyFundAccount);
-        }
-        if (importedData.metadata.monthlyExpenses) {
-          setMonthlyExpenses(importedData.metadata.monthlyExpenses);
-        }
 
         // Show success message with details
         const totalItems = Object.values(importedData.assets).reduce((sum: number, section: any) => sum + section.length, 0);
         const exportDate = importedData.metadata.exportDate ? new Date(importedData.metadata.exportDate).toLocaleDateString('it-IT') : 'Sconosciuta';
         
-        showNotification(`Backup importato con successo! ${totalItems} elementi caricati.`, 'success');
+        showNotification(`Backup importato con successo!\n\n📊 Dati importati:\n• ${totalItems} elementi totali\n• Data backup: ${exportDate}\n• Versione: ${importedData.metadata.version || 'Sconosciuta'}\n\n💾 I dati sono stati sovrascritti e salvati automaticamente.`, 'success');
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
-        showNotification(`Errore nell'importazione. Verifica che il file sia un backup valido di MangoMoney.`, 'error');
+        showNotification(`Errore nell'importazione:\n\n${errorMessage}\n\nAssicurati di aver selezionato un file di backup JSON valido di MangoMoney.`, 'error');
       }
     };
 
@@ -2650,123 +2721,13 @@ const NetWorthManager = () => {
     const [propertyType, setPropertyType] = useState<'primary' | 'secondary'>('primary');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    // Enhanced input validation functions
-    const validateAmount = (amount: string, section: string): { isValid: boolean; error?: string } => {
-      if (amount === '') return { isValid: false, error: 'L\'importo è obbligatorio' };
-      
-      const numAmount = parseFloat(amount);
-      if (isNaN(numAmount)) return { isValid: false, error: 'L\'importo deve essere un numero valido' };
-      
-      // Prevent zero amounts
-      if (numAmount === 0) return { isValid: false, error: 'L\'importo non può essere zero' };
-      
-      // Debt-specific validation
-      if (section === 'debts') {
-        if (numAmount > 0) return { isValid: false, error: 'I debiti devono essere inseriti come importi negativi' };
-        if (numAmount < -1000000000) return { isValid: false, error: 'L\'importo del debito è troppo elevato' };
-      } else {
-        // Asset validation (non-debts)
-        if (numAmount < 0) return { isValid: false, error: 'L\'importo deve essere positivo per gli asset' };
-        if (numAmount > 1000000000) return { isValid: false, error: 'L\'importo è troppo elevato' };
-      }
-      
-      return { isValid: true };
-    };
-
-    const validateQuantity = (quantity: string): { isValid: boolean; error?: string } => {
-      if (quantity === '') return { isValid: false, error: 'La quantità è obbligatoria' };
-      
-      const numQuantity = parseInt(quantity);
-      if (isNaN(numQuantity)) return { isValid: false, error: 'La quantità deve essere un numero intero' };
-      
-      if (numQuantity <= 0) return { isValid: false, error: 'La quantità deve essere maggiore di zero' };
-      if (numQuantity > 1000000000) return { isValid: false, error: 'La quantità è troppo elevata' };
-      
-      return { isValid: true };
-    };
-
-    const validatePrice = (price: string, fieldName: string): { isValid: boolean; error?: string } => {
-      if (price === '') return { isValid: true }; // Optional field
-      
-      const numPrice = parseFloat(price);
-      if (isNaN(numPrice)) return { isValid: false, error: `${fieldName} deve essere un numero valido` };
-      
-      if (numPrice < 0) return { isValid: false, error: `${fieldName} non può essere negativo` };
-      if (numPrice > 1000000) return { isValid: false, error: `${fieldName} è troppo elevato` };
-      
-      return { isValid: true };
-    };
-
-    const validateDate = (date: string | undefined): { isValid: boolean; error?: string } => {
-      if (!date) return { isValid: true }; // Optional field
-      
-      const transactionDate = new Date(date);
-      if (isNaN(transactionDate.getTime())) return { isValid: false, error: 'Data non valida' };
-      
-      const today = new Date();
-      today.setHours(23, 59, 59, 999); // End of today
-      if (transactionDate > today) return { isValid: false, error: 'La data della transazione non può essere nel futuro' };
-      
-      return { isValid: true };
-    };
-
     const validateForm = () => {
       const newErrors: { [key: string]: string } = {};
-      
-      // Name validation
-      if (!formData.name.trim()) {
-        newErrors.name = 'Il nome è obbligatorio';
-      } else if (formData.name.trim().length < 2) {
-        newErrors.name = 'Il nome deve contenere almeno 2 caratteri';
-      } else if (formData.name.trim().length > 100) {
-        newErrors.name = 'Il nome non può superare i 100 caratteri';
-      }
-      
-      // Amount validation with business rules
-      const amountValidation = validateAmount(formData.amount, section);
-      if (!amountValidation.isValid) {
-        newErrors.amount = amountValidation.error!;
-      }
-      
-      // Quantity validation for transactions
-      if (section === 'transactions') {
-        const quantityValidation = validateQuantity(formData.quantity);
-        if (!quantityValidation.isValid) {
-          newErrors.quantity = quantityValidation.error!;
-        }
-      }
-      
-      // Price validations for investments
-      if (section === 'investments') {
-        const avgPriceValidation = validatePrice(formData.avgPrice, 'Prezzo medio');
-        if (!avgPriceValidation.isValid) {
-          newErrors.avgPrice = avgPriceValidation.error!;
-        }
-        
-        const currentPriceValidation = validatePrice(formData.currentPrice, 'Prezzo attuale');
-        if (!currentPriceValidation.isValid) {
-          newErrors.currentPrice = currentPriceValidation.error!;
-        }
-      }
-      
-      // Date validation for transactions
-      if (section === 'transactions') {
-        const dateValidation = validateDate(formData.date);
-        if (!dateValidation.isValid) {
-          newErrors.date = dateValidation.error!;
-        }
-      }
-      
-      // Description length validation
-      if (formData.description && formData.description.length > 500) {
-        newErrors.description = 'La descrizione non può superare i 500 caratteri';
-      }
-      
-      // Notes length validation
-      if (formData.notes && formData.notes.length > 1000) {
-        newErrors.notes = 'Le note non possono superare i 1000 caratteri';
-      }
-      
+      if (!formData.name.trim()) newErrors.name = 'Il nome è obbligatorio';
+      if (formData.amount === '') newErrors.amount = 'L\'importo è obbligatorio';
+      if (formData.amount !== '' && (isNaN(parseFloat(formData.amount)) || parseFloat(formData.amount) < 0) && section !== 'debts') newErrors.amount = 'L\'importo deve essere un numero positivo';
+      if (section === 'transactions' && formData.quantity === '') newErrors.quantity = 'La quantità è obbligatoria';
+      if (section === 'transactions' && formData.quantity !== '' && (isNaN(parseInt(formData.quantity)) || parseInt(formData.quantity) <= 0)) newErrors.quantity = 'La quantità deve essere un numero intero positivo';
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -3304,8 +3265,8 @@ const NetWorthManager = () => {
     </div>
   );
 
-  // Compact pie chart component for all sections - Optimized with React.memo
-  const CompactPieChart = React.memo(({ data, size = 200, title = "", showLegend = true }: CompactPieChartProps) => {
+  // Compact pie chart component for all sections
+  const CompactPieChart = ({ data, size = 200, title = "", showLegend = true }: CompactPieChartProps) => {
     const [localHoveredIndex, setLocalHoveredIndex] = useState<number | null>(null);
     const total = data.reduce((sum: number, item: ChartDataItem) => sum + item.value, 0);
     if (total === 0) return <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('noData')}</div>;
@@ -3385,7 +3346,7 @@ const NetWorthManager = () => {
         )}
       </div>
     );
-  });
+  };
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
@@ -3529,7 +3490,7 @@ const NetWorthManager = () => {
                 <div className={`absolute right-0 mt-2 w-32 ${darkMode ? 'bg-gray-900' : 'bg-white'} rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
                   <div className="py-1">
                     {Object.entries(languages).map(([code, language]) => (
-              <button
+                      <button
                         key={code}
                         onClick={() => setSelectedLanguage(code)}
                         className={`block w-full text-left px-3 py-2 text-sm ${
@@ -3539,7 +3500,7 @@ const NetWorthManager = () => {
                         }`}
                       >
                         {language.flag} {language.name}
-              </button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -3719,147 +3680,69 @@ const NetWorthManager = () => {
                   {/* Pie Chart - Horizontal Layout */}
                   <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-6 hover:shadow-xl transition-shadow`}>
                     <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('assetDistribution')}</h3>
-                    {filteredPieData.length === 0 ? (
-                      <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <div className="mb-4">
-                          <p className="text-lg mb-2">📊 Nessun asset da visualizzare</p>
-                          <p className="text-sm">Aggiungi i tuoi asset per vedere la distribuzione del patrimonio.</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                          <button 
-                            onClick={() => setActiveSection('investments')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                              darkMode 
-                                ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                                : 'bg-blue-500 text-white hover:bg-blue-600'
-                            }`}
-                          >
-                            💼 Aggiungi Investimenti
-                          </button>
-                          <button 
-                            onClick={() => setActiveSection('realEstate')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                              darkMode 
-                                ? 'bg-green-600 text-white hover:bg-green-700' 
-                                : 'bg-green-500 text-white hover:bg-green-600'
-                            }`}
-                          >
-                            🏠 Aggiungi Immobili
-                          </button>
-                          <button 
-                            onClick={() => setActiveSection('cash')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                              darkMode 
-                                ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
-                                : 'bg-yellow-500 text-white hover:bg-yellow-600'
-                            }`}
-                          >
-                            💰 Aggiungi Liquidità
-                          </button>
-                        </div>
-                        <div className="mt-4 text-xs">
-                          <p>💡 Suggerimento: Inizia con i tuoi asset principali per vedere la distribuzione</p>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <CompactPieChart data={filteredPieData} size={240} showLegend={false} />
+                    </div>
+                      <div className="flex-1 ml-8 min-w-0">
+                        <div className="grid grid-cols-1 gap-3">
+                          {filteredPieData.map((item, index) => (
+                            <div key={index} className="flex items-center min-w-0">
+                              <div 
+                                className="w-4 h-4 rounded-full mr-3 flex-shrink-0" 
+                                style={{ backgroundColor: item.color }}
+                              ></div>
+                              <span className={`text-sm flex-1 min-w-0 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`} style={{ wordBreak: 'break-word' }}>
+                                {item.name}
+                              </span>
+                              <div className="text-right ml-4 flex-shrink-0">
+                                <div className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                                  {formatCurrency(item.value)}
+                    </div>
+                                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  {totals.total > 0 ? ((item.value / totals.total) * 100).toFixed(1) : '0'}%
+                    </div>
+                  </div>
+                </div>
+                          ))}
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <CompactPieChart data={filteredPieData} size={240} showLegend={false} />
-                        </div>
-                        <div className="flex-1 ml-8 min-w-0">
-                          <div className="grid grid-cols-1 gap-3">
-                            {filteredPieData.map((item, index) => (
-                              <div key={index} className="flex items-center min-w-0">
-                                <div 
-                                  className="w-4 h-4 rounded-full mr-3 flex-shrink-0" 
-                                  style={{ backgroundColor: item.color }}
-                                ></div>
-                                <span className={`text-sm flex-1 min-w-0 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`} style={{ wordBreak: 'break-word' }}>
-                                  {item.name}
-                                </span>
-                                <div className="text-right ml-4 flex-shrink-0">
-                                  <div className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                                    {formatCurrency(item.value)}
-                                  </div>
-                                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {totals.total > 0 ? ((item.value / totals.total) * 100).toFixed(1) : '0'}%
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Bar Chart - Horizontal Layout */}
                   <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-6 hover:shadow-xl transition-shadow`}>
                     <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('categoryComparison')}</h3>
-                    {filteredBarData.length === 0 ? (
-                      <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <div className="mb-4">
-                          <p className="text-lg mb-2">📊 Nessun dato da visualizzare</p>
-                          <p className="text-sm">Aggiungi asset per vedere il confronto tra le categorie.</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                          <button 
-                            onClick={() => setActiveSection('investments')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                              darkMode 
-                                ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                                : 'bg-blue-500 text-white hover:bg-blue-600'
-                            }`}
-                          >
-                            💼 Aggiungi Investimenti
-                          </button>
-                          <button 
-                            onClick={() => setActiveSection('realEstate')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                              darkMode 
-                                ? 'bg-green-600 text-white hover:bg-green-700' 
-                                : 'bg-green-500 text-white hover:bg-green-600'
-                            }`}
-                          >
-                            🏠 Aggiungi Immobili
-                          </button>
-                        </div>
-                        <div className="mt-4 text-xs">
-                          <p>💡 Suggerimento: Inizia aggiungendo i tuoi asset principali per vedere la distribuzione</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={filteredBarData} margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
-                          <XAxis dataKey="category" tick={{fontSize: 12}} stroke={darkMode ? '#9ca3af' : '#6b7280'} />
-                          <YAxis 
-                            tickFormatter={(value) => {
-                              const currency = currencies[selectedCurrency as keyof typeof currencies];
-                              const symbol = currency.symbol;
-                              return `${symbol}${(value/1000).toFixed(0)}k`;
-                            }} 
-                            tick={{fontSize: 10}} 
-                            stroke={darkMode ? '#9ca3af' : '#6b7280'}
-                            width={50}
-                          />
-                          <Tooltip 
-                            formatter={(value: any) => [formatCurrency(Number(value)), 'Importo']}
-                            contentStyle={{
-                              backgroundColor: darkMode ? '#1f2937' : 'white',
-                              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-                              borderRadius: '6px',
-                              color: darkMode ? '#f3f4f6' : '#1f2937'
-                            }}
-                          />
-                          <Bar dataKey="amount" fill="#3b82f6">
-                            {filteredBarData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart data={filteredBarData} margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="category" tick={{fontSize: 12}} stroke={darkMode ? '#9ca3af' : '#6b7280'} />
+                        <YAxis 
+                          tickFormatter={(value) => {
+                            const currency = currencies[selectedCurrency as keyof typeof currencies];
+                            const symbol = currency.symbol;
+                            return `${symbol}${(value/1000).toFixed(0)}k`;
+                          }} 
+                          tick={{fontSize: 10}} 
+                          stroke={darkMode ? '#9ca3af' : '#6b7280'}
+                          width={50}
+                        />
+                        <Tooltip 
+                          formatter={(value: any) => [formatCurrency(Number(value)), 'Importo']}
+                          contentStyle={{
+                            backgroundColor: darkMode ? '#1f2937' : 'white',
+                            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                            borderRadius: '6px',
+                            color: darkMode ? '#f3f4f6' : '#1f2937'
+                          }}
+                        />
+                        <Bar dataKey="amount" fill="#3b82f6">
+                          {filteredBarData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
@@ -4167,15 +4050,6 @@ const NetWorthManager = () => {
                 </div>
               ) : (
                 <>
-                {isCompactLayout ? (
-                  // Mobile card view
-                  <div className="space-y-3">
-                    {assets.investmentPositions.map((item: InvestmentPosition) => (
-                      <InvestmentPositionMobileCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                ) : (
-                  // Desktop table view
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-sm">
                   <thead>
@@ -4229,7 +4103,6 @@ const NetWorthManager = () => {
                   </tbody>
                 </table>
               </div>
-                )}
               <div className="mt-2 text-right">
                 <span className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                       {t('totalLabel')} {formatCurrency(assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}
@@ -4364,6 +4237,7 @@ const NetWorthManager = () => {
 
             {/* Portfolio Performance Summary */}
             {(() => {
+              const portfolioPerformance = calculatePortfolioPerformance();
               const hasAssetsWithPrices = portfolioPerformance.assets.some((asset: any) => asset.currentPrice && asset.currentPrice > 0);
               
               if (!hasAssetsWithPrices) {
@@ -4372,36 +4246,8 @@ const NetWorthManager = () => {
                     <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                       📊 Performance Portfolio
                     </h4>
-                    <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <div className="mb-4">
-                        <p className="text-lg mb-2">📈 Inserisci i prezzi attuali per vedere la performance</p>
-                        <p className="text-sm">Per visualizzare grafici e statistiche di performance, aggiungi i prezzi attuali ai tuoi asset.</p>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button 
-                          onClick={() => setActiveSection('investments')}
-                          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                            darkMode 
-                              ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
-                          }`}
-                        >
-                          📊 Gestisci Investimenti
-                        </button>
-                        <button 
-                          onClick={() => setActiveSection('investmentPositions')}
-                          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                            darkMode 
-                              ? 'bg-green-600 text-white hover:bg-green-700' 
-                              : 'bg-green-500 text-white hover:bg-green-600'
-                          }`}
-                        >
-                          💼 Posizioni Individuali
-                        </button>
-                      </div>
-                      <div className="mt-4 text-xs">
-                        <p>💡 Suggerimento: Aggiorna regolarmente i prezzi per monitorare la performance del tuo portfolio</p>
-                      </div>
+                    <div className={`text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p>Inserisci i prezzi attuali degli asset per visualizzare la performance del portfolio.</p>
                     </div>
                   </div>
                 );
@@ -4605,15 +4451,6 @@ const NetWorthManager = () => {
                 </div>
               ) : (
                 <>
-                {isCompactLayout ? (
-                  // Mobile card view
-                  <div className="space-y-3">
-                    {paginatedTransactions.map((item: Transaction) => (
-                      <TransactionMobileCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                ) : (
-                  // Desktop table view
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
@@ -4627,68 +4464,67 @@ const NetWorthManager = () => {
                         <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Commissioni</th>
                         <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Descrizione</th>
                         <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Data</th>
-                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('linkedToAsset')}</th>
+                          <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('linkedToAsset')}</th>
                         <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Azioni</th>
                       </tr>
                     </thead>
                     <tbody>
-                          {paginatedTransactions.map((item: Transaction) => (
+                        {paginatedTransactions.map((item: Transaction) => (
                         <tr key={item.id} className={`hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                           <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.name}</td>
                           <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.ticker}</td>
                           <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.isin}</td>
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              <span className={`px-2 py-1 rounded text-xs ${item.transactionType === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                {item.transactionType === 'purchase' ? 'Acquisto' : 'Vendita'}
-                              </span>
-                            </td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity.toLocaleString()}</td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.commissions)}</td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.date}</td>
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              {item.linkedToAsset ? 
-                                assets.investments.find((asset: AssetItem) => asset.id === item.linkedToAsset)?.name || 'Asset non trovato' 
-                                : 'Nessuno'
-                              }
-                            </td>
-                            <td className={`border px-2 py-1 text-center`}>
-                              <div className="flex justify-center gap-1">
-                                <button 
-                                  onClick={() => handleCopyRow('transactions', item.id)}
-                                  className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-                                  title="Copia riga"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                  </svg>
-                                </button>
-                                <button 
-                                  onClick={() => handleEditRow('transactions', item.id)}
-                                  className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-                                  title="Modifica riga"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteItem('transactions', item.id)}
-                                  className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                          <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
+                            <span className={`px-2 py-1 rounded text-xs ${item.transactionType === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {item.transactionType === 'purchase' ? 'Acquisto' : 'Vendita'}
+                            </span>
+                          </td>
+                          <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity.toLocaleString()}</td>
+                          <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</td>
+                          <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.commissions)}</td>
+                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
+                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.date}</td>
+                          <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
+                            {item.linkedToAsset ? 
+                              assets.investments.find((asset: AssetItem) => asset.id === item.linkedToAsset)?.name || 'Asset non trovato' 
+                              : 'Nessuno'
+                            }
+                          </td>
+                          <td className={`border px-2 py-1 text-center`}>
+                            <div className="flex justify-center gap-1">
+                              <button 
+                                onClick={() => handleCopyRow('transactions', item.id)}
+                                className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
+                                title="Copia riga"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                              </button>
+                              <button 
+                                onClick={() => handleEditRow('transactions', item.id)}
+                                className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
+                                title="Modifica riga"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteItem('transactions', item.id)}
+                                className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 
                 {/* Pagination */}
                 {totalTransactionPages > 1 && (
@@ -5070,77 +4906,65 @@ const NetWorthManager = () => {
                   <p className="text-sm mt-2">Aggiungi la tua residenza principale e altre proprietà.</p>
                 </div>
               ) : (
-                <>
-                {isCompactLayout ? (
-                  // Mobile card view
-                  <div className="space-y-3">
-                    {assets.realEstate.map((item: RealEstate) => (
-                      <RealEstateMobileCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                ) : (
-                  // Desktop table view
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-sm">
-                      <thead>
-                        <tr className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nome</th>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo</th>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Descrizione</th>
-                          <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Valore</th>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Indirizzo</th>
-                          <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Azioni</th>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nome</th>
+                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo</th>
+                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Descrizione</th>
+                        <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Valore</th>
+                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Indirizzo</th>
+                        <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Azioni</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {assets.realEstate.map((item: RealEstate) => (
+                        <tr key={item.id} className={`hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.name}</td>
+                          <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
+                            <span className={`px-2 py-1 rounded text-xs ${item.type === 'primary' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+                              {item.type === 'primary' ? 'Principale' : 'Secondaria'}
+                            </span>
+                          </td>
+                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
+                          <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.value)}</td>
+                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.address || '-'}</td>
+                          <td className={`border px-2 py-1 text-center`}>
+                            <div className="flex justify-center gap-1">
+                              <button 
+                                onClick={() => handleEditRow('realEstate', item.id)}
+                                className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
+                                title="Modifica riga"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                              </button>
+                              <button 
+                                onClick={() => handleCopyRow('realEstate', item.id)}
+                                className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
+                                title="Copia riga"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteItem('realEstate', item.id)}
+                                className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {assets.realEstate.map((item: RealEstate) => (
-                          <tr key={item.id} className={`hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.name}</td>
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              <span className={`px-2 py-1 rounded text-xs ${item.type === 'primary' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                                {item.type === 'primary' ? 'Principale' : 'Secondaria'}
-                              </span>
-                            </td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.value)}</td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.address || '-'}</td>
-                            <td className={`border px-2 py-1 text-center`}>
-                              <div className="flex justify-center gap-1">
-                                <button 
-                                  onClick={() => handleEditRow('realEstate', item.id)}
-                                  className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-                                  title="Modifica riga"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                  </svg>
-                                </button>
-                                <button 
-                                  onClick={() => handleCopyRow('realEstate', item.id)}
-                                  className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-                                  title="Copia riga"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteItem('realEstate', item.id)}
-                                  className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                </>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
               
               <div className="mt-2 text-right">
@@ -5555,73 +5379,6 @@ const NetWorthManager = () => {
                       
                       <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                         {t('settingsSaved')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Emergency Fund Settings */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">🛡️ Fondo di emergenza</h3>
-                  <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Mesi per "Ottimale"
-                        </label>
-                        <input
-                          type="number"
-                          step="0.5"
-                          min="1"
-                          max="24"
-                          value={emergencyFundOptimalMonths}
-                          onChange={(e) => setEmergencyFundOptimalMonths(parseFloat(e.target.value) || 6)}
-                          className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
-                          }`}
-                        />
-                        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Numero di mesi di spese per considerare il fondo ottimale
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Mesi per "Adeguato"
-                        </label>
-                        <input
-                          type="number"
-                          step="0.5"
-                          min="1"
-                          max="24"
-                          value={emergencyFundAdequateMonths}
-                          onChange={(e) => setEmergencyFundAdequateMonths(parseFloat(e.target.value) || 3)}
-                          className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
-                          }`}
-                        />
-                        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Numero di mesi di spese per considerare il fondo adeguato
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center pt-2">
-                      <button
-                        onClick={() => {
-                          setEmergencyFundOptimalMonths(6);
-                          setEmergencyFundAdequateMonths(3);
-                          showNotification('Impostazioni fondo di emergenza reimpostate ai valori predefiniti', 'success');
-                        }}
-                        className={`px-4 py-2 rounded-md text-sm transition-colors ${
-                          darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'
-                        }`}
-                      >
-                        Reimposta predefiniti
-                      </button>
-                      
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Personalizza in base alle tue circostanze
                       </div>
                     </div>
                   </div>
