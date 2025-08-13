@@ -6,15 +6,15 @@
 
 **Portfolio tracker completo e moderno, pensato per monitorare investimenti e patrimonio in modo (non)professionale, semplice e — soprattutto — senza che i tuoi dati vadano a spasso per Internet.**
 
-Gli utenti che potrebbero usarlo e trovarlo utile/comodo non sono sicuramente i pignolazzi, ma gli utenti che si sono appena affacciati al mondo della finanza personale e hanno quindi poche pretese.
+Gli utenti che potrebbero usarlo e trovarlo utile/comodo non sono sicuramente i pignolazzi, ma gli utenti che si sono appena affacciati al mondo della finanza personale e hanno quindi poche pretese. Inoltre è pensato principalmente per utenti italiani, tuttavia è stata aggiunta una traduzione inglese (più o meno completa) e la possibilità di usare diverse valute.
 
 L'idea nasce perché per anni ho gestito il mio *Net Worth* su Excel... e diciamolo, gli Excel non brillano per estetica. Ho fatto largo uso di IA per costruirlo, quindi se pensi "questo pezzo sembra scritto da un'IA", probabilmente hai ragione.
 
-L'ho condiviso per gentilezza e spirito divulgativo, non come prodotto commerciale finito. Eventuali *issue*? Potrei sistemarle… oppure no.
+L'ho condiviso per gentilezza e spirito divulgativo, non come prodotto commerciale finito. Eventuali *issue*? Potrei sistemarle… oppure no. 
 
 ## 📛 Origine del Nome
 
-**MangoMoney** = gioco di parole da *"Magano i money"* → *mancano i soldi*  
+**MangoMoney** = gioco di parole da *"Mangano i money"* → *mancano i soldi*  
 Un nome simpatico per un problema serio: il portafoglio sempre vuoto! 🥭
 
 ---
@@ -142,7 +142,7 @@ Anni di Sostentamento = Asset Liquidi / (Spese Mensili × 12)
 ### 🔗 **Validazione Collegamenti**
 Controllo coerenza tra posizioni globali (broker) e asset individuali:
 ```
-Tolleranza = max(5% del valore, soglia minima per valuta)
+Tolleranza = max 5% del valore, soglia minima per valuta
 Soglie: €10 (EUR), $10 (USD), £8 (GBP), ¥1000 (JPY), CHF10
 
 Status: ✅ Valido | ⚠️ Discrepanza oltre tolleranza
@@ -275,7 +275,7 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 - 🧮 Calcoli indicativi, non sostituiscono consulenza professionale
 
 ### **Disclaimer Finanziario**
-**MangoMoney è a scopo educativo e informativo. Non garantisco accuratezza dei dati o consigli di investimento. Le performance passate non garantiscono risultati futuri. Uso a vostro rischio e responsabilità.**
+**MangoMoney è a scopo educativo e informativo. Non garantisco accuratezza dei dati e non fornisco consigli di investimento. Le performance passate non garantiscono risultati futuri. Uso a vostro rischio e responsabilità.**
 
 ---
 
@@ -289,7 +289,7 @@ Ogni contributo aiuta a mantenere il progetto gratuito e open source! 🙏
 
 ---
 
-## 📈 Roadmap Future
+## 📈 Roadmap Future - Senza alcuna garanzia di implementazione
 
 - [ ] **API Integration**: Prezzi automatici (opzionale)
 - [ ] **Advanced Charts**: Grafici storici performance
@@ -304,7 +304,7 @@ Ogni contributo aiuta a mantenere il progetto gratuito e open source! 🙏
 
 **Creato con ❤️, IA e tanta pazienza**
 
-*"Magano i money, ma almeno sappiamo quanto"*
+*"Mangano i money, ma almeno sappiamo quanti"*
 
 **⭐ Lascia una stella su GitHub se ti piace!**
 
