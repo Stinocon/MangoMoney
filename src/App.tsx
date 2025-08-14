@@ -1,9 +1,48 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Component, ReactNode } from 'react';
 import { PlusCircle, Trash2, Download, Upload, RotateCcw, Moon, Sun, Calculator, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { translations, languages, type TranslationKey, type Language } from './translations';
+
+// Error Boundary Component
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+          <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              An unexpected error occurred. Please refresh the page to continue.
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Custom debounce hook for performance optimization
-const useDebounce = (value: any, delay: number) => {
+const useDebounce = (value: unknown, delay: number): unknown => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
@@ -20,523 +59,6 @@ const useDebounce = (value: any, delay: number) => {
 };
 
 
-// Translation system
-const translations = {
-  it: {
-    // Navigation
-    overview: 'Panoramica',
-    liquidity: 'Liquidità',
-    investmentsNav: 'Investimenti',
-    realEstateNav: 'Immobili',
-    statistics: 'Statistiche',
-    info: 'Info',
-    
-    // Common
-    name: 'Nome',
-    amount: 'Importo',
-    description: 'Descrizione',
-    notes: 'Note',
-    actions: 'Azioni',
-    total: 'Totale',
-    totalLabel: 'Totale:',
-    add: 'Aggiungi',
-    edit: 'Modifica',
-    delete: 'Elimina',
-    copy: 'Copia',
-    save: 'Salva',
-    cancel: 'Annulla',
-    close: 'Chiudi',
-    
-    // Asset categories
-    cash: 'Liquidità',
-    debts: 'Debiti',
-    investments: 'Investimenti',
-    realEstate: 'Immobili',
-    pensionFunds: 'Fondi pensione',
-    otherAccounts: 'Altri conti',
-    alternativeAssets: 'Beni alternativi',
-    
-    // Investment specific
-    globalPositions: 'Posizioni globali',
-    individualPositions: 'Posizioni individuali',
-    transactions: 'Transazioni',
-    ticker: 'Ticker',
-    isin: 'ISIN',
-    quantity: 'Quantità',
-    avgPrice: 'Prezzo medio',
-    currentPrice: 'Prezzo attuale',
-    purchaseDate: 'Data acquisto',
-    transactionType: 'Tipo transazione',
-    purchase: 'Acquisto',
-    sale: 'Vendita',
-    commissions: 'Commissioni',
-    date: 'Data',
-    linkedTo: 'Collegato a',
-    linkedToAsset: 'Collegato a asset',
-    verifyLinks: 'Verifica collegamenti',
-    performance: 'Performance',
-    totalReturn: 'Rendimento totale',
-    percentageReturn: 'Rendimento %',
-    annualizedReturn: 'Rendimento annualizzato',
-    annualizedReturnPercentage: 'Rendimento annualizzato %',
-    updatePrice: 'Aggiorna prezzo',
-    performanceChart: 'Grafico performance',
-    portfolioPerformance: 'Performance portfolio',
-
-    reconciliation: 'Riconciliazione',
-    costBasis: 'Costo base',
-    transactionBased: 'Basato su transazioni',
-    manualBased: 'Basato su manuale',
-    
-    // Real estate
-    primary: 'Primaria',
-    secondary: 'Secondaria',
-    address: 'Indirizzo',
-    propertyType: 'Tipo proprietà',
-    
-    // Statistics
-    riskScore: 'Score di rischio',
-    emergencyFund: 'Fondo emergenza',
-    diversification: 'Diversificazione',
-    concentration: 'Concentrazione',
-    debtToAssetRatio: 'Rapporto debiti/patrimonio',
-    liquidityRatio: 'Rapporto liquidità',
-    investmentEfficiency: 'Efficienza investimenti',
-    growthPotential: 'Potenziale di crescita',
-    
-    // Safe Withdrawal Rate
-    swrSimulation: 'Simulazione Safe Withdrawal Rate',
-    swrRate: 'Tasso di prelievo sicuro',
-    swrMonthlyWithdrawal: 'Prelievo mensile',
-    swrYearsOfSupport: 'Anni di sostentamento',
-    swrNetLiquidAssets: 'Asset liquidi netti',
-    swrMonthlyExpenses: 'Spese mensili',
-    swrAnnualWithdrawal: 'Prelievo annuo',
-    swrExplanation: 'Questa simulazione calcola se il prelievo di una certa percentuale dei tuoi asset liquidi netti (contanti + investimenti + altri conti) può coprire le tue spese mensili. Il "Prelievo mensile" mostra quanto riceveresti ogni mese con il tasso di prelievo selezionato.',
-    swrDisclaimer: '⚠️ Calcolo estremamente indicativo e non esaustivo',
-    
-    // Messages
-    noData: 'Nessun dato',
-    welcomeMessage: 'Benvenuto in MangoMoney!',
-    addYourAssets: 'Inizia ad aggiungere i tuoi asset finanziari per tenere traccia del tuo patrimonio netto.',
-    navigateSections: 'Naviga nelle sezioni per aggiungere conti bancari, investimenti, debiti e altro ancora.',
-    lastSaved: 'Ultimo salvataggio',
-    totalAssets: 'Patrimonio totale',
-    
-    // Forms
-    addItem: 'Aggiungi elemento',
-    editItem: 'Modifica elemento',
-    addProperty: 'Aggiungi immobile',
-    addTransaction: 'Aggiungi transazione',
-    
-    // Charts
-    assetDistribution: 'Distribuzione patrimonio',
-    categoryComparison: 'Confronto categorie',
-    realEstateDistribution: 'Distribuzione immobili',
-    
-    // Toolbar
-    darkMode: 'Modalità scura/chiara',
-    mobileLayout: 'Layout mobile',
-    import: 'Importa',
-    export: 'Esporta',
-    reset: 'Reset',
-    currency: 'Valuta',
-    language: 'Lingua',
-    
-    // Info section
-    projectPurpose: 'Scopo del progetto',
-    mainFeatures: 'Funzionalità principali',
-    dataEntryGuide: 'Guida all\'inserimento dati',
-    privacySecurity: 'Privacy e sicurezza',
-    supportProject: 'Supporta il progetto',
-    legalDisclaimer: 'Disclaimer legale',
-    
-    // Info section detailed
-    projectPurposeTitle: '🎯 Scopo del progetto',
-    projectPurposeText: 'MangoMoney è un portfolio tracker completo e assolutamente non professionale progettato per aiutarti a monitorare, analizzare e ottimizzare il tuo patrimonio netto. Il sistema supporta la gestione degli assett più comuni fornendo analisi avanzate basate su principi di finanza moderna.',
-    mainFeaturesTitle: '🚀 Funzionalità principali',
-    liquidityManagement: 'Gestione liquidità & contanti',
-    investmentManagement: 'Gestione investimenti avanzata',
-    realEstateManagement: 'Gestione immobili',
-    advancedAnalytics: 'Analisi avanzate & statistiche',
-
-    backupSecurity: 'Backup & sicurezza avanzati',
-    advancedUI: 'Interfaccia utente avanzata',
-    
-    // Info section content
-    liquidityDesc1: 'Conti bancari, contanti e altri strumenti liquidi',
-    liquidityDesc2: 'Configurazione avanzata del fondo di emergenza',
-    liquidityDesc3: 'Calcolo autonomia finanziaria in mesi',
-    liquidityDesc4: 'Gestione spese mensili per calcoli di sicurezza',
-    
-    investmentDesc1: 'Valore totale per broker/banca con gestione completa',
-    investmentDesc2: 'Asset specifici con ticker, ISIN, quantità, prezzo medio',
-    investmentDesc3: 'Collegamento tra posizioni individuali e globali con validazione automatica',
-    investmentDesc4: 'Registro completo con date, quantità, prezzi e commissioni',
-    investmentDesc5: 'Analisi per anno con totale investito/venduto',
-    
-    realEstateDesc1: 'Proprietà immobiliari (primaria e secondarie)',
-    realEstateDesc2: 'Valutazioni immobiliari con indirizzi',
-    realEstateDesc3: 'Gestione tipologie (primaria/secondaria)',
-    realEstateDesc4: 'Note e descrizioni dettagliate',
-    
-    analyticsDesc1: 'Calcolo basato su Modern Portfolio Theory (0-10)',
-    analyticsDesc2: 'Debt-to-Asset, Liquidity Ratio, Investment Efficiency',
-    analyticsDesc3: 'Distribuzione patrimonio e confronto categorie con colori coordinati',
-    analyticsDesc4: 'Simulazione Safe Withdrawal Rate (SWR) personalizzabile',
-    analyticsDesc5: 'Analisi fondo di emergenza e autonomia finanziaria',
-    
-    linkingDesc1: 'Collegamento posizioni individuali a posizioni globali',
-    linkingDesc2: 'Validazione automatica con tolleranza del 5%',
-    linkingDesc3: 'Verifica discrepanze e stato collegamenti',
-    linkingDesc4: 'Gestione completa delle relazioni tra asset',
-    
-    backupDesc1: 'Backup completo con metadati e timestamp',
-    backupDesc2: 'Esportazione per analisi esterne',
-    backupDesc3: 'Report professionali per documentazione',
-    backupDesc4: 'Validazione e sovrascrittura completa',
-    backupDesc5: 'Persistenza locale nel browser',
-    
-    uiDesc1: 'Tema personalizzabile per comfort visivo',
-    uiDesc2: 'Ottimizzato per desktop, tablet e mobile',
-    uiDesc3: 'Per presentazioni e schermi piccoli',
-    uiDesc4: 'Colori consistenti tra pie chart e bar chart',
-    uiDesc5: 'Interfaccia completa per editing avanzato',
-    
-    dataEntryDesc1: 'Nome broker/banca, valore totale',
-    dataEntryDesc2: 'Ticker, ISIN, quantità, prezzo medio',
-    dataEntryDesc3: 'Ticker, tipo, quantità, prezzo, commissioni, data',
-    dataEntryDesc4: 'Ticker, quantità, prezzo medio',
-    dataEntryDesc5: 'Nome/ISIN, valore nominale, prezzo',
-    dataEntryDesc6: 'Symbol (BTC, ETH), quantità',
-    dataEntryDesc7: 'Nome, valore, tipo, indirizzo',
-    dataEntryDesc8: 'Descrizione, valore stimato',
-    
-    bestPracticesDesc1: 'Usa ticker ufficiali per accuratezza',
-    bestPracticesDesc2: 'Aggiorna quantità e prezzi regolarmente',
-    bestPracticesDesc3: 'Collega posizioni per tracciabilità',
-    bestPracticesDesc4: 'Registra tutte le transazioni',
-    bestPracticesDesc5: 'Aggiorna valutazioni immobiliari',
-    bestPracticesDesc6: 'Configura il fondo di emergenza',
-    bestPracticesDesc7: 'Esporta regolarmente i dati',
-    
-
-    dataEntryTitle: '📝 Guida all\'inserimento dati',
-    dataEntryCategory: 'Inserimento per categoria',
-    bestPractices: 'Best practices',
-
-    privacyTitle: '🔒 Privacy e sicurezza',
-    localData: 'Dati completamente locali',
-    localDataText1: 'Tutti i dati sono memorizzati localmente nel tuo browser',
-    localDataText2: 'Nessuna trasmissione a server esterni o terze parti',
-    localDataText3: 'Nessun tracking, analytics o raccolta dati',
-    localDataText4: 'Salvataggio automatico in localStorage',
-    localDataText5: 'Backup manuale tramite esportazione JSON',
-    localDataText6: 'Controllo completo sui tuoi dati finanziari',
-    supportTitle: '💖 Supporta il progetto',
-    supportText: 'Se MangoMoney ti è stato utile, considera di supportare lo sviluppo con una piccola donazione.',
-    donatePayPal: 'Dona con PayPal',
-    supportNote: 'Ogni contributo aiuta a mantenere il progetto gratuito e open source',
-    disclaimerTitle: '⚠️ Disclaimer legale',
-    disclaimerText: 'MangoMoney è uno strumento di monitoraggio portfolio a scopo informativo. Non ci assumiamo alcuna responsabilità sulla validità, accuratezza o completezza dei dati inseriti. I prezzi e le valutazioni sono indicativi e potrebbero non riflettere i valori reali di mercato. Non forniamo consigli di investimento. L\'uso di questo strumento è a vostro rischio e pericolo. Consultate sempre un professionista finanziario per decisioni di investimento.',
-    developedWith: 'Sviluppato con ❤️ per il controllo finanziario personale',
-    
-    // Welcome messages
-    welcomeCash: 'Gestisci i tuoi conti bancari e liquidità',
-    welcomeDebts: 'Traccia i tuoi debiti e passività',
-    welcomeInvestments: 'Gestisci i tuoi investimenti e posizioni',
-    welcomeRealEstate: 'Gestisci le tue proprietà immobiliari',
-    welcomePensionFunds: 'Traccia i tuoi fondi pensione',
-    welcomeOtherAccounts: 'Gestisci altri conti finanziari',
-    welcomeAlternativeAssets: 'Traccia beni alternativi e collezionabili',
-    
-    // Section descriptions
-    alternativeAssetsDesc: 'Collezionabili, arte, alcolici o altro',
-    debtsDesc: 'Mutui, prestiti e altre passività',
-    
-    // Table totals
-    totalAssetsLabel: 'Totale asset:',
-    totalTransactionsLabel: 'Totale transazioni:',
-    totalPropertiesLabel: 'Totale immobili:',
-    netInvestment: 'Netto investito',
-    
-    // Settings
-    settings: 'Impostazioni',
-    capitalGainsTax: 'Imposta sulle plusvalenze',
-    capitalGainsTaxRate: 'Aliquota plusvalenze (%)',
-    currentAccountStampDuty: 'Bollo conto corrente',
-    currentAccountStampDutyAmount: 'Importo bollo conto corrente (€)',
-    currentAccountStampDutyThreshold: 'Soglia bollo conto corrente (€)',
-    depositAccountStampDuty: 'Bollo conto deposito',
-    depositAccountStampDutyRate: 'Aliquota bollo conto deposito (%)',
-    saveSettings: 'Salva impostazioni',
-    settingsSaved: 'Impostazioni salvate',
-    defaultItalianSettings: 'Impostazioni predefinite Italia',
-  },
-  en: {
-    // Navigation
-    overview: 'Overview',
-    liquidity: 'Liquidity',
-    investmentsNav: 'Investments',
-    realEstateNav: 'Real Estate',
-    statistics: 'Statistics',
-    info: 'Info',
-    
-    // Common
-    name: 'Name',
-    amount: 'Amount',
-    description: 'Description',
-    notes: 'Notes',
-    actions: 'Actions',
-    total: 'Total',
-    totalLabel: 'Total:',
-    add: 'Add',
-    edit: 'Edit',
-    delete: 'Delete',
-    copy: 'Copy',
-    save: 'Save',
-    cancel: 'Cancel',
-    close: 'Close',
-    
-    // Asset categories
-    cash: 'Cash',
-    debts: 'Debts',
-    investments: 'Investments',
-    realEstate: 'Real Estate',
-    pensionFunds: 'Pension Funds',
-    otherAccounts: 'Other Accounts',
-    alternativeAssets: 'Alternative Assets',
-    
-    // Investment specific
-    globalPositions: 'Global Positions',
-    individualPositions: 'Individual Positions',
-    transactions: 'Transactions',
-    ticker: 'Ticker',
-    isin: 'ISIN',
-    quantity: 'Quantity',
-    avgPrice: 'Avg Price',
-    currentPrice: 'Current Price',
-    purchaseDate: 'Purchase Date',
-    transactionType: 'Transaction Type',
-    purchase: 'Purchase',
-    sale: 'Sale',
-    commissions: 'Commissions',
-    date: 'Date',
-    linkedTo: 'Linked to',
-    linkedToAsset: 'Linked to Asset',
-    verifyLinks: 'Verify Links',
-    performance: 'Performance',
-    totalReturn: 'Total Return',
-    percentageReturn: 'Return %',
-    annualizedReturn: 'Annualized Return',
-    annualizedReturnPercentage: 'Annualized Return %',
-    updatePrice: 'Update Price',
-    performanceChart: 'Performance Chart',
-    portfolioPerformance: 'Portfolio Performance',
-
-    reconciliation: 'Reconciliation',
-    costBasis: 'Cost Basis',
-    transactionBased: 'Transaction Based',
-    manualBased: 'Manual Based',
-    
-    // Real estate
-    primary: 'Primary',
-    secondary: 'Secondary',
-    address: 'Address',
-    propertyType: 'Property Type',
-    
-    // Statistics
-    riskScore: 'Risk Score',
-    emergencyFund: 'Emergency Fund',
-    diversification: 'Diversification',
-    concentration: 'Concentration',
-    debtToAssetRatio: 'Debt-to-Asset Ratio',
-    liquidityRatio: 'Liquidity Ratio',
-    investmentEfficiency: 'Investment Efficiency',
-    growthPotential: 'Growth Potential',
-    
-    // Safe Withdrawal Rate
-    swrSimulation: 'Safe Withdrawal Rate Simulation',
-    swrRate: 'Safe Withdrawal Rate',
-    swrMonthlyWithdrawal: 'Monthly Withdrawal',
-    swrYearsOfSupport: 'Years of Support',
-    swrNetLiquidAssets: 'Net Liquid Assets',
-    swrMonthlyExpenses: 'Monthly Expenses',
-    swrAnnualWithdrawal: 'Annual Withdrawal',
-    swrExplanation: 'This simulation calculates whether withdrawing a certain percentage of your net liquid assets (cash + investments + other accounts) can cover your monthly expenses. The "Monthly Withdrawal" shows how much you would receive each month with the selected withdrawal rate.',
-    swrDisclaimer: '⚠️ Extremely indicative and non-exhaustive calculation',
-    
-    // Messages
-    noData: 'No data',
-    welcomeMessage: 'Welcome to MangoMoney!',
-    addYourAssets: 'Start adding your financial assets to track your net worth.',
-    navigateSections: 'Navigate through sections to add bank accounts, investments, debts and more.',
-    lastSaved: 'Last saved',
-    totalAssets: 'Total Assets',
-    
-    // Forms
-    addItem: 'Add Item',
-    editItem: 'Edit Item',
-    addProperty: 'Add Property',
-    addTransaction: 'Add Transaction',
-    
-    // Charts
-    assetDistribution: 'Asset Distribution',
-    categoryComparison: 'Category Comparison',
-    realEstateDistribution: 'Real Estate Distribution',
-    
-    // Toolbar
-    darkMode: 'Dark/light mode',
-    mobileLayout: 'Mobile layout',
-    import: 'Import',
-    export: 'Export',
-    reset: 'Reset',
-    currency: 'Currency',
-    language: 'Language',
-    
-    // Info section
-    projectPurpose: 'Project Purpose',
-    mainFeatures: 'Main Features',
-    controlsGuide: 'Controls and Features',
-    privacySecurity: 'Privacy and Security',
-    supportProject: 'Support the Project',
-    legalDisclaimer: 'Legal Disclaimer',
-    
-    // Info section detailed
-    projectPurposeTitle: '🎯 Project Purpose',
-    projectPurposeText: 'MangoMoney is a complete and absolutely non-professional portfolio tracker designed to help you monitor, analyze and optimize your net worth. The system supports management of the most common assets providing advanced analysis based on modern finance principles.',
-    mainFeaturesTitle: '🚀 Main Features',
-    // Info section content - Updated to match current features
-    liquidityManagement: 'Liquidity Management',
-    liquidityDesc1: 'Bank accounts, cash and liquid instruments',
-    liquidityDesc2: 'Emergency fund configuration',
-    liquidityDesc3: 'Financial autonomy calculation',
-    liquidityDesc4: 'Account type distinction (current, deposit, cash)',
-    
-    investmentManagement: 'Investment Management',
-    investmentDesc1: 'Global and individual positions',
-    investmentDesc2: 'Transaction history with advanced filters',
-    investmentDesc3: 'Performance tracking and annualized returns',
-    investmentDesc4: 'Transaction linking to positions',
-    investmentDesc5: 'Performance charts and trends',
-    
-    realEstateManagement: 'Real Estate Management',
-    realEstateDesc1: 'Primary and secondary properties',
-    realEstateDesc2: 'Real estate valuations',
-    realEstateDesc3: 'Address and notes management',
-    realEstateDesc4: 'Detailed notes and descriptions',
-    
-    advancedAnalytics: 'Advanced Analytics',
-    analyticsDesc1: 'Risk score (0-10)',
-    analyticsDesc2: 'Financial health metrics',
-    analyticsDesc3: 'Safe Withdrawal Rate simulation',
-    analyticsDesc4: 'Emergency fund analysis',
-    analyticsDesc5: 'Commission and cost statistics',
-    
-    assetLinking: 'Asset Linking',
-    linkingDesc1: 'Linking global and individual positions',
-    linkingDesc2: 'Automatic validation with 5% tolerance',
-    linkingDesc3: 'Discrepancy verification and link status',
-    linkingDesc4: 'Complete asset relationship management',
-    
-    backupSecurity: 'Backup and Security',
-    backupDesc1: 'JSON, CSV, Excel, PDF export',
-    backupDesc2: 'Secure import with validation',
-    backupDesc3: 'Automatic local saving',
-    backupDesc4: 'Completely local data',
-    backupDesc5: 'Local persistence in browser',
-    
-    advancedUI: 'Advanced Interface',
-    uiDesc1: 'Dark/light mode',
-    uiDesc2: 'Responsive and mobile layout',
-    uiDesc3: 'Advanced filters and pagination',
-    uiDesc4: 'Centered notifications',
-    uiDesc5: 'Dedicated settings section',
-    
-    configuration: 'Configuration',
-    configDesc1: 'Tax settings (capital gains, stamp duty)',
-    configDesc2: 'Currency selection (EUR, USD, GBP, CHF, JPY)',
-    configDesc3: 'Quick configuration for Italy',
-    configDesc4: 'Alternative assets management (TCG, collectibles, etc.)',
-    
-    dataEntryGuide: 'Data Entry Guide',
-    dataEntryCategories: 'Data Categories',
-    dataEntryDesc1: 'Global and individual positions',
-    dataEntryDesc2: 'Transactions (purchases/sales)',
-    dataEntryDesc3: 'Stocks, ETFs, bonds, crypto',
-    dataEntryDesc4: 'Real estate and alternative assets',
-    dataEntryDesc5: 'Bank accounts and liquidity',
-    dataEntryDesc6: 'Symbol (BTC, ETH), quantity',
-    dataEntryDesc7: 'Name, value, type, address',
-    dataEntryDesc8: 'Description, estimated value',
-    
-    bestPractices: 'Best Practices',
-    bestPracticesDesc1: 'Enter global positions first',
-    bestPracticesDesc2: 'Link individual positions',
-    bestPracticesDesc3: 'Record all transactions',
-    bestPracticesDesc4: 'Update current prices',
-    bestPracticesDesc5: 'Use filters for large datasets',
-    bestPracticesDesc6: 'Configure emergency fund',
-    bestPracticesDesc7: 'Export data regularly',
-    
-    dataEntryTitle: '📝 Data Entry Guide',
-    dataEntryCategory: 'Data Categories',
-
-    privacyTitle: '🔒 Privacy and Security',
-    localData: 'Completely local data',
-    localDataText1: 'All data is stored locally in your browser',
-    localDataText2: 'No transmission to external servers or third parties',
-    localDataText3: 'No tracking, analytics or data collection',
-    localDataText4: 'Automatic saving in localStorage',
-    localDataText5: 'Manual backup via JSON export',
-    localDataText6: 'Complete control over your financial data',
-    supportTitle: '💖 Support the Project',
-    supportText: 'If MangoMoney has been useful to you, consider supporting development with a small donation.',
-    donatePayPal: 'Donate with PayPal',
-    supportNote: 'Every contribution helps keep the project free and open source',
-    disclaimerTitle: '⚠️ Legal Disclaimer',
-    disclaimerText: 'MangoMoney is a portfolio monitoring tool for informational purposes. We assume no responsibility for the validity, accuracy or completeness of the data entered. Prices and valuations are indicative and may not reflect actual market values. We do not provide investment advice. Use of this tool is at your own risk. Always consult a financial professional for investment decisions.',
-    developedWith: 'Developed with ❤️ for personal financial control',
-    
-    // Welcome messages
-    welcomeCash: 'Manage your bank accounts and liquidity',
-    welcomeDebts: 'Track your debts and liabilities',
-    welcomeInvestments: 'Manage your investments and positions',
-    welcomeRealEstate: 'Manage your real estate properties',
-    welcomePensionFunds: 'Track your pension funds',
-    welcomeOtherAccounts: 'Manage other financial accounts',
-    welcomeAlternativeAssets: 'Track alternative assets and collectibles',
-    
-    // Section descriptions
-    alternativeAssetsDesc: 'Collectibles, art, alcohol or other',
-    debtsDesc: 'Mortgages, loans and other liabilities',
-    
-    // Table totals
-    totalAssetsLabel: 'Total Assets:',
-    totalTransactionsLabel: 'Total Transactions:',
-    totalPropertiesLabel: 'Total Properties:',
-    netInvestment: 'Net Investment',
-    
-    // Settings
-    settings: 'Settings',
-    capitalGainsTax: 'Capital Gains Tax',
-    capitalGainsTaxRate: 'Capital Gains Tax Rate (%)',
-    currentAccountStampDuty: 'Current Account Stamp Duty',
-    currentAccountStampDutyAmount: 'Current Account Stamp Duty Amount (€)',
-    currentAccountStampDutyThreshold: 'Current Account Stamp Duty Threshold (€)',
-    depositAccountStampDuty: 'Deposit Account Stamp Duty',
-    depositAccountStampDutyRate: 'Deposit Account Stamp Duty Rate (%)',
-    saveSettings: 'Save Settings',
-    settingsSaved: 'Settings saved',
-    defaultItalianSettings: 'Default Italian Settings',
-  }
-};
-
-// Language configuration
-const languages = {
-  it: { name: 'Italiano', flag: '🇮🇹' },
-  en: { name: 'English', flag: '🇺🇸' }
-};
 
 // TypeScript interfaces
 interface AssetItem {
@@ -631,6 +153,56 @@ interface NewItem {
   assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other';
 }
 
+// Enhanced TypeScript interfaces for better type safety
+interface AssetWithPerformance extends AssetItem {
+  performance: {
+    totalReturn: number;
+    percentageReturn: number;
+    currentValue: number;
+    costBasis: number;
+    totalInvested: number;
+  };
+}
+
+interface ChartDataItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface ExportData {
+  assets: Assets;
+  settings: {
+    capitalGainsTaxRate: number;
+    currentAccountStampDuty: number;
+    currentAccountStampDutyThreshold: number;
+    depositAccountStampDutyRate: number;
+    emergencyFundOptimalMonths: number;
+    emergencyFundAdequateMonths: number;
+    selectedCurrency: string;
+    selectedLanguage: string;
+    swrRate: number;
+    darkMode: boolean;
+    forceMobileLayout: boolean;
+  };
+  metadata: {
+    exportDate: string;
+    version: string;
+    appName: string;
+    totalItems: number;
+    totalValue: number;
+    emergencyFundAccount: EmergencyFundAccount;
+    monthlyExpenses: number;
+    exportInfo: {
+      totalAssets: number;
+      sections: Array<{
+        name: string;
+        count: number;
+      }>;
+    };
+  };
+}
+
 interface ChartDataItem {
   name: string;
   value: number;
@@ -649,15 +221,81 @@ interface CompactPieChartProps {
   showLegend?: boolean;
 }
 
+// Additional type definitions for better type safety
+interface EditingItem {
+  section: string;
+  id: number;
+  data: AssetItem | InvestmentPosition | Transaction | RealEstate;
+  // Add all possible properties that can be edited
+  name?: string;
+  amount?: number;
+  description?: string;
+  notes?: string;
+  fees?: number;
+  quantity?: number;
+  avgPrice?: number;
+  currentPrice?: number;
+  ticker?: string;
+  isin?: string;
+  sector?: string;
+  date?: string;
+  purchaseDate?: string;
+  transactionType?: 'purchase' | 'sale';
+  commissions?: number;
+  linkedToAsset?: number;
+  accountType?: 'current' | 'deposit' | 'cash';
+  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other';
+  type?: 'primary' | 'secondary';
+  address?: string;
+  value?: number;
+}
+
+interface CSVRow {
+  [key: string]: string | number | undefined;
+}
+
+// Additional interfaces to replace 'any' types
+// Note: These interfaces are defined for future use and type safety improvements
+
+// Safe localStorage utilities with validation
+const safeParseJSON = (data: string, fallback: any): any => {
+  try {
+    const parsed = JSON.parse(data);
+    return parsed;
+  } catch {
+    return fallback;
+  }
+};
+
+const validateAssets = (data: unknown): Assets | null => {
+  if (!data || typeof data !== 'object') return null;
+  
+  const assets = data as Partial<Assets>;
+  const requiredSections = ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'otherAccounts', 'alternativeAssets'];
+  
+  for (const section of requiredSections) {
+    if (!Array.isArray(assets[section as keyof Assets])) {
+      return null;
+    }
+  }
+  
+  return data as Assets;
+};
+
 const NetWorthManager = () => {
   // State management
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('mangomoney-darkMode');
-    return saved ? JSON.parse(saved) : false;
+    return saved ? safeParseJSON(saved, false) : false;
   });
   const [assets, setAssets] = useState(() => {
     const saved = localStorage.getItem('mangomoney-assets');
-    return saved ? JSON.parse(saved) : getInitialData();
+    if (saved) {
+      const parsedAssets = safeParseJSON(saved, getInitialData());
+      const validatedAssets = validateAssets(parsedAssets);
+      return validatedAssets || getInitialData();
+    }
+    return getInitialData();
   });
   const [lastSaved, setLastSaved] = useState(() => {
     const saved = localStorage.getItem('mangomoney-lastSaved');
@@ -665,31 +303,31 @@ const NetWorthManager = () => {
   });
   // Auto-save handles all saving - no manual save needed
   const [activeSection, setActiveSection] = useState('overview');
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   const [forceMobileLayout, setForceMobileLayout] = useState(() => {
     const saved = localStorage.getItem('mangomoney-forceMobileLayout');
-    return saved ? JSON.parse(saved) : false;
+    return saved ? safeParseJSON(saved, false) : false;
   });
   const [emergencyFundAccount, setEmergencyFundAccount] = useState<EmergencyFundAccount>(() => {
     const saved = localStorage.getItem('mangomoney-emergencyFundAccount');
-    return saved ? JSON.parse(saved) : { section: 'otherAccounts', id: 2, name: 'Conto Emergenza' };
+    return saved ? safeParseJSON(saved, { section: 'otherAccounts', id: 2, name: 'Conto Emergenza' }) : { section: 'otherAccounts', id: 2, name: 'Conto Emergenza' };
   });
   const [monthlyExpenses, setMonthlyExpenses] = useState(() => {
     const saved = localStorage.getItem('mangomoney-monthlyExpenses');
-    return saved ? JSON.parse(saved) : 3500;
+    return saved ? safeParseJSON(saved, 3500) : 3500;
   });
   
   // Language configuration
   const [selectedLanguage, setSelectedLanguage] = useState(() => {
     const saved = localStorage.getItem('mangomoney-language');
-    return saved ? JSON.parse(saved) : 'it';
+    return saved ? safeParseJSON(saved, 'it') : 'it';
   });
 
   // Safe Withdrawal Rate simulation
   const [swrRate, setSwrRate] = useState(() => {
     const saved = localStorage.getItem('mangomoney-swr-rate');
-    return saved ? JSON.parse(saved) : 4.0;
+    return saved ? safeParseJSON(saved, 4.0) : 4.0;
   });
 
   // Notification system
@@ -699,6 +337,8 @@ const NetWorthManager = () => {
     visible: boolean;
   }>({ message: '', type: 'info', visible: false });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setNotification({ message, type, visible: true });
     setTimeout(() => setNotification(prev => ({ ...prev, visible: false })), 5000);
@@ -707,14 +347,14 @@ const NetWorthManager = () => {
 
 
   // Translation helper function
-  const t = useCallback((key: string): string => {
-    return translations[selectedLanguage as keyof typeof translations]?.[key as keyof typeof translations.it] || key;
+  const t = useCallback((key: TranslationKey): string => {
+    return translations[selectedLanguage as Language]?.[key] || key;
   }, [selectedLanguage]);
 
   // Currency configuration
   const [selectedCurrency, setSelectedCurrency] = useState(() => {
     const saved = localStorage.getItem('mangomoney-currency');
-    return saved ? JSON.parse(saved) : 'EUR';
+    return saved ? safeParseJSON(saved, 'EUR') : 'EUR';
   });
 
   // Transaction filtering and pagination
@@ -743,33 +383,33 @@ const NetWorthManager = () => {
   // Tax and fee settings
   const [capitalGainsTaxRate, setCapitalGainsTaxRate] = useState(() => {
     const saved = localStorage.getItem('mangomoney-capital-gains-tax');
-    return saved ? JSON.parse(saved) : 26.0; // Default 26% for Italy
+    return saved ? safeParseJSON(saved, 26.0) : 26.0; // Default 26% for Italy
   });
 
   const [currentAccountStampDuty, setCurrentAccountStampDuty] = useState(() => {
     const saved = localStorage.getItem('mangomoney-current-account-stamp-duty');
-    return saved ? JSON.parse(saved) : 34.20; // Default €34.20 for Italy
+    return saved ? safeParseJSON(saved, 34.20) : 34.20; // Default €34.20 for Italy
   });
 
   const [currentAccountStampDutyThreshold, setCurrentAccountStampDutyThreshold] = useState(() => {
     const saved = localStorage.getItem('mangomoney-current-account-stamp-duty-threshold');
-    return saved ? JSON.parse(saved) : 5000; // Default €5,000 threshold for Italy
+    return saved ? safeParseJSON(saved, 5000) : 5000; // Default €5,000 threshold for Italy
   });
 
   const [depositAccountStampDutyRate, setDepositAccountStampDutyRate] = useState(() => {
     const saved = localStorage.getItem('mangomoney-deposit-account-stamp-duty');
-    return saved ? JSON.parse(saved) : 0.20; // Default 0.20% for Italy
+    return saved ? safeParseJSON(saved, 0.20) : 0.20; // Default 0.20% for Italy
   });
 
   // Emergency fund threshold settings
   const [emergencyFundOptimalMonths, setEmergencyFundOptimalMonths] = useState(() => {
     const saved = localStorage.getItem('mangomoney-emergency-fund-optimal-months');
-    return saved ? JSON.parse(saved) : 6; // Default 6 months for optimal
+    return saved ? safeParseJSON(saved, 6) : 6; // Default 6 months for optimal
   });
 
   const [emergencyFundAdequateMonths, setEmergencyFundAdequateMonths] = useState(() => {
     const saved = localStorage.getItem('mangomoney-emergency-fund-adequate-months');
-    return saved ? JSON.parse(saved) : 3; // Default 3 months for adequate
+    return saved ? safeParseJSON(saved, 3) : 3; // Default 3 months for adequate
   });
   
   // Currency definitions
@@ -996,65 +636,7 @@ const NetWorthManager = () => {
     </div>
   );
 
-  // Mobile card view component for real estate
-  const RealEstateMobileCard = ({ item }: { item: RealEstate }) => (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg p-4 mb-3 shadow-sm`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <h4 className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{item.name}</h4>
-          <span className={`px-2 py-1 rounded text-xs mt-1 inline-block ${item.type === 'primary' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-            {item.type === 'primary' ? 'Principale' : 'Secondaria'}
-          </span>
-        </div>
-        <div className={`font-mono text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-          {formatCurrency(item.value)}
-        </div>
-      </div>
-      
-      {item.description && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Descrizione</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</div>
-        </div>
-      )}
-      
-      {item.address && (
-        <div className="mb-3">
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Indirizzo</div>
-          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.address}</div>
-        </div>
-      )}
-      
-      <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-        <button 
-          onClick={() => handleEditRow('realEstate', item.id)}
-          className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-          title="Modifica riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
-        </button>
-        <button 
-          onClick={() => handleCopyRow('realEstate', item.id)}
-          className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-          title="Copia riga"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-        <button
-          onClick={() => handleDeleteItem('realEstate', item.id)}
-          className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-    </div>
-  );
+
 
   // Mobile detection hook
   useEffect(() => {
@@ -1149,8 +731,8 @@ const NetWorthManager = () => {
       ? (emergencyFundValue / monthlyExpenses).toFixed(1) 
       : monthlyExpenses === 0 ? '0' : '0';
     
-    const emergencyFundStatus = parseFloat(emergencyMonths) >= emergencyFundOptimalMonths ? 'Ottimale' :
-                               parseFloat(emergencyMonths) >= emergencyFundAdequateMonths ? 'Adeguato' : 'Insufficiente';
+    const emergencyFundStatus = parseFloat(emergencyMonths) >= emergencyFundOptimalMonths ? t('optimal') :
+                               parseFloat(emergencyMonths) >= emergencyFundAdequateMonths ? t('adequate') : t('insufficient');
 
 
     
@@ -1174,11 +756,11 @@ const NetWorthManager = () => {
     // Financial Health Metrics
     const debtToAssetRatio = total > 0 ? (totalDebts / total) : 0;
     const debtToAssetPercentage = (debtToAssetRatio * 100).toFixed(1);
-    const debtHealth = debtToAssetRatio < 0.3 ? 'Ottima' : debtToAssetRatio < 0.5 ? 'Buona' : 'Attenzione';
+          const debtHealth = debtToAssetRatio < 0.3 ? t('excellent') : debtToAssetRatio < 0.5 ? t('good') : t('attention');
 
     const liquidityRatio = total > 0 ? (cash / total) : 0;
     const liquidityPercentage = (liquidityRatio * 100).toFixed(1);
-    const liquidityHealth = liquidityRatio > 0.1 ? 'Adeguata' : liquidityRatio > 0.05 ? 'Limitata' : 'Insufficiente';
+    const liquidityHealth = liquidityRatio > 0.1 ? t('adequate') : liquidityRatio > 0.05 ? t('limited') : t('insufficient');
 
     // Investment Efficiency
     const totalInvestments = investments + investmentPositions;
@@ -1201,7 +783,7 @@ const NetWorthManager = () => {
       liquidityHealth,
       investmentPercentage
     };
-  }, [totals, assets, emergencyFundAccount, monthlyExpenses, emergencyFundOptimalMonths, emergencyFundAdequateMonths]);
+  }, [totals, assets, emergencyFundAccount, monthlyExpenses, emergencyFundOptimalMonths, emergencyFundAdequateMonths, t]);
 
   // Chart data preparation with memoization for performance
   const pieData = useMemo(() => [
@@ -1228,7 +810,7 @@ const NetWorthManager = () => {
   const filteredPieData = useMemo(() => pieData.filter(item => item.value > 0), [pieData]);
   const filteredBarData = useMemo(() => barData.filter(item => item.amount !== 0), [barData]);
 
-  const sections = {
+  const sections = useMemo(() => ({
     cash: t('cash'),
     debts: t('debts'),
     investments: t('investments'),
@@ -1236,7 +818,7 @@ const NetWorthManager = () => {
     pensionFunds: t('pensionFunds'),
     otherAccounts: t('otherAccounts'),
     alternativeAssets: t('alternativeAssets')
-  };
+  }), [t]);
 
   // Generate section-specific chart data - Optimized with memoization
   const getSectionChartData = useCallback((section: string): ChartDataItem[] => {
@@ -1431,7 +1013,7 @@ const NetWorthManager = () => {
 
   // Add missing functions
   const handleEditRow = (section: string, id: number) => {
-    let itemToEdit: any;
+    let itemToEdit: AssetItem | InvestmentPosition | Transaction | RealEstate | undefined;
     
     if (section === 'investmentPositions') {
       itemToEdit = assets.investmentPositions.find((item: InvestmentPosition) => item.id === id);
@@ -1444,12 +1026,12 @@ const NetWorthManager = () => {
     }
     
     if (itemToEdit) {
-      setEditingItem({ ...itemToEdit, section });
+      setEditingItem({ section, id, data: itemToEdit });
     }
   };
 
   const handleCopyRow = (section: string, itemId: number) => {
-    let itemToCopy: any;
+          let itemToCopy: AssetItem | InvestmentPosition | Transaction | RealEstate | undefined;
     
     if (section === 'investmentPositions') {
       itemToCopy = assets.investmentPositions.find((item: InvestmentPosition) => item.id === itemId);
@@ -1518,19 +1100,20 @@ const NetWorthManager = () => {
   const handleSaveEdit = () => {
     if (!editingItem) return;
     
-    const { section, id, ...data } = editingItem;
+    const { section, id, data } = editingItem;
     
     // Sanitize the data based on section type
-    const sanitizedData = { ...data };
+    const sanitizedData: any = { ...(data as any) };
     
     if (section === 'investmentPositions') {
-      sanitizedData.name = sanitizeString(data.name || '');
-      sanitizedData.ticker = sanitizeTicker(data.ticker || '');
-      sanitizedData.isin = sanitizeISIN(data.isin || '');
-      sanitizedData.amount = Math.abs(sanitizeNumber(data.amount || 0));
-      sanitizedData.purchaseDate = sanitizeDate(data.purchaseDate || '');
-      sanitizedData.description = sanitizeString(data.description || '');
-      sanitizedData.notes = sanitizeString(data.notes || '');
+      const investmentData = data as InvestmentPosition;
+      sanitizedData.name = sanitizeString(investmentData.name || '');
+      sanitizedData.ticker = sanitizeTicker(investmentData.ticker || '');
+      sanitizedData.isin = sanitizeISIN(investmentData.isin || '');
+      sanitizedData.amount = Math.abs(sanitizeNumber(investmentData.amount || 0));
+      sanitizedData.purchaseDate = sanitizeDate(investmentData.purchaseDate || '');
+      sanitizedData.description = sanitizeString(investmentData.description || '');
+      sanitizedData.notes = sanitizeString(investmentData.notes || '');
       
       setAssets({
         ...assets,
@@ -1539,15 +1122,16 @@ const NetWorthManager = () => {
         )
       });
     } else if (section === 'transactions') {
-      sanitizedData.name = sanitizeString(data.name || '');
-      sanitizedData.ticker = sanitizeTicker(data.ticker || '');
-      sanitizedData.isin = sanitizeISIN(data.isin || '');
-      sanitizedData.amount = Math.abs(sanitizeNumber(data.amount || 0));
-      sanitizedData.quantity = sanitizeInteger(data.quantity || 0);
-      sanitizedData.commissions = sanitizeNumber(data.commissions || 0);
-      sanitizedData.description = sanitizeString(data.description || '');
-      sanitizedData.date = sanitizeDate(data.date || '');
-      sanitizedData.linkedToAsset = data.linkedToAsset;
+      const transactionData = data as Transaction;
+      sanitizedData.name = sanitizeString(transactionData.name || '');
+      sanitizedData.ticker = sanitizeTicker(transactionData.ticker || '');
+      sanitizedData.isin = sanitizeISIN(transactionData.isin || '');
+      sanitizedData.amount = Math.abs(sanitizeNumber(transactionData.amount || 0));
+      sanitizedData.quantity = sanitizeInteger(transactionData.quantity || 0);
+      sanitizedData.commissions = sanitizeNumber(transactionData.commissions || 0);
+      sanitizedData.description = sanitizeString(transactionData.description || '');
+      sanitizedData.date = sanitizeDate(transactionData.date || '');
+      sanitizedData.linkedToAsset = transactionData.linkedToAsset;
       
       setAssets({
         ...assets,
@@ -1556,11 +1140,12 @@ const NetWorthManager = () => {
         )
       });
     } else if (section === 'realEstate') {
-      sanitizedData.name = sanitizeString(data.name || '');
-      sanitizedData.description = sanitizeString(data.description || '');
-      sanitizedData.value = Math.abs(sanitizeNumber(data.value || 0));
-      sanitizedData.address = sanitizeString(data.address || '');
-      sanitizedData.notes = sanitizeString(data.notes || '');
+      const realEstateData = data as RealEstate;
+      sanitizedData.name = sanitizeString(realEstateData.name || '');
+      sanitizedData.description = sanitizeString(realEstateData.description || '');
+      sanitizedData.value = Math.abs(sanitizeNumber(realEstateData.value || 0));
+      sanitizedData.address = sanitizeString(realEstateData.address || '');
+      sanitizedData.notes = sanitizeString(realEstateData.notes || '');
       
       setAssets({
         ...assets,
@@ -1569,27 +1154,29 @@ const NetWorthManager = () => {
         )
       });
     } else {
-      sanitizedData.name = sanitizeString(data.name || '');
-      sanitizedData.amount = section === 'debts' ? -Math.abs(sanitizeNumber(data.amount || 0)) : Math.abs(sanitizeNumber(data.amount || 0));
-      sanitizedData.description = sanitizeString(data.description || '');
-      sanitizedData.notes = sanitizeString(data.notes || '');
+      // Handle other sections (cash, debts, investments, alternativeAssets, etc.)
+      const assetData = data as AssetItem;
+      sanitizedData.name = sanitizeString(assetData.name || '');
+      sanitizedData.amount = section === 'debts' ? -Math.abs(sanitizeNumber(assetData.amount || 0)) : Math.abs(sanitizeNumber(assetData.amount || 0));
+      sanitizedData.description = sanitizeString(assetData.description || '');
+      sanitizedData.notes = sanitizeString(assetData.notes || '');
       
       if (section === 'investments') {
-        sanitizedData.fees = sanitizeNumber(data.fees || 0);
-        sanitizedData.quantity = sanitizeInteger(data.quantity || 0);
-        sanitizedData.avgPrice = sanitizeNumber(data.avgPrice || 0);
-        sanitizedData.currentPrice = sanitizeNumber(data.currentPrice || 0);
+        sanitizedData.fees = sanitizeNumber(assetData.fees || 0);
+        sanitizedData.quantity = sanitizeInteger(assetData.quantity || 0);
+        sanitizedData.avgPrice = sanitizeNumber(assetData.avgPrice || 0);
+        sanitizedData.currentPrice = sanitizeNumber(assetData.currentPrice || 0);
         sanitizedData.lastPriceUpdate = new Date().toISOString().split('T')[0];
-        sanitizedData.sector = sanitizeTicker(data.sector || '');
-        sanitizedData.isin = sanitizeISIN(data.isin || '');
+        sanitizedData.sector = sanitizeTicker(assetData.sector || '');
+        sanitizedData.isin = sanitizeISIN(assetData.isin || '');
       }
       
       if (section === 'cash') {
-        sanitizedData.accountType = data.accountType;
+        sanitizedData.accountType = assetData.accountType;
       }
       
       if (section === 'alternativeAssets') {
-        sanitizedData.assetType = data.assetType;
+        sanitizedData.assetType = assetData.assetType;
       }
       
       setAssets({
@@ -1703,7 +1290,7 @@ const NetWorthManager = () => {
   };
 
   // Calculate transaction-based performance for individual assets
-  const calculateTransactionBasedPerformance = (asset: AssetItem) => {
+  const calculateTransactionBasedPerformance = useCallback((asset: AssetItem) => {
     if (!asset.currentPrice || !asset.quantity) {
       return { totalReturn: 0, percentageReturn: 0, currentValue: 0, costBasis: 0, totalInvested: 0 };
     }
@@ -1754,7 +1341,19 @@ const NetWorthManager = () => {
       // Cap percentage return to reasonable values to prevent extreme numbers
       // Allow for realistic investment scenarios (crypto, startups, leveraged products)
       if (percentageReturn > 10000) percentageReturn = 10000; // 100x return (10000%)
-      if (percentageReturn < -99.99) percentageReturn = -99.99; // Near total loss (-99.99%)
+      if (percentageReturn < -99.9) percentageReturn = -99.9; // Cap negative returns at -99.9%
+    }
+
+    // Additional validation for edge cases
+    if (totalQuantity <= 0) {
+      return { 
+        totalReturn: 0, 
+        percentageReturn: 0, 
+        currentValue: 0, 
+        costBasis: 0, 
+        totalInvested: 0,
+        warning: 'No valid quantity for performance calculation'
+      };
     }
 
     return {
@@ -1764,17 +1363,18 @@ const NetWorthManager = () => {
       costBasis,
       totalInvested: costBasis
     };
-  };
+  }, [assets.transactions]);
 
   // Filter and paginate transactions - Optimized with debounced filters
   const filteredTransactions = useMemo(() => {
     return assets.transactions.filter((transaction: Transaction) => {
-      const matchesType = debouncedTransactionFilters.type === 'all' || 
-                         transaction.transactionType === debouncedTransactionFilters.type;
-      const matchesTicker = !debouncedTransactionFilters.ticker || 
-                           transaction.ticker.toLowerCase().includes(debouncedTransactionFilters.ticker.toLowerCase());
-      const matchesIsin = !debouncedTransactionFilters.isin || 
-                         transaction.isin.toLowerCase().includes(debouncedTransactionFilters.isin.toLowerCase());
+      const filters = debouncedTransactionFilters as { type: string; ticker: string; isin: string };
+      const matchesType = filters.type === 'all' || 
+                         transaction.transactionType === filters.type;
+      const matchesTicker = !filters.ticker || 
+                           transaction.ticker.toLowerCase().includes(filters.ticker.toLowerCase());
+      const matchesIsin = !filters.isin || 
+                         transaction.isin.toLowerCase().includes(filters.isin.toLowerCase());
       
       return matchesType && matchesTicker && matchesIsin;
     });
@@ -1805,7 +1405,7 @@ const NetWorthManager = () => {
 
   // Calculate annualized performance based on transaction history
   // Edge case: For periods < 1 month, annualized returns become misleading and are set to 0
-  const calculateAnnualizedPerformance = () => {
+  const calculateAnnualizedPerformance = useCallback(() => {
     if (assets.transactions.length === 0) {
       return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
     }
@@ -1832,6 +1432,15 @@ const NetWorthManager = () => {
       return { annualizedReturn: 0, annualizedReturnPercentage: 0 };
     }
 
+    // Additional validation: ensure time period is reasonable (not negative or too long)
+    if (timeInYears < 0 || timeInYears > 50) {
+      return { 
+        annualizedReturn: 0, 
+        annualizedReturnPercentage: 0,
+        warning: timeInYears < 0 ? 'Invalid time period (negative)' : 'Period too long for reliable calculation'
+      };
+    }
+
     // Calculate total invested and current value
     const totalInvested = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
     const totalCommissions = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.commissions, 0);
@@ -1856,17 +1465,21 @@ const NetWorthManager = () => {
       
       // Cap extreme values to reasonable limits
       // Allow for realistic investment scenarios (crypto, startups, leveraged products)
-      if (annualizedReturnPercentage > 10000) annualizedReturnPercentage = 10000; // 100x annualized return
-      if (annualizedReturnPercentage < -99.99) annualizedReturnPercentage = -99.99; // Near total annualized loss
+      // Dynamic capping based on asset type and time period
+      const maxReturn = timeInYears < 1 ? 50000 : 10000; // Higher cap for short-term investments
+      if (annualizedReturnPercentage > maxReturn) annualizedReturnPercentage = maxReturn;
+      if (annualizedReturnPercentage < -99.9) annualizedReturnPercentage = -99.9; // Cap negative returns at -99.9%
     }
 
     const annualizedReturn = (totalCost * annualizedReturnPercentage) / 100;
 
     return {
       annualizedReturn,
-      annualizedReturnPercentage
+      annualizedReturnPercentage,
+      warning: timeInYears <= 0.083 ? 'Period too short for meaningful annualization' : 
+               timeInYears > 50 ? 'Period too long for reliable calculation' : undefined
     };
-  };
+  }, [assets.transactions, assets.investments]);
 
   // Calculate portfolio performance with annualized returns - Optimized with useMemo
   const portfolioPerformance = useMemo(() => {
@@ -1878,11 +1491,11 @@ const NetWorthManager = () => {
       };
     });
 
-    const totalInvested = assetsWithPerformance.reduce((sum: number, asset: any) => {
+    const totalInvested = assetsWithPerformance.reduce((sum: number, asset: AssetWithPerformance) => {
       return sum + asset.performance.totalInvested;
     }, 0);
 
-    const totalCurrentValue = assetsWithPerformance.reduce((sum: number, asset: any) => {
+    const totalCurrentValue = assetsWithPerformance.reduce((sum: number, asset: AssetWithPerformance) => {
       return sum + asset.performance.currentValue;
     }, 0);
 
@@ -1901,10 +1514,10 @@ const NetWorthManager = () => {
       annualizedReturnPercentage: annualizedPerformance.annualizedReturnPercentage,
       assets: assetsWithPerformance
     };
-  }, [assets.investments, assets.transactions]);
+  }, [assets.investments, calculateAnnualizedPerformance, calculateTransactionBasedPerformance]);
 
   // Function to calculate Safe Withdrawal Rate simulation
-  const calculateSWR = () => {
+  const calculateSWR = useCallback(() => {
     // Net liquid assets: cash + investments + other accounts
     const netLiquidAssets = totals.cash + totals.investments + totals.otherAccounts;
     
@@ -1918,7 +1531,7 @@ const NetWorthManager = () => {
     // Formula: years = netLiquidAssets / (monthlyExpenses * 12 * (swrRate/100))
     // This calculates how long the assets would last if you withdraw the SWR percentage
     // instead of withdrawing 100% of monthly expenses
-    const yearsOfSupport = monthlyExpenses > 0 ? 
+    const yearsOfSupport = monthlyExpenses > 100 ? 
       netLiquidAssets / (monthlyExpenses * 12 * (swrRate / 100)) : 0;
     
     return {
@@ -1927,7 +1540,7 @@ const NetWorthManager = () => {
       monthlyWithdrawal,
       yearsOfSupport: Math.max(0, yearsOfSupport)
     };
-  };
+  }, [totals.cash, totals.investments, totals.otherAccounts, swrRate, monthlyExpenses]);
 
   // Currency formatting utility
   const formatCurrency = (amount: number): string => {
@@ -1942,15 +1555,35 @@ const NetWorthManager = () => {
   // Input sanitization utilities
   const sanitizeString = (input: string): string => {
     if (typeof input !== 'string') return '';
-    // Remove potential HTML tags and dangerous characters, but allow spaces
-    return input.trim().replace(/[<>"'&]/g, '');
+    // Whitelist approach: only allow safe characters
+    // Allow letters, numbers, spaces, common punctuation, and currency symbols
+    return input.trim().replace(/[^a-zA-Z0-9\s\-_.,()€$%£¥@#&+]/g, '');
   };
 
   const sanitizeNumber = (input: string | number): number => {
-    if (typeof input === 'number') return isNaN(input) || !isFinite(input) ? 0 : input;
+    if (typeof input === 'number') {
+      if (!validateFinancialValue(input)) {
+        return 0;
+      }
+      return input;
+    }
     if (typeof input !== 'string') return 0;
-    const parsed = parseFloat(input);
-    return isNaN(parsed) || !isFinite(parsed) ? 0 : parsed;
+    
+    // Remove any non-numeric characters except decimal point and minus sign
+    const cleaned = input.replace(/[^0-9.-]/g, '');
+    const parsed = parseFloat(cleaned);
+    
+    if (!validateFinancialValue(parsed)) {
+      return 0;
+    }
+    return parsed;
+  };
+
+  // Enhanced financial value validation
+  const validateFinancialValue = (value: number): boolean => {
+    return !isNaN(value) && isFinite(value) && 
+           value >= -Number.MAX_SAFE_INTEGER && 
+           value <= Number.MAX_SAFE_INTEGER;
   };
 
   const sanitizeInteger = (input: string | number): number => {
@@ -1962,13 +1595,21 @@ const NetWorthManager = () => {
 
   const sanitizeDate = (input: string): string => {
     if (!input || typeof input !== 'string') return new Date().toISOString().split('T')[0];
+    
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(input)) {
+      return new Date().toISOString().split('T')[0];
+    }
+    
     const date = new Date(input);
     const today = new Date();
     // Set today's time to end of day to allow same-day transactions
     today.setHours(23, 59, 59, 999);
     
-    // Validate: date must be valid and not in the future
-    if (isNaN(date.getTime()) || date > today) {
+    // Validate: date must be valid, not in the future, and not too far in the past
+    const minDate = new Date('1900-01-01');
+    if (isNaN(date.getTime()) || date > today || date < minDate) {
       return new Date().toISOString().split('T')[0];
     }
     return input;
@@ -1984,15 +1625,16 @@ const NetWorthManager = () => {
 
   // Export functionality
   const exportToJSON = () => {
+    setIsLoading(true);
     try {
       // Calculate statistics for metadata
-      const totalItems = Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0);
+      const totalItems = Object.values(assets).reduce((sum: number, section: unknown) => sum + (Array.isArray(section) ? section.length : 0), 0);
       const totalValue = Object.entries(totals).reduce((sum: number, [key, value]) => {
         if (key === 'total') return sum;
         return sum + Math.abs(value);
       }, 0);
 
-    const exportData = {
+    const exportData: ExportData = {
       assets,
       settings: {
         // Tax and fee settings
@@ -2021,7 +1663,7 @@ const NetWorthManager = () => {
         emergencyFundAccount,
         monthlyExpenses,
         exportInfo: {
-          totalAssets: Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0),
+          totalAssets: Object.values(assets).reduce((sum: number, section: unknown) => sum + (Array.isArray(section) ? section.length : 0), 0),
           sections: Object.keys(assets).map(section => ({
             name: section,
             count: assets[section as keyof typeof assets].length
@@ -2043,12 +1685,15 @@ const NetWorthManager = () => {
       showNotification(`Backup esportato con successo! ${totalItems} elementi salvati.`, 'success');
     } catch (error) {
       showNotification('Errore durante l\'esportazione del backup. Riprova.', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const exportToCSV = () => {
+    setIsLoading(true);
     try {
-    const allData: any[] = [];
+    const allData: CSVRow[] = [];
     
     // Add regular assets
     Object.entries(assets).forEach(([section, items]) => {
@@ -2078,7 +1723,7 @@ const NetWorthManager = () => {
             ticker: item.ticker || '',
             isin: item.isin || '',
             data_acquisto: item.purchaseDate || '',
-            tipo: 'Posizione Globale',
+            tipo: t('globalPositionType'),
             fondo_emergenza: 'No',
             id: item.id,
             note: item.notes || ''
@@ -2175,8 +1820,11 @@ const NetWorthManager = () => {
     
     // Create CSV content with all available fields
     const csvHeader = Object.keys(allData[0] || {}).join(',') + '\n';
-    const csvContent = allData.map((row: any) => 
-      Object.values(row).map((value: any) => `"${String(value).replace(/"/g, '""')}"`).join(',')
+        const csvContent = allData.map((row: CSVRow) =>
+      Object.values(row).map((value: string | number | undefined) => {
+        const stringValue = value !== undefined ? String(value) : '';
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }).join(',')
     ).join('\n');
     
     const dataBlob = new Blob(['\ufeff' + csvHeader + csvContent], { type: 'text/csv;charset=utf-8' });
@@ -2191,12 +1839,15 @@ const NetWorthManager = () => {
           showNotification(`CSV esportato con successo! ${allData.length} elementi salvati.`, 'success');
     } catch (error) {
       showNotification('Errore durante l\'esportazione CSV. Riprova.', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const exportToExcel = () => {
+    setIsLoading(true);
     try {
-    const allData: any[] = [];
+    const allData: CSVRow[] = [];
     
     // Add regular assets
     Object.entries(assets).forEach(([section, items]) => {
@@ -2226,7 +1877,7 @@ const NetWorthManager = () => {
             Ticker: item.ticker || '',
             ISIN: item.isin || '',
             'Purchase Date': item.purchaseDate || '',
-            Type: 'Posizione Globale',
+            Type: t('globalPositionType'),
             'Emergency Fund': 'No',
             ID: item.id,
             Notes: item.notes || ''
@@ -2290,8 +1941,11 @@ const NetWorthManager = () => {
     
     // Create Excel-compatible CSV with semicolon separator
     const csvHeader = Object.keys(allData[0] || {}).join(';') + '\n';
-    const csvContent = allData.map((row: any) => 
-      Object.values(row).map((value: any) => `"${String(value).replace(/"/g, '""')}"`).join(';')
+        const csvContent = allData.map((row: CSVRow) =>
+      Object.values(row).map((value: string | number | undefined) => {
+        const stringValue = value !== undefined ? String(value) : '';
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }).join(';')
     ).join('\n');
     
     // Add BOM for Excel compatibility
@@ -2307,6 +1961,8 @@ const NetWorthManager = () => {
           showNotification(`Excel esportato con successo! ${allData.length} elementi salvati.`, 'success');
     } catch (error) {
       showNotification('Errore durante l\'esportazione Excel. Riprova.', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -2316,7 +1972,7 @@ const NetWorthManager = () => {
     
     const currentDate = new Date().toLocaleDateString('it-IT');
     const currentTime = new Date().toLocaleTimeString('it-IT');
-    const totalItems = Object.values(assets).reduce((sum: number, section: any) => sum + section.length, 0);
+    const totalItems = Object.values(assets).reduce((sum: number, section: unknown) => sum + (Array.isArray(section) ? section.length : 0), 0);
     
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -2352,9 +2008,9 @@ const NetWorthManager = () => {
       </head>
       <body>
         <div class="header">
-          <h1>🥭 MangoMoney - Report Patrimonio Completo</h1>
-          <p><strong>Data:</strong> ${currentDate} alle ${currentTime}</p>
-          <p class="total">Patrimonio Netto: ${formatCurrency(totals.total)}</p>
+                          <h1>🥭 MangoMoney - {t('completeWealthReport')}</h1>
+                      <p><strong>{t('dateAt').split(':')[0]}:</strong> ${currentDate} {t('dateAt').split(':')[1]} ${currentTime}</p>
+                      <p class="total">{t('netWorth')}: ${formatCurrency(totals.total)}</p>
         </div>
         
         <div class="summary">
@@ -2366,7 +2022,7 @@ const NetWorthManager = () => {
             </div>
             <div class="summary-item">
               <div class="summary-value">${formatCurrency(totals.total)}</div>
-              <div class="summary-label">Patrimonio Netto</div>
+              <div class="summary-label">{t('netWorth')}</div>
             </div>
             <div class="summary-item">
               <div class="summary-value">${formatCurrency(Math.abs(totals.debts))}</div>
@@ -2374,11 +2030,11 @@ const NetWorthManager = () => {
             </div>
             <div class="summary-item">
               <div class="summary-value">${formatCurrency(totals.cash)}</div>
-              <div class="summary-label">Liquidità</div>
+              <div class="summary-label">{t('liquidity')}</div>
             </div>
             <div class="summary-item">
               <div class="summary-value">${formatCurrency(totals.investments + assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}</div>
-              <div class="summary-label">Investimenti</div>
+              <div class="summary-label">{t('investments')}</div>
             </div>
             <div class="summary-item">
               <div class="summary-value">${formatCurrency(totals.realEstate)}</div>
@@ -2522,7 +2178,10 @@ const NetWorthManager = () => {
           throw new Error('Impossibile leggere il file');
         }
         
-        const importedData = JSON.parse(result);
+        const importedData = safeParseJSON(result, null);
+        if (!importedData) {
+          throw new Error('Formato JSON non valido');
+        }
         
         // Validate the imported data structure
         if (!importedData.assets || typeof importedData.assets !== 'object') {
@@ -2600,19 +2259,186 @@ const NetWorthManager = () => {
         }
 
         // Show success message with details
-        const totalItems = Object.values(importedData.assets).reduce((sum: number, section: any) => sum + section.length, 0);
-        const exportDate = importedData.metadata.exportDate ? new Date(importedData.metadata.exportDate).toLocaleDateString('it-IT') : 'Sconosciuta';
+        const totalItems = Object.values(importedData.assets).reduce((sum: number, section: unknown) => sum + (Array.isArray(section) ? section.length : 0), 0);
         
         showNotification(`Backup importato con successo! ${totalItems} elementi caricati.`, 'success');
         
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
         showNotification(`Errore nell'importazione. Verifica che il file sia un backup valido di MangoMoney.`, 'error');
       }
     };
 
     reader.onerror = () => {
       showNotification('Errore nella lettura del file. Riprova.', 'error');
+    };
+
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
+  // CSV Import functionality for transactions
+  const downloadCSVTemplate = () => {
+    const csvContent = `${t('csvTemplateHeaders')}\n${t('csvTemplateExample')}`;
+    const dataBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mangomoney-transactions-template.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+    showNotification(t('downloadCSVTemplate'), 'success');
+  };
+
+  const importTransactionsFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      showNotification(t('csvInvalidFormat'), 'error');
+      event.target.value = '';
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification('Il file è troppo grande. Dimensione massima: 5MB', 'error');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const result = e.target?.result;
+        if (typeof result !== 'string') {
+          throw new Error('Impossibile leggere il file');
+        }
+
+        // Parse CSV content
+        const lines = result.split('\n').filter(line => line.trim() !== '');
+        if (lines.length < 2) {
+          throw new Error(t('csvInvalidFormat'));
+        }
+
+        // Parse header
+        const header = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        const requiredFields = ['Nome', 'Ticker', 'ISIN', 'Tipo Transazione', 'Quantità', 'Importo', 'Commissioni', 'Data'];
+        
+        // Check if all required fields are present
+        const missingFields = requiredFields.filter(field => !header.includes(field));
+        if (missingFields.length > 0) {
+          throw new Error(`${t('csvMissingRequiredFields')}: ${missingFields.join(', ')}`);
+        }
+
+        // Get field indices
+        const nameIndex = header.indexOf('Nome');
+        const tickerIndex = header.indexOf('Ticker');
+        const isinIndex = header.indexOf('ISIN');
+        const typeIndex = header.indexOf('Tipo Transazione');
+        const quantityIndex = header.indexOf('Quantità');
+        const amountIndex = header.indexOf('Importo');
+        const feesIndex = header.indexOf('Commissioni');
+        const dateIndex = header.indexOf('Data');
+
+        // Parse data rows
+        const newTransactions: Transaction[] = [];
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          try {
+            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+            
+            // Validate required values
+            if (values.length < header.length) continue;
+            
+            const name = values[nameIndex];
+            const ticker = values[tickerIndex];
+            const isin = values[isinIndex];
+            const transactionType = values[typeIndex];
+            const quantity = values[quantityIndex];
+            const amount = values[amountIndex];
+            const fees = values[feesIndex];
+            const date = values[dateIndex];
+
+            // Validate data
+            if (!name || !quantity || !amount || !date) {
+              errorCount++;
+              continue;
+            }
+
+            // Parse and validate numeric values
+            const numQuantity = parseFloat(quantity);
+            const numAmount = parseFloat(amount);
+            const numFees = parseFloat(fees) || 0;
+
+            if (isNaN(numQuantity) || isNaN(numAmount) || numQuantity <= 0 || numAmount <= 0) {
+              errorCount++;
+              continue;
+            }
+
+            // Validate date format (YYYY-MM-DD)
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(date)) {
+              errorCount++;
+              continue;
+            }
+
+            // Determine transaction type
+            let type: 'purchase' | 'sale';
+            if (transactionType.toLowerCase().includes('acquisto') || transactionType.toLowerCase().includes('purchase') || transactionType.toLowerCase().includes('buy')) {
+              type = 'purchase';
+            } else if (transactionType.toLowerCase().includes('vendita') || transactionType.toLowerCase().includes('sale') || transactionType.toLowerCase().includes('sell')) {
+              type = 'sale';
+            } else {
+              errorCount++;
+              continue;
+            }
+
+            // Create new transaction
+            const newTransaction: Transaction = {
+              id: Date.now() + Math.floor(Math.random() * 1000),
+              name: sanitizeString(name),
+              ticker: sanitizeString(ticker),
+              isin: sanitizeString(isin),
+              transactionType: type,
+              quantity: numQuantity,
+              amount: numAmount,
+              commissions: numFees,
+              date: date,
+              description: `${type === 'purchase' ? 'Acquisto' : 'Vendita'} di ${name}`,
+              linkedToAsset: undefined
+            };
+
+            newTransactions.push(newTransaction);
+            successCount++;
+
+          } catch (error) {
+            errorCount++;
+          }
+        }
+
+        if (newTransactions.length === 0) {
+          throw new Error(t('csvInvalidData'));
+        }
+
+        // Add new transactions to existing ones
+        setAssets(prev => ({
+          ...prev,
+          transactions: [...prev.transactions, ...newTransactions]
+        }));
+
+        // Show success message
+        showNotification(`${t('csvImportSuccess')}: ${successCount} transazioni importate${errorCount > 0 ? `, ${errorCount} righe ignorate` : ''}`, 'success');
+
+      } catch (error) {
+        showNotification(`${t('csvImportError')}: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`, 'error');
+      }
+    };
+
+    reader.onerror = () => {
+      showNotification(t('csvImportError'), 'error');
     };
 
     reader.readAsText(file);
@@ -2627,6 +2453,52 @@ const NetWorthManager = () => {
       showNotification('Dati ripristinati ai valori originali!', 'success');
     }
   };
+
+  // Memoized BarChart component for better performance
+  const MemoizedBarChart = React.memo(({ 
+    data, 
+    darkMode, 
+    selectedCurrency, 
+    currencies, 
+    formatCurrency 
+  }: {
+    data: Array<{ category: string; amount: number; color: string }>;
+    darkMode: boolean;
+    selectedCurrency: string;
+    currencies: Record<string, { symbol: string; locale: string }>;
+    formatCurrency: (amount: number) => string;
+  }) => (
+    <ResponsiveContainer width="100%" height={350}>
+      <BarChart data={data} margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
+        <XAxis dataKey="category" tick={{fontSize: 12}} stroke={darkMode ? '#9ca3af' : '#6b7280'} />
+        <YAxis 
+          tickFormatter={(value) => {
+            const currency = currencies[selectedCurrency as keyof typeof currencies];
+            const symbol = currency.symbol;
+            return `${symbol}${(value/1000).toFixed(0)}k`;
+          }} 
+          tick={{fontSize: 10}} 
+          stroke={darkMode ? '#9ca3af' : '#6b7280'}
+          width={50}
+        />
+        <Tooltip 
+          formatter={(value: string | number) => [formatCurrency(Number(value)), 'Importo']}
+          contentStyle={{
+            backgroundColor: darkMode ? '#1f2937' : 'white',
+            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+            borderRadius: '6px',
+            color: darkMode ? '#f3f4f6' : '#1f2937'
+          }}
+        />
+        <Bar dataKey="amount" fill="#3b82f6">
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  ));
 
   // Dynamic form component for adding new items
   const AddItemForm = ({ section }: { section: string }) => {
@@ -2655,7 +2527,7 @@ const NetWorthManager = () => {
       if (amount === '') return { isValid: false, error: 'L\'importo è obbligatorio' };
       
       const numAmount = parseFloat(amount);
-      if (isNaN(numAmount)) return { isValid: false, error: 'L\'importo deve essere un numero valido' };
+      if (isNaN(numAmount)) return { isValid: false, error: t('amountMustBeValid') };
       
       // Prevent zero amounts
       if (numAmount === 0) return { isValid: false, error: 'L\'importo non può essere zero' };
@@ -2666,7 +2538,7 @@ const NetWorthManager = () => {
         if (numAmount < -1000000000) return { isValid: false, error: 'L\'importo del debito è troppo elevato' };
       } else {
         // Asset validation (non-debts)
-        if (numAmount < 0) return { isValid: false, error: 'L\'importo deve essere positivo per gli asset' };
+        if (numAmount < 0) return { isValid: false, error: t('amountMustBePositive') };
         if (numAmount > 1000000000) return { isValid: false, error: 'L\'importo è troppo elevato' };
       }
       
@@ -2674,13 +2546,13 @@ const NetWorthManager = () => {
     };
 
     const validateQuantity = (quantity: string): { isValid: boolean; error?: string } => {
-      if (quantity === '') return { isValid: false, error: 'La quantità è obbligatoria' };
+      if (quantity === '') return { isValid: false, error: t('quantityRequired') };
       
       const numQuantity = parseInt(quantity);
-      if (isNaN(numQuantity)) return { isValid: false, error: 'La quantità deve essere un numero intero' };
+      if (isNaN(numQuantity)) return { isValid: false, error: t('quantityMustBeInteger') };
       
-      if (numQuantity <= 0) return { isValid: false, error: 'La quantità deve essere maggiore di zero' };
-      if (numQuantity > 1000000000) return { isValid: false, error: 'La quantità è troppo elevata' };
+              if (numQuantity <= 0) return { isValid: false, error: t('quantityMustBePositive') };
+      if (numQuantity > 1000000000) return { isValid: false, error: t('quantityTooHigh') };
       
       return { isValid: true };
     };
@@ -2885,7 +2757,7 @@ const NetWorthManager = () => {
         >
           <div className="flex items-center justify-center gap-2">
             <PlusCircle size={20} />
-            <span>Aggiungi nuovo elemento</span>
+                                    <span>{t('addNewItem')}</span>
           </div>
         </button>
       );
@@ -2894,7 +2766,7 @@ const NetWorthManager = () => {
     return (
       <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4 border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <h4 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-          Aggiungi nuovo elemento
+                                  {t('addNewItem')}
         </h4>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2964,7 +2836,7 @@ const NetWorthManager = () => {
           {section === 'transactions' ? (
             <div>
               <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Tipo Transazione *
+                                        {t('transactionType')} *
               </label>
               <select
                 value={transactionType}
@@ -3287,19 +3159,22 @@ const NetWorthManager = () => {
         {section === 'pensionFunds' && '🏦'}
         {section === 'otherAccounts' && '🏛️'}
         {section === 'alternativeAssets' && '🎨'}
+        {section === 'realEstate' && '🏠'}
       </div>
       <h3 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-        Benvenuto in {sections[section as keyof typeof sections]}
+        {t('welcomeMessage')} {sections[section as keyof typeof sections]}
       </h3>
       <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-        Inizia ad aggiungere i tuoi {section === 'cash' ? 'conti bancari' : 
-                                   section === 'debts' ? 'debiti' :
-                                   section === 'investments' ? 'investimenti' :
-                                   section === 'pensionFunds' ? 'fondi pensione' :
-                                   section === 'otherAccounts' ? 'altri conti' : 'beni alternativi'} per tenere traccia del tuo patrimonio.
+        {section === 'cash' && t('welcomeCash')}
+        {section === 'debts' && t('welcomeDebts')}
+        {section === 'investments' && t('welcomeInvestments')}
+        {section === 'pensionFunds' && t('welcomePensionFunds')}
+        {section === 'otherAccounts' && t('welcomeOtherAccounts')}
+        {section === 'realEstate' && t('welcomeRealEstate')}
+        {section === 'alternativeAssets' && t('welcomeAlternativeAssets')}
       </p>
       <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-        Clicca su "Aggiungi nuovo elemento" per iniziare
+        {t('addYourAssets')}
       </p>
     </div>
   );
@@ -3332,9 +3207,9 @@ const NetWorthManager = () => {
           style={{
             width: size,
             height: size,
-            background: `conic-gradient(${segments.map((segment: any) => 
-              `${segment.color} ${segment.startPercentage}% ${segment.endPercentage}%`
-            ).join(', ')})`
+                    background: `conic-gradient(${segments.map((segment: any) =>
+          `${segment.color} ${segment.startPercentage}% ${segment.endPercentage}%`
+        ).join(', ')})`
           }}
         >
           <div className="absolute inset-0 flex items-center justify-center">
@@ -3722,8 +3597,8 @@ const NetWorthManager = () => {
                     {filteredPieData.length === 0 ? (
                       <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                         <div className="mb-4">
-                          <p className="text-lg mb-2">📊 Nessun asset da visualizzare</p>
-                          <p className="text-sm">Aggiungi i tuoi asset per vedere la distribuzione del patrimonio.</p>
+                                                      <p className="text-lg mb-2">📊 {t('noAssetsToDisplay')}</p>
+                          <p className="text-sm">{t('addAssetsForDistribution')}</p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <button 
@@ -3754,7 +3629,7 @@ const NetWorthManager = () => {
                                 : 'bg-yellow-500 text-white hover:bg-yellow-600'
                             }`}
                           >
-                            💰 Aggiungi Liquidità
+                            💰 {t('addLiquidity')}
                           </button>
                         </div>
                         <div className="mt-4 text-xs">
@@ -3799,8 +3674,8 @@ const NetWorthManager = () => {
                     {filteredBarData.length === 0 ? (
                       <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                         <div className="mb-4">
-                          <p className="text-lg mb-2">📊 Nessun dato da visualizzare</p>
-                          <p className="text-sm">Aggiungi asset per vedere il confronto tra le categorie.</p>
+                                                      <p className="text-lg mb-2">📊 {t('noDataToDisplay')}</p>
+                          <p className="text-sm">{t('addAssetsForComparison')}</p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <button 
@@ -3829,36 +3704,13 @@ const NetWorthManager = () => {
                         </div>
                       </div>
                     ) : (
-                      <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={filteredBarData} margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
-                          <XAxis dataKey="category" tick={{fontSize: 12}} stroke={darkMode ? '#9ca3af' : '#6b7280'} />
-                          <YAxis 
-                            tickFormatter={(value) => {
-                              const currency = currencies[selectedCurrency as keyof typeof currencies];
-                              const symbol = currency.symbol;
-                              return `${symbol}${(value/1000).toFixed(0)}k`;
-                            }} 
-                            tick={{fontSize: 10}} 
-                            stroke={darkMode ? '#9ca3af' : '#6b7280'}
-                            width={50}
-                          />
-                          <Tooltip 
-                            formatter={(value: any) => [formatCurrency(Number(value)), 'Importo']}
-                            contentStyle={{
-                              backgroundColor: darkMode ? '#1f2937' : 'white',
-                              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-                              borderRadius: '6px',
-                              color: darkMode ? '#f3f4f6' : '#1f2937'
-                            }}
-                          />
-                          <Bar dataKey="amount" fill="#3b82f6">
-                            {filteredBarData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <MemoizedBarChart 
+                        data={filteredBarData}
+                        darkMode={darkMode}
+                        selectedCurrency={selectedCurrency}
+                        currencies={currencies}
+                        formatCurrency={formatCurrency}
+                      />
                     )}
                   </div>
                 </div>
@@ -3986,7 +3838,7 @@ const NetWorthManager = () => {
 
         {activeSection === 'statistics' && (
           <div className="space-y-4">
-            <h2 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-4`}>📊 Statistiche avanzate</h2>
+                            <h2 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-4`}>📊 {t('advancedStatistics')}</h2>
             
             {/* Main Statistics Grid */}
             <div className={`grid gap-4 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
@@ -3997,12 +3849,12 @@ const NetWorthManager = () => {
                     <Calculator className={`h-6 w-6 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Score di Rischio</p>
+                                            <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('riskScoreTitle')}</p>
                     <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{statistics.riskScore}/10</p>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {parseFloat(statistics.riskScore) < 3 ? 'Molto Conservativo' : 
-                       parseFloat(statistics.riskScore) < 5 ? 'Conservativo' :
-                       parseFloat(statistics.riskScore) < 7 ? 'Moderato' : 'Aggressivo'}
+                                              {parseFloat(statistics.riskScore) < 3 ? t('veryConservative') : 
+                                                parseFloat(statistics.riskScore) < 5 ? t('conservative') :
+                         parseFloat(statistics.riskScore) < 7 ? t('moderate') : t('aggressive')}
                     </p>
                   </div>
                 </div>
@@ -4015,7 +3867,7 @@ const NetWorthManager = () => {
                     <Target className={`h-6 w-6 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Fondo Emergenza</p>
+                                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('emergencyFundTitle')}</p>
                     <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{statistics.emergencyMonths}</p>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       {statistics.emergencyFundStatus}
@@ -4031,7 +3883,7 @@ const NetWorthManager = () => {
                     <span className={`text-sm font-bold ${darkMode ? 'text-red-300' : 'text-red-600'}`}>D</span>
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Debito/Patrimonio</p>
+                                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('debtToWealthRatio')}</p>
                     <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{statistics.debtToAssetPercentage}%</p>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       {statistics.debtHealth}
@@ -4047,7 +3899,7 @@ const NetWorthManager = () => {
                     <span className={`text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>L</span>
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Liquidità</p>
+                                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('liquidity')}</p>
                     <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{statistics.liquidityPercentage}%</p>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       {statistics.liquidityHealth}
@@ -4063,10 +3915,10 @@ const NetWorthManager = () => {
                     <span className={`text-sm font-bold ${darkMode ? 'text-green-300' : 'text-green-600'}`}>I</span>
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Investimenti</p>
+                                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('investments')}</p>
                     <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{statistics.investmentPercentage}%</p>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      del patrimonio
+                                              {t('ofWealth')}
                     </p>
                   </div>
                 </div>
@@ -4079,10 +3931,10 @@ const NetWorthManager = () => {
                     <span className={`text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-600'}`}>P</span>
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Posizioni Totali</p>
+                                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('totalPositions')}</p>
                     <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{statistics.totalPositions}</p>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {statistics.activePositions} attive
+                                              {statistics.activePositions} {t('active')}
                     </p>
                   </div>
                 </div>
@@ -4092,45 +3944,45 @@ const NetWorthManager = () => {
             {/* Metodologie e Basi Teoriche - SPOSTATO QUI ALLA FINE */}
             <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-indigo-50 to-purple-50'} rounded-lg shadow-lg p-6 border ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
               <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-blue-200' : 'text-indigo-800'} flex items-center`}>
-                📊 Metodologie e basi teoriche
+                📊 {t('methodologiesTheoreticalBases')}
               </h3>
               
               <div className={`space-y-4 text-sm ${darkMode ? 'text-gray-200' : 'text-indigo-900'}`}>
                 <div>
-                  <h4 className="font-semibold mb-2">📊 Score di Rischio (0-10)</h4>
-                  <p className="mb-2">Basato sul <strong>Modern Portfolio Theory</strong> e sulla volatilità degli asset. Calcolo ponderato e normalizzato:</p>
+                  <h4 className="font-semibold mb-2">📊 {t('riskScoreTitle')} (0-10)</h4>
+                                      <p className="mb-2">{t('riskScoreBasedOnMPT')}</p>
                   <ul className="list-disc list-inside ml-4 space-y-1">
-                    <li><strong>Liquidità:</strong> 1.0 (rischio minimo - alta liquidità)</li>
-                    <li><strong>Altri conti:</strong> 1.5 (rischio basso - prodotti finanziari vari)</li>
-                    <li><strong>Fondi pensione:</strong> 2.0 (rischio medio - regolamentati, lungo termine)</li>
-                    <li><strong>Immobili:</strong> 2.0 (rischio medio - stabili ma illiquidi)</li>
-                    <li><strong>Posizioni globali:</strong> 3.0 (rischio medio-alto - conti broker)</li>
-                    <li><strong>Investimenti/Transazioni:</strong> 4.0 (rischio alto - volatilità di mercato)</li>
-                    <li><strong>Beni alternativi:</strong> 5.0 (rischio molto alto - asset speculativi)</li>
+                                          <li><strong>{t('liquidity')}:</strong> {t('liquidityRiskDescription')}</li>
+                                          <li><strong>{t('otherAccounts')}:</strong> {t('otherAccountsRiskDescription')}</li>
+                                          <li><strong>{t('pensionFunds')}:</strong> {t('pensionFundsRiskDescription')}</li>
+                                          <li><strong>{t('realEstate')}:</strong> {t('realEstateRiskDescription')}</li>
+                                          <li><strong>{t('globalPositions')}:</strong> {t('globalPositionsRiskDescription')}</li>
+                                          <li><strong>{t('investments')}/{t('transactions')}:</strong> {t('investmentsTransactionsRiskDescription')}</li>
+                                          <li><strong>{t('alternativeAssets')}:</strong> {t('alternativeAssetsRiskDescription')}</li>
                   </ul>
-                  <p className="mt-2 italic">Formula: (Σ(% allocazione × peso rischio) ÷ Σ(% allocazione)) × 2</p>
+                                          <p className="mt-2 italic">{t('riskScoreFormula')}</p>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">🛡️ Fondo di Emergenza</h4>
-                  <p>Basato sui principi di <strong>Financial Planning</strong> e <strong>Behavioral Economics</strong>. Classificazione automatica:</p>
+                  <h4 className="font-semibold mb-2">🛡️ {t('emergencyFundHeading')}</h4>
+                                      <p>{t('basedOnFinancialPlanning')}</p>
                   <ul className="list-disc list-inside ml-4 space-y-1">
-                    <li><strong>Ottimale:</strong> ≥6 mesi di spese</li>
-                    <li><strong>Adeguato:</strong> 3-6 mesi di spese</li>
-                    <li><strong>Insufficiente:</strong> &lt;3 mesi di spese</li>
+                                            <li><strong>{t('optimal')}:</strong> {t('optimalMonths')}</li>
+                                            <li><strong>{t('adequate')}:</strong> {t('adequateMonths')}</li>
+                                            <li><strong>{t('insufficient')}:</strong> {t('insufficientMonths')}</li>
                   </ul>
-                  <p className="italic">Formula: Valore fondo designato ÷ Spese mensili</p>
+                                      <p className="italic">{t('emergencyFundFormula')}</p>
                 </div>
 
 
 
                 <div>
-                  <h4 className="font-semibold mb-2">💰 Salute Finanziaria</h4>
-                  <p>Metriche aggiuntive per valutare la solidità finanziaria:</p>
+                                      <h4 className="font-semibold mb-2">💰 {t('financialHealth')}</h4>
+                                      <p>{t('additionalMetricsForFinancialHealth')}</p>
                   <ul className="list-disc list-inside ml-4 space-y-1">
-                    <li><strong>Debito/Patrimonio:</strong> &lt;30% Ottima, &lt;50% Buona, &gt;50% Attenzione</li>
-                    <li><strong>Liquidità:</strong> &gt;10% Adeguata, &gt;5% Limitata, &lt;5% Insufficiente</li>
-                    <li><strong>Investimenti:</strong> % del patrimonio allocata in asset growth</li>
+                                            <li><strong>{t('debtToWealthRatio')}:</strong> {t('debtToWealthRatioDescription')}</li>
+                                            <li><strong>{t('liquidity')}:</strong> {t('liquidityDescription')}</li>
+                                            <li><strong>{t('investments')}:</strong> {t('investmentsDescription')}</li>
                   </ul>
                 </div>
 
@@ -4140,7 +3992,7 @@ const NetWorthManager = () => {
                     <li><strong>Harry Markowitz</strong> - Modern Portfolio Theory (1952)</li>
                     <li><strong>William Sharpe</strong> - Capital Asset Pricing Model</li>
                     <li><strong>Benjamin Graham</strong> - Security Analysis e Value Investing</li>
-                    <li><strong>John Bogle</strong> - Principi di diversificazione e costi bassi</li>
+                                            <li><strong>John Bogle</strong> - {t('johnBoglePrinciples')}</li>
                     <li><strong>Robert Merton</strong> - Financial Planning e Lifecycle Investing</li>
                   </ul>
                 </div>
@@ -4154,16 +4006,16 @@ const NetWorthManager = () => {
             {/* Global Positions (Broker Accounts) - At the top */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
               <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                Posizioni Globali
+                                        {t('globalPositions')}
                 <p className={`text-sm font-normal ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                  Indicazione generale del valore investito presso broker o banche
+                                      {t('globalPositionsDescription')}
                 </p>
               </h3>
               
               {assets.investmentPositions.length === 0 ? (
                 <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <p>Nessuna posizione globale registrata.</p>
-                  <p className="text-sm mt-2">Aggiungi posizioni globali per tenere traccia dei tuoi conti broker.</p>
+                                          <p>{t('noGlobalPositionsRegistered')}</p>
+                                      <p className="text-sm mt-2">{t('addGlobalPositionsForBrokerAccounts')}</p>
                 </div>
               ) : (
                 <>
@@ -4241,18 +4093,18 @@ const NetWorthManager = () => {
 
             {/* Add Global Position Form */}
             <div>
-              <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Aggiungi Posizione Globale</h4>
+                                    <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('addGlobalPosition')}</h4>
               <AddItemForm section="investmentPositions" />
             </div>
 
             {/* Individual Positions (Assets) Table */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
-              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Posizioni Individuali - Asset</h3>
+              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('individualPositionsAsset')}</h3>
               
               {assets.investments.length === 0 ? (
                 <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <p>Nessun asset individuale registrato.</p>
-                  <p className="text-sm mt-2">Aggiungi asset per tenere traccia dei singoli titoli.</p>
+                  <p>{t('noIndividualAssetsRegistered')}</p>
+                  <p className="text-sm mt-2">{t('addAssetsForTracking')}</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -4357,190 +4209,63 @@ const NetWorthManager = () => {
               
               <div className="mt-2 text-right">
                 <span className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                  Posizioni Individuali: {assets.investments.length} • {t('totalAssetsLabel')} {formatCurrency(assets.investments.reduce((sum: number, item: AssetItem) => sum + item.amount, 0))}
+                  {t('individualPositionsLabel')}: {assets.investments.length} • {t('totalAssetsLabel')} {formatCurrency(assets.investments.reduce((sum: number, item: AssetItem) => sum + item.amount, 0))}
                 </span>
               </div>
             </div>
 
-            {/* Portfolio Performance Summary */}
-            {(() => {
-              const hasAssetsWithPrices = portfolioPerformance.assets.some((asset: any) => asset.currentPrice && asset.currentPrice > 0);
-              
-              if (!hasAssetsWithPrices) {
-                return (
+
+
+            {/* Add Individual Position Form */}
+            <div>
+              <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('addAsset')}</h4>
+              <AddItemForm section="investments" />
+            </div>
+
+            {/* History Table */}
                   <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
-                    <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                      📊 Performance Portfolio
-                    </h4>
-                    <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <div className="mb-4">
-                        <p className="text-lg mb-2">📈 Inserisci i prezzi attuali per vedere la performance</p>
-                        <p className="text-sm">Per visualizzare grafici e statistiche di performance, aggiungi i prezzi attuali ai tuoi asset.</p>
+              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('transactionHistory')}</h3>
+              
+              {/* CSV Import Section */}
+              <div className={`mb-4 p-3 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{t('importTransactionsFromCSV')}</h4>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('csvImportInstructions')}</p>
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <div className="flex gap-2">
                         <button 
-                          onClick={() => setActiveSection('investments')}
-                          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      onClick={downloadCSVTemplate}
+                      className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
                             darkMode 
                               ? 'bg-blue-600 text-white hover:bg-blue-700' 
                               : 'bg-blue-500 text-white hover:bg-blue-600'
                           }`}
                         >
-                          📊 Gestisci Investimenti
+                      📥 {t('downloadCSVTemplate')}
                         </button>
-                        <button 
-                          onClick={() => setActiveSection('investmentPositions')}
-                          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    <label className={`px-3 py-2 text-xs font-medium rounded-md transition-colors cursor-pointer ${
                             darkMode 
                               ? 'bg-green-600 text-white hover:bg-green-700' 
                               : 'bg-green-500 text-white hover:bg-green-600'
-                          }`}
-                        >
-                          💼 Posizioni Individuali
-                        </button>
+                    }`}>
+                      📤 {t('importTransactions')}
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={importTransactionsFromCSV}
+                        className="hidden"
+                      />
+                    </label>
                       </div>
-                      <div className="mt-4 text-xs">
-                        <p>💡 Suggerimento: Aggiorna regolarmente i prezzi per monitorare la performance del tuo portfolio</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-              
-              return (
-                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
-                  <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                    📊 Performance Portfolio
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Investito</div>
-                      <div className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                        {formatCurrency(portfolioPerformance.totalInvested)}
                       </div>
                     </div>
-                    <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Valore Attuale</div>
-                      <div className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                        {formatCurrency(portfolioPerformance.totalCurrentValue)}
-                      </div>
-                    </div>
-                    <div className={`p-3 rounded-lg ${portfolioPerformance.totalReturn >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('totalReturn')}</div>
-                      <div className={`text-lg font-semibold ${portfolioPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(portfolioPerformance.totalReturn)}
-                      </div>
-                    </div>
-                    <div className={`p-3 rounded-lg ${portfolioPerformance.percentageReturn >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('percentageReturn')}</div>
-                      <div className={`text-lg font-semibold ${portfolioPerformance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {portfolioPerformance.percentageReturn.toFixed(2)}%
-                      </div>
-                    </div>
-                    <div className={`p-3 rounded-lg ${portfolioPerformance.annualizedReturn >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('annualizedReturn')}</div>
-                      <div className={`text-lg font-semibold ${portfolioPerformance.annualizedReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(portfolioPerformance.annualizedReturn)}
-                      </div>
-                    </div>
-                    <div className={`p-3 rounded-lg ${portfolioPerformance.annualizedReturnPercentage >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
-                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Rendimento ann. %</div>
-                      <div className={`text-lg font-semibold ${portfolioPerformance.annualizedReturnPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {portfolioPerformance.annualizedReturnPercentage.toFixed(2)}%
-                      </div>
-                    </div>
-                    
-                    {/* Performance Chart */}
-                    <div className="mt-4 col-span-full">
-                      <h5 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        📈 Performance per Asset
-                      </h5>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {/* Performance List */}
-                        <div className="space-y-2">
-                          {portfolioPerformance.assets
-                            .filter((asset: any) => asset.currentPrice && asset.currentPrice > 0)
-                            .sort((a: any, b: any) => b.performance.percentageReturn - a.performance.percentageReturn)
-                            .map((asset: any) => (
-                              <div key={asset.id} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                                <div className="flex justify-between items-center">
-                                  <div className="flex-1">
-                                    <div className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                                      {asset.name} ({asset.sector || 'N/A'})
-                                    </div>
-                                    <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                      {asset.quantity} × {formatCurrency(asset.currentPrice || asset.avgPrice || 0)} = {formatCurrency((asset.currentPrice || asset.avgPrice || 0) * asset.quantity)}
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className={`text-sm font-medium ${asset.performance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {asset.performance.percentageReturn.toFixed(1)}%
-                                    </div>
-                                    <div className={`text-xs ${asset.performance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {formatCurrency(asset.performance.totalReturn)}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                        </div>
-                        
-                        {/* Performance Trend Chart */}
-                        <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                          <h6 className={`text-sm font-medium mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                            📊 Trend Performance
-                          </h6>
-                          <div className="space-y-3">
-                            {portfolioPerformance.assets
-                              .filter((asset: any) => asset.currentPrice && asset.currentPrice > 0)
-                              .sort((a: any, b: any) => b.performance.percentageReturn - a.performance.percentageReturn)
-                              .slice(0, 5) // Show top 5 performers
-                              .map((asset: any) => {
-                                const percentage = asset.performance.percentageReturn;
-                                const barWidth = Math.min(Math.abs(percentage), 50); // Cap at 50% for display
-                                return (
-                                  <div key={asset.id} className="space-y-1">
-                                    <div className="flex justify-between text-xs">
-                                      <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        {asset.name.substring(0, 15)}{asset.name.length > 15 ? '...' : ''}
-                                      </span>
-                                      <span className={`font-medium ${percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {percentage.toFixed(1)}%
-                                      </span>
-                                    </div>
-                                    <div className={`h-2 rounded-full ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                                      <div 
-                                        className={`h-2 rounded-full transition-all duration-300 ${percentage >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
-                                        style={{ width: `${barWidth}%` }}
-                                      ></div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Add Individual Position Form */}
-            <div>
-              <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Aggiungi Asset</h4>
-              <AddItemForm section="investments" />
-            </div>
-
-            {/* History Table */}
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
-              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Storico Transazioni</h3>
               
               {/* Transaction Filters */}
               <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div>
                   <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Tipo Transazione
+                                            {t('transactionType')}
                   </label>
                   <select
                     value={transactionFilters.type}
@@ -4550,9 +4275,9 @@ const NetWorthManager = () => {
                     }}
                     className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
                   >
-                    <option value="all">Tutte</option>
-                    <option value="purchase">Acquisti</option>
-                    <option value="sale">Vendite</option>
+                    <option value="all">{t('allTransactions')}</option>
+                    <option value="purchase">{t('purchases')}</option>
+                    <option value="sale">{t('sales')}</option>
                   </select>
                 </div>
                 <div>
@@ -4561,7 +4286,7 @@ const NetWorthManager = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Filtra per ticker..."
+                    placeholder={t('filterByTicker')}
                     value={transactionFilters.ticker}
                     onChange={(e) => {
                       setTransactionFilters(prev => ({ ...prev, ticker: e.target.value }));
@@ -4576,7 +4301,7 @@ const NetWorthManager = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Filtra per ISIN..."
+                    placeholder={t('filterByISIN')}
                     value={transactionFilters.isin}
                     onChange={(e) => {
                       setTransactionFilters(prev => ({ ...prev, isin: e.target.value }));
@@ -4593,15 +4318,15 @@ const NetWorthManager = () => {
                     }}
                     className={`w-full text-xs px-3 py-1 border rounded ${darkMode ? 'bg-gray-600 border-gray-500 text-gray-100 hover:bg-gray-500' : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300'}`}
                   >
-                    Reset Filtri
+                    {t('resetFilters')}
                   </button>
                 </div>
               </div>
               
               {filteredTransactions.length === 0 ? (
                 <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <p>Nessuna transazione trovata con i filtri applicati.</p>
-                  <p className="text-sm mt-2">Prova a modificare i filtri o aggiungi nuove transazioni.</p>
+                  <p>{t('noTransactionsFound')}</p>
+                  <p className="text-sm mt-2">{t('tryModifyFilters')}</p>
                 </div>
               ) : (
                 <>
@@ -4741,7 +4466,7 @@ const NetWorthManager = () => {
 
             {/* Add Transaction Form */}
             <div>
-              <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Aggiungi Transazione</h4>
+                                    <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('addTransaction')}</h4>
               <AddItemForm section="transactions" />
             </div>
 
@@ -4751,7 +4476,7 @@ const NetWorthManager = () => {
                 <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                   🔗 {t('reconciliation')}
                   <p className={`text-sm font-normal ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                    Verifica collegamenti tra transazioni e asset individuali
+                    {t('verifyLinksBetweenTransactionsAssets')}
                   </p>
                 </h3>
                 
@@ -4809,18 +4534,18 @@ const NetWorthManager = () => {
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
                                     <div className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                                      {asset.name} ({asset.sector || 'N/A'})
+                                      {asset.name} ({asset.sector || t('notAvailable')})
                                     </div>
                                     <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                      {linkedTransactions.length} transazioni • {asset.quantity} unità
+                                      {linkedTransactions.length} {t('transactionsUnits').split(' • ')[0]} • {asset.quantity} {t('transactionsUnits').split(' • ')[1]}
                                     </div>
                                   </div>
                                   <div className="text-right">
                                     <div className={`text-sm font-medium ${transactionPerformance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {transactionPerformance.percentageReturn.toFixed(1)}% (Transazioni)
+                                      {transactionPerformance.percentageReturn.toFixed(1)}% {t('transactionsLabel')}
                                     </div>
                                     <div className={`text-xs ${manualPerformance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {manualPerformance.percentageReturn.toFixed(1)}% (Manuale)
+                                                                              {manualPerformance.percentageReturn.toFixed(1)}% {t('manualLabel')}
                                     </div>
                                   </div>
                                 </div>
@@ -4838,9 +4563,9 @@ const NetWorthManager = () => {
             {assets.investmentPositions.length > 0 && (
               <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
                 <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                  🔗 Verifica Collegamenti
+                  🔗 {t('verifyLinks')}
                   <p className={`text-sm font-normal ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                    Controllo della corrispondenza tra posizioni globali e asset individuali
+                    {t('controlGlobalIndividualCorrespondence')}
                   </p>
                 </h3>
                 
@@ -4851,8 +4576,8 @@ const NetWorthManager = () => {
                   if (!hasLinkedAssets) {
                     return (
                       <div className={`text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <p>Nessun asset collegato a posizioni globali.</p>
-                        <p className="text-sm mt-1">Usa il dropdown "Collegato a" per collegare gli asset individuali.</p>
+                        <p>{t('noAssetsLinkedToGlobalPositions')}</p>
+                        <p className="text-sm mt-1">{t('useDropdownToLinkAssets')}</p>
                       </div>
                     );
                   }
@@ -4869,25 +4594,25 @@ const NetWorthManager = () => {
                                 {assets.investmentPositions.find((gp: InvestmentPosition) => gp.id === parseInt(globalId))?.name}
                               </h4>
                               <span className={`px-2 py-1 rounded text-xs font-medium ${data.isValid ? (darkMode ? 'bg-green-700 text-green-100' : 'bg-green-100 text-green-800') : (darkMode ? 'bg-red-700 text-red-100' : 'bg-red-100 text-red-800')}`}>
-                                {data.isValid ? '✅ OK' : '⚠️ Discrepanza'}
+                                {data.isValid ? t('okStatus') : t('discrepancyStatus')}
                               </span>
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                               <div>
-                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Posizione Globale:</span>
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('globalPositionLabel')}</span>
                                 <div className={`font-mono ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
                                   {formatCurrency(data.globalValue)}
                                 </div>
                               </div>
                               <div>
-                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Asset Collegati:</span>
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('linkedAssetsLabel')}</span>
                                 <div className={`font-mono ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
                                   {formatCurrency(data.totalLinkedValue)}
                                 </div>
                               </div>
                               <div>
-                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Differenza:</span>
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('differenceLabel')}</span>
                                 <div className={`font-mono ${data.isValid ? (darkMode ? 'text-green-300' : 'text-green-700') : (darkMode ? 'text-red-300' : 'text-red-700')}`}>
                                   {formatCurrency(data.deviation)} ({((data.deviation / data.globalValue) * 100).toFixed(1)}%)
                                 </div>
@@ -4895,7 +4620,7 @@ const NetWorthManager = () => {
                             </div>
                             
                             <div className="mt-2">
-                              <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Asset collegati:</span>
+                              <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('linkedAssetsTitle')}</span>
                               <div className="flex flex-wrap gap-1 mt-1">
                                 {data.linkedAssets.map((asset: AssetItem) => (
                                   <span key={asset.id} className={`px-2 py-1 rounded text-xs ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
@@ -4921,7 +4646,7 @@ const NetWorthManager = () => {
                     {formatCurrency(assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}
                   </div>
                   <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Valore Totale Investimenti
+                                            {t('totalInvestmentValue')}
                   </div>
                 </div>
               </div>
@@ -4932,7 +4657,7 @@ const NetWorthManager = () => {
                     {assets.investmentPositions.length + assets.investments.length}
                   </div>
                   <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Posizioni Totali
+                                            {t('totalPositions')}
                   </div>
                 </div>
               </div>
@@ -4943,7 +4668,7 @@ const NetWorthManager = () => {
                     {totals.total > 0 ? (((assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0)) / totals.total) * 100).toFixed(1) : '0'}%
                   </div>
                   <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    % del Patrimonio
+                                            {t('percentOfWealth')}
                   </div>
                 </div>
               </div>
@@ -4955,9 +4680,9 @@ const NetWorthManager = () => {
             {assets.transactions.length > 0 && (
               <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-shadow`}>
                 <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                  📊 Statistiche Transazioni
+                  📊 {t('transactionStatistics')}
                   <p className={`text-sm font-normal ${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
-                    Analisi delle transazioni per anno
+                                          {t('transactionAnalysisPerYear')}
                   </p>
                 </h3>
                 
@@ -5050,33 +4775,295 @@ const NetWorthManager = () => {
                   </div>
                 </div>
             </div>
+
+            {/* Portfolio Performance Summary - Moved to bottom */}
+            {(() => {
+              const hasAssetsWithPrices = portfolioPerformance.assets.some((asset: AssetWithPerformance) => asset.currentPrice && asset.currentPrice > 0);
+              
+              if (!hasAssetsWithPrices) {
+                return (
+                  <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
+                    <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+                      📊 Performance Portfolio
+                    </h4>
+                    <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <div className="mb-4">
+                                                  <p className="text-lg mb-2">📈 {t('enterCurrentPricesForPerformance')}</p>
+                        <p className="text-sm">{t('addCurrentPricesForPerformance')}</p>
+                      </div>
+                      <div className="mt-4 text-xs">
+                        <p>💡 {t('updatePricesTip')}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              
+              return (
+                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
+                  <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+                    📊 Performance Portfolio
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Investito</div>
+                      <div className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                        {formatCurrency(portfolioPerformance.totalInvested)}
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Valore Attuale</div>
+                      <div className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                        {formatCurrency(portfolioPerformance.totalCurrentValue)}
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${portfolioPerformance.totalReturn >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('totalReturn')}</div>
+                      <div className={`text-lg font-semibold ${portfolioPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(portfolioPerformance.totalReturn)}
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${portfolioPerformance.percentageReturn >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('percentageReturn')}</div>
+                      <div className={`text-lg font-semibold ${portfolioPerformance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {portfolioPerformance.percentageReturn.toFixed(2)}%
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${portfolioPerformance.annualizedReturn >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('annualizedReturn')}</div>
+                      <div className={`text-lg font-semibold ${portfolioPerformance.annualizedReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(portfolioPerformance.annualizedReturn)}
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${portfolioPerformance.annualizedReturnPercentage >= 0 ? (darkMode ? 'bg-green-900/20' : 'bg-green-50') : (darkMode ? 'bg-red-900/20' : 'bg-red-50')}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Rendimento ann. %</div>
+                      <div className={`text-lg font-semibold ${portfolioPerformance.annualizedReturnPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {portfolioPerformance.annualizedReturnPercentage.toFixed(2)}%
+                      </div>
+                    </div>
+                    
+                    {/* Performance Chart */}
+                    <div className="mt-4 col-span-full">
+                      <h5 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        📈 Performance per Asset
+                      </h5>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Performance List */}
+                        <div className="space-y-2">
+                          {portfolioPerformance.assets
+                            .filter((asset: AssetWithPerformance) => asset.currentPrice && asset.currentPrice > 0)
+                            .sort((a: AssetWithPerformance, b: AssetWithPerformance) => b.performance.percentageReturn - a.performance.percentageReturn)
+                            .map((asset: AssetWithPerformance) => (
+                              <div key={asset.id} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                <div className="flex justify-between items-center">
+                                  <div className="flex-1">
+                                    <div className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                                      {asset.name} ({asset.sector || t('notAvailable')})
+                                    </div>
+                                    <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {asset.quantity || 0} × {formatCurrency(asset.currentPrice || asset.avgPrice || 0)} = {formatCurrency((asset.currentPrice || asset.avgPrice || 0) * (asset.quantity || 0))}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className={`text-sm font-medium ${asset.performance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                      {asset.performance.percentageReturn.toFixed(1)}%
+                                    </div>
+                                    <div className={`text-xs ${asset.performance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                      {formatCurrency(asset.performance.totalReturn)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                        
+                        {/* Performance Trend Chart */}
+                        <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                          <h6 className={`text-sm font-medium mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            📊 {t('performanceTrend')}
+                          </h6>
+                          <div className="space-y-3">
+                            {portfolioPerformance.assets
+                              .filter((asset: AssetWithPerformance) => asset.currentPrice && asset.currentPrice > 0)
+                              .sort((a: AssetWithPerformance, b: AssetWithPerformance) => b.performance.percentageReturn - a.performance.percentageReturn)
+                              .slice(0, 5) // Show top 5 performers
+                              .map((asset: AssetWithPerformance) => {
+                                const percentage = asset.performance.percentageReturn;
+                                const barWidth = Math.min(Math.abs(percentage), 50); // Cap at 50% for display
+                                return (
+                                  <div key={asset.id} className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                      <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        {asset.name.substring(0, 15)}{asset.name.length > 15 ? '...' : ''}
+                                      </span>
+                                      <span className={`font-medium ${percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {percentage.toFixed(1)}%
+                                      </span>
+                                    </div>
+                                    <div className={`h-2 rounded-full ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                                      <div 
+                                        className={`h-2 rounded-full transition-all duration-300 ${percentage >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                                        style={{ width: `${barWidth}%` }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
-        {activeSection === 'realEstate' && (
+        {activeSection === 'investmentPositions' && (
           <div className="space-y-6">
-            {/* Real Estate Table */}
+            {/* Individual Positions (Assets) Table */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
               <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                Immobili
+                {t('individualPositionsAsset')}
                 <p className={`text-sm font-normal ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                  Residenza principale e altre proprietà immobiliari
+                  {t('welcomeIndividualPositions')}
                 </p>
               </h3>
               
-              {assets.realEstate.length === 0 ? (
-                <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <p>Nessun immobile registrato.</p>
-                  <p className="text-sm mt-2">Aggiungi la tua residenza principale e altre proprietà.</p>
+              {assets.investments.length === 0 ? (
+                <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className="mb-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <h4 className={`text-lg font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                    {t('welcomeIndividualPositions')}
+                  </h4>
+                  <p className="mb-4">{t('addYourAssets')}</p>
+                  <p className="text-sm mb-6">{t('addYourAssets')}</p>
+                  
+                  {/* Navigation buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button 
+                      onClick={() => setActiveSection('investments')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        darkMode 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                    >
+                      📊 {t('manageInvestments')}
+                    </button>
+                    <button 
+                      onClick={() => setActiveSection('overview')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        darkMode 
+                          ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                          : 'bg-gray-500 text-white hover:bg-gray-600'
+                      }`}
+                    >
+                      🏠 {t('overview')}
+                    </button>
+                  </div>
+                  
+                  <div className="mt-6 text-xs">
+                    <p>{t('individualPositionsTip')}</p>
+                  </div>
                 </div>
               ) : (
                 <>
                 {isCompactLayout ? (
                   // Mobile card view
                   <div className="space-y-3">
-                    {assets.realEstate.map((item: RealEstate) => (
-                      <RealEstateMobileCard key={item.id} item={item} />
-                    ))}
+                    {assets.investments.map((item: AssetItem) => {
+                      const manualPerformance = calculateAssetPerformance(item);
+                      const transactionPerformance = calculateTransactionBasedPerformance(item);
+                      const linkedTransactions = assets.transactions.filter((t: Transaction) => t.linkedToAsset === item.id);
+                      
+                      return (
+                        <div key={item.id} className={`${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} border rounded-lg p-4 shadow-sm`}>
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <h4 className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{item.name}</h4>
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                                {item.sector || t('notAvailable')} • {item.isin || t('notAvailable')}
+                              </div>
+                            </div>
+                            <div className={`font-mono text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
+                              {formatCurrency(item.amount)}
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            <div>
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quantità</div>
+                              <div className={`font-mono text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity?.toLocaleString() || '-'}</div>
+                            </div>
+                            <div>
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Rendimento</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
+                                {linkedTransactions.length > 0 ? (
+                                  <div className={`${transactionPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(transactionPerformance.totalReturn)} ({transactionPerformance.percentageReturn.toFixed(1)}%)
+                                  </div>
+                                ) : manualPerformance.totalReturn !== 0 ? (
+                                  <div className={`${manualPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(manualPerformance.totalReturn)} ({manualPerformance.percentageReturn.toFixed(1)}%)
+                                  </div>
+                                ) : '-'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {item.description && (
+                            <div className="mb-3">
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Descrizione</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</div>
+                            </div>
+                          )}
+                          
+                          <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
+                            <button 
+                              onClick={() => handleEditRow('investments', item.id)}
+                              className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
+                              title="Modifica riga"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                            </button>
+                            <button 
+                              onClick={() => handleCopyRow('investments', item.id)}
+                              className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
+                              title="Copia riga"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </button>
+                            <button 
+                              onClick={() => handleEditRow('investments', item.id)}
+                              className={`${darkMode ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-500 hover:text-yellow-700'}`}
+                              title="Aggiorna Prezzo"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                              </svg>
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteItem('investments', item.id)}
+                              className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   // Desktop table view
@@ -5085,29 +5072,58 @@ const NetWorthManager = () => {
                       <thead>
                         <tr className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                           <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nome</th>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo</th>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Descrizione</th>
+                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Ticker</th>
+                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>ISIN</th>
+                          <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Quantità</th>
                           <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Valore</th>
-                          <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Indirizzo</th>
+                          <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Rendimento</th>
+                          <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Collegato a</th>
                           <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Azioni</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {assets.realEstate.map((item: RealEstate) => (
+                        {assets.investments.map((item: AssetItem) => {
+                          const manualPerformance = calculateAssetPerformance(item);
+                          const transactionPerformance = calculateTransactionBasedPerformance(item);
+                          const linkedTransactions = assets.transactions.filter((t: Transaction) => t.linkedToAsset === item.id);
+                          return (
                           <tr key={item.id} className={`hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                             <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.name}</td>
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              <span className={`px-2 py-1 rounded text-xs ${item.type === 'primary' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                                {item.type === 'primary' ? 'Principale' : 'Secondaria'}
-                              </span>
+                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.sector || '-'}</td>
+                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.isin || '-'}</td>
+                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity?.toLocaleString() || '-'}</td>
+                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</td>
+                            <td className={`border px-2 py-1 text-right font-mono text-xs`}>
+                              {linkedTransactions.length > 0 ? (
+                                <div className={`${transactionPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <div>{formatCurrency(transactionPerformance.totalReturn)}</div>
+                                  <div className="text-xs">{transactionPerformance.percentageReturn.toFixed(1)}% (T)</div>
+                                </div>
+                              ) : manualPerformance.totalReturn !== 0 ? (
+                                <div className={`${manualPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <div>{formatCurrency(manualPerformance.totalReturn)}</div>
+                                  <div className="text-xs">{manualPerformance.percentageReturn.toFixed(1)}% (M)</div>
+                                </div>
+                              ) : '-'}
                             </td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.value)}</td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.address || '-'}</td>
+                            <td className={`border px-2 py-1 text-center`}>
+                              <select
+                                value={item.linkedToGlobalPosition || ''}
+                                onChange={(e) => handleLinkToGlobalPosition(item.id, e.target.value ? parseInt(e.target.value) : null)}
+                                className={`text-xs px-1 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                              >
+                                <option value="">Nessuno</option>
+                                {assets.investmentPositions.map((globalPosition: InvestmentPosition) => (
+                                  <option key={globalPosition.id} value={globalPosition.id}>
+                                    {globalPosition.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
                             <td className={`border px-2 py-1 text-center`}>
                               <div className="flex justify-center gap-1">
                                 <button 
-                                  onClick={() => handleEditRow('realEstate', item.id)}
+                                  onClick={() => handleEditRow('investments', item.id)}
                                   className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
                                   title="Modifica riga"
                                 >
@@ -5117,7 +5133,7 @@ const NetWorthManager = () => {
                                   </svg>
                                 </button>
                                 <button 
-                                  onClick={() => handleCopyRow('realEstate', item.id)}
+                                  onClick={() => handleCopyRow('investments', item.id)}
                                   className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
                                   title="Copia riga"
                                 >
@@ -5127,7 +5143,16 @@ const NetWorthManager = () => {
                                   </svg>
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteItem('realEstate', item.id)}
+                                  onClick={() => handleEditRow('investments', item.id)}
+                                  className={`${darkMode ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-500 hover:text-yellow-700'}`}
+                                  title="Aggiorna Prezzo"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                                  </svg>
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteItem('investments', item.id)}
                                   className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
                                 >
                                   <Trash2 size={14} />
@@ -5135,7 +5160,7 @@ const NetWorthManager = () => {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                        )})}
                       </tbody>
                     </table>
                   </div>
@@ -5145,89 +5170,46 @@ const NetWorthManager = () => {
               
               <div className="mt-2 text-right">
                 <span className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                                      {t('totalPropertiesLabel')} {formatCurrency(assets.realEstate.reduce((sum: number, item: RealEstate) => sum + item.value, 0))}
+                  {t('individualPositionsLabel')}: {assets.investments.length} • {t('totalAssetsLabel')} {formatCurrency(assets.investments.reduce((sum: number, item: AssetItem) => sum + item.amount, 0))}
                 </span>
               </div>
             </div>
 
-            {/* Real Estate Statistics */}
-            <div className={`grid gap-4 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-3'}`}>
-              <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
-                <div className="text-center">
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {formatCurrency(totals.realEstate)}
-                  </div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Valore Totale Immobili
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
-                <div className="text-center">
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                    {assets.realEstate.length}
-                  </div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {t('total')}
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
-                <div className="text-center">
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                    {totals.total > 0 ? ((totals.realEstate / totals.total) * 100).toFixed(1) : '0'}%
-                  </div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    % del Patrimonio
-                  </div>
-                </div>
-              </div>
-              
-
-            </div>
-
-            {/* Add Form */}
+            {/* Add Individual Position Form */}
             <div>
-              <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Aggiungi Immobile</h4>
-              <AddItemForm section="realEstate" />
+              <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('addIndividualAsset')}</h4>
+              <AddItemForm section="investments" />
             </div>
 
-            {/* Real Estate Chart */}
-            {assets.realEstate.length > 0 && (
-              <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <CompactPieChart 
-                      data={getSectionChartData('realEstate')} 
-                      size={180} 
-                      showLegend={false}
-                    />
+            {/* Navigation back to main investments section */}
+            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button 
+                  onClick={() => setActiveSection('investments')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    darkMode 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                                        📊 {t('backToInvestments')}
+                </button>
+                <button 
+                  onClick={() => setActiveSection('overview')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    darkMode 
+                      ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                      : 'bg-gray-500 text-white hover:bg-gray-600'
+                  }`}
+                >
+                                        🏠 {t('overview')}
+                </button>
                   </div>
-                  <div className="flex-1 ml-6 min-w-0">
-                    <div className="grid grid-cols-1 gap-3">
-                      {getSectionChartData('realEstate').filter(item => item.value > 0).map((item, index) => (
-                        <div key={index} className="flex items-center min-w-0">
-                          <div 
-                            className="w-3 h-3 rounded-full mr-2 flex-shrink-0" 
-                            style={{ backgroundColor: item.color }}
-                          ></div>
-                          <span className={`text-sm flex-1 min-w-0 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`} style={{ wordBreak: 'break-word' }}>
-                            {item.name}
-                          </span>
-                          <span className={`text-sm font-semibold ml-4 flex-shrink-0 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                            {formatCurrency(item.value)}
-                          </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
+
+
 
         {activeSection === 'info' && (
           <div className="space-y-6">
@@ -5249,111 +5231,111 @@ const NetWorthManager = () => {
                   
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-lg font-medium mb-2">💰 Gestione liquidità</h4>
+                      <h4 className="text-lg font-medium mb-2">💰 {t('liquidityManagementHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Conti bancari, contanti e strumenti liquidi</li>
-                        <li>Configurazione fondo di emergenza</li>
-                        <li>Calcolo autonomia finanziaria</li>
-                        <li>Distinzione tipo conto (corrente, deposito, cash)</li>
+                                                  <li>{t('bankAccountsCashInstruments')}</li>
+                                                  <li>{t('emergencyFundConfiguration')}</li>
+                                                  <li>{t('financialAutonomyCalculation')}</li>
+                                                  <li>{t('accountTypeDistinction')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">📈 Gestione investimenti</h4>
+                      <h4 className="text-lg font-medium mb-2">📈 {t('investmentManagementHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Posizioni globali e individuali</li>
-                        <li>Storico transazioni con filtri avanzati</li>
-                        <li>Performance tracking e rendimenti annualizzati</li>
-                        <li>Collegamento transazioni a posizioni</li>
-                        <li>Grafici performance e trend</li>
+                        <li>{t('globalIndividualPositions')}</li>
+                        <li>{t('transactionHistoryAdvanced')}</li>
+                        <li>{t('performanceTrackingAnnualized')}</li>
+                        <li>{t('transactionPositionLinking')}</li>
+                        <li>{t('performanceChartsTrends')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">🏠 Gestione immobili</h4>
+                      <h4 className="text-lg font-medium mb-2">🏠 {t('realEstateManagementHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Proprietà primarie e secondarie</li>
-                        <li>Valutazioni immobiliari</li>
-                        <li>Gestione indirizzi e note</li>
+                        <li>{t('primarySecondaryProperties')}</li>
+                        <li>{t('realEstateValuations')}</li>
+                        <li>{t('addressNotesManagement')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">📊 Analisi avanzate</h4>
+                      <h4 className="text-lg font-medium mb-2">📊 {t('advancedAnalyticsHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Score di rischio (0-10)</li>
-                        <li>Metriche salute finanziaria</li>
-                        <li>Simulazione Safe Withdrawal Rate</li>
-                        <li>Analisi fondo di emergenza</li>
-                        <li>Statistiche commissioni e costi</li>
+                        <li>{t('riskScore010')}</li>
+                        <li>{t('financialHealthMetrics')}</li>
+                        <li>{t('swrSimulationList')}</li>
+                        <li>{t('emergencyFundAnalysis')}</li>
+                        <li>{t('commissionCostStatistics')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">🔗 Collegamenti asset</h4>
+                      <h4 className="text-lg font-medium mb-2">🔗 {t('assetLinking')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Collegamento posizioni globali e individuali</li>
-                        <li>Validazione automatica con tolleranza 5%</li>
-                        <li>Verifica discrepanze e stato collegamenti</li>
+                        <li>{t('linkingGlobalIndividualPositions')}</li>
+                        <li>{t('automaticValidationTolerance')}</li>
+                        <li>{t('discrepancyVerificationStatus')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">💾 Backup e sicurezza</h4>
+                      <h4 className="text-lg font-medium mb-2">💾 {t('backupSecurityHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Esportazione JSON, CSV, Excel, PDF</li>
-                        <li>Importazione sicura con validazione</li>
-                        <li>Salvataggio automatico locale</li>
-                        <li>Dati completamente locali</li>
+                                                  <li>{t('jsonCsvExcelPdfExport')}</li>
+                                                  <li>{t('secureImportValidation')}</li>
+                                                  <li>{t('automaticLocalSaving')}</li>
+                                                  <li>{t('completelyLocalData')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">🎨 Interfaccia avanzata</h4>
+                      <h4 className="text-lg font-medium mb-2">🎨 {t('advancedInterfaceHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Modalità scura/chiara</li>
-                        <li>Layout responsive e mobile</li>
-                        <li>Filtri e paginazione avanzati</li>
-                        <li>Notifiche centrate</li>
-                        <li>Sezione impostazioni dedicata</li>
+                                                  <li>{t('darkLightMode')}</li>
+                                                  <li>{t('responsiveMobileLayout')}</li>
+                                                  <li>{t('advancedFiltersPagination')}</li>
+                                                  <li>{t('centeredNotifications')}</li>
+                                                  <li>{t('dedicatedSettingsSection')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">⚙️ Configurazione</h4>
+                      <h4 className="text-lg font-medium mb-2">⚙️ {t('configurationHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Impostazioni fiscali (plusvalenze, bolli)</li>
-                        <li>Selezione valuta (EUR, USD, GBP, CHF, JPY)</li>
-                        <li>Configurazione rapida per l'Italia</li>
-                        <li>Gestione asset alternativi (TCG, collezionabili, etc.)</li>
+                                                  <li>{t('taxSettings')}</li>
+                                                  <li>{t('currencySelection')}</li>
+                                                  <li>{t('quickItalyConfiguration')}</li>
+                                                  <li>{t('alternativeAssetsManagement')}</li>
                       </ul>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">📝 Guida all'inserimento dati</h3>
+                  <h3 className="text-xl font-semibold mb-4">{t('dataEntryTitle')}</h3>
                   
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-lg font-medium mb-2">📊 Categorie di dati</h4>
+                      <h4 className="text-lg font-medium mb-2">📊 {t('dataCategoriesHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Posizioni globali e individuali</li>
-                        <li>Transazioni (acquisti/vendite)</li>
-                        <li>Azioni, ETF, obbligazioni, crypto</li>
-                        <li>Immobili e beni alternativi</li>
-                        <li>Conti bancari e liquidità</li>
+                        <li>{t('globalIndividualPositions')}</li>
+                        <li>{t('transactionsPurchasesSales')}</li>
+                        <li>{t('stocksEtfsBondsCrypto')}</li>
+                        <li>{t('realEstateAlternativeAssets')}</li>
+                        <li>{t('bankAccountsLiquidity')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">💡 Best practices</h4>
+                      <h4 className="text-lg font-medium mb-2">💡 {t('bestPracticesHeading')}</h4>
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Inserire prima le posizioni globali</li>
-                        <li>Collegare le posizioni individuali</li>
-                        <li>Registrare tutte le transazioni</li>
-                        <li>Aggiornare i prezzi attuali</li>
-                        <li>Utilizzare i filtri per grandi dataset</li>
+                        <li>{t('enterGlobalPositionsFirst')}</li>
+                        <li>{t('linkIndividualPositions')}</li>
+                        <li>{t('recordAllTransactions')}</li>
+                        <li>{t('updateCurrentPrices')}</li>
+                        <li>{t('useFiltersForLargeDatasets')}</li>
                       </ul>
                     </div>
                   </div>
@@ -5425,7 +5407,7 @@ const NetWorthManager = () => {
                       rel="noopener noreferrer"
                       className={`underline hover:no-underline ${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-800'}`}
                     >
-                      📚 Risorse finanziarie utili su GitHub
+                      📚 {t('usefulFinancialResources')}
                     </a>
                   </p>
                 </div>
@@ -5438,16 +5420,16 @@ const NetWorthManager = () => {
           <div className="space-y-6">
             <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg shadow-lg p-6 border ${darkMode ? 'border-slate-700' : 'border-blue-200'}`}>
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-blue-200' : 'text-blue-800'} flex items-center`}>
-                ⚙️ Impostazioni
+                ⚙️ {t('settings')}
               </h2>
               
               <div className={`space-y-6 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                 {/* Currency Settings */}
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">💱 Valuta</h3>
+                  <h3 className="text-xl font-semibold mb-4">💱 {t('currency')}</h3>
                   <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
                     <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Seleziona valuta
+                                              {t('selectCurrency')}
                     </label>
                     <select
                       value={selectedCurrency}
@@ -5467,7 +5449,7 @@ const NetWorthManager = () => {
 
                 {/* Tax Settings */}
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">💰 Impostazioni fiscali</h3>
+                  <h3 className="text-xl font-semibold mb-4">💰 {t('taxSettings')}</h3>
                   <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -5562,12 +5544,12 @@ const NetWorthManager = () => {
 
                 {/* Emergency Fund Settings */}
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">🛡️ Fondo di emergenza</h3>
+                  <h3 className="text-xl font-semibold mb-4">{t('emergencyFundWithIcon')}</h3>
                   <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Mesi per "Ottimale"
+                          {t('monthsForOptimal')}
                         </label>
                         <input
                           type="number"
@@ -5581,13 +5563,13 @@ const NetWorthManager = () => {
                           }`}
                         />
                         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Numero di mesi di spese per considerare il fondo ottimale
+                          {t('monthsForOptimalDescription')}
                         </p>
                       </div>
                       
                       <div>
                         <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Mesi per "Adeguato"
+                          {t('monthsForAdequate')}
                         </label>
                         <input
                           type="number"
@@ -5601,7 +5583,7 @@ const NetWorthManager = () => {
                           }`}
                         />
                         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Numero di mesi di spese per considerare il fondo adeguato
+                          {t('monthsForAdequateDescription')}
                         </p>
                       </div>
                     </div>
@@ -5611,17 +5593,17 @@ const NetWorthManager = () => {
                         onClick={() => {
                           setEmergencyFundOptimalMonths(6);
                           setEmergencyFundAdequateMonths(3);
-                          showNotification('Impostazioni fondo di emergenza reimpostate ai valori predefiniti', 'success');
+                          showNotification(t('emergencyFundSettingsReset'), 'success');
                         }}
                         className={`px-4 py-2 rounded-md text-sm transition-colors ${
                           darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'
                         }`}
                       >
-                        Reimposta predefiniti
+                        {t('resetDefaults')}
                       </button>
                       
                       <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Personalizza in base alle tue circostanze
+                        {t('customizeCircumstances')}
                       </div>
                     </div>
                   </div>
@@ -5631,7 +5613,7 @@ const NetWorthManager = () => {
           </div>
         )}
 
-        {(activeSection !== 'overview' && activeSection !== 'statistics' && activeSection !== 'info' && activeSection !== 'settings' && activeSection !== 'investments' && activeSection !== 'realEstate') && (
+        {(activeSection !== 'overview' && activeSection !== 'statistics' && activeSection !== 'info' && activeSection !== 'settings' && activeSection !== 'investments') && (
           <div className="space-y-6">
             {/* Welcome message or data table */}
             {(() => {
@@ -5670,7 +5652,7 @@ const NetWorthManager = () => {
                   {activeSection === 'alternativeAssets' && (
                     <div className="mb-4">
                       <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Filtra per tipo asset
+                        {t('filterByAssetType')}
                       </label>
                       <select
                         value={alternativeAssetFilter}
@@ -5721,7 +5703,7 @@ const NetWorthManager = () => {
                             {activeSection === 'cash' && (
                               <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
                                 <span className={`px-2 py-1 rounded text-xs ${item.accountType === 'current' ? 'bg-blue-100 text-blue-800' : item.accountType === 'deposit' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                  {item.accountType === 'current' ? 'Corrente' : item.accountType === 'deposit' ? 'Deposito' : item.accountType === 'cash' ? 'Cash' : 'N/A'}
+                                  {item.accountType === 'current' ? 'Corrente' : item.accountType === 'deposit' ? 'Deposito' : item.accountType === 'cash' ? 'Cash' : t('notAvailable')}
                                 </span>
                               </td>
                             )}
@@ -5736,7 +5718,7 @@ const NetWorthManager = () => {
                                    item.assetType === 'books' ? 'Libri' :
                                    item.assetType === 'comics' ? 'Fumetti' :
                                    item.assetType === 'art' ? 'Arte' :
-                                   item.assetType === 'other' ? 'Altro' : 'N/A'}
+                                   item.assetType === 'other' ? t('other') : t('notAvailable')}
                                 </span>
                               </td>
                             )}
@@ -5849,13 +5831,13 @@ const NetWorthManager = () => {
             {activeSection === 'cash' && (
               <div className={`${darkMode ? 'bg-gradient-to-br from-green-900 to-blue-900' : 'bg-gradient-to-br from-green-50 to-blue-50'} rounded-lg shadow p-4 border ${darkMode ? 'border-green-800' : 'border-green-200'} mb-6`}>
                 <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-green-200' : 'text-green-800'} flex items-center`}>
-                  ⚙️ Configurazione fondo di emergenza
+                  ⚙️ {t('emergencyFundConfigurationTitle')}
                 </h3>
                 
                 <div className={`grid gap-4 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
                   <div>
                     <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-green-300' : 'text-green-700'}`}>
-                      Spese Mensili
+                                              {t('monthlyExpenses')}
                     </label>
                     <input
                       type="number"
@@ -5866,14 +5848,14 @@ const NetWorthManager = () => {
                     />
                     {monthlyExpenses > 0 && (
                       <p className={`text-xs mt-1 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                        💰 Con la liquidità totale ({formatCurrency(totals.cash)}) puoi sopravvivere per <strong>{(totals.cash / monthlyExpenses).toFixed(1)} mesi</strong>
+                        💰 {t('withTotalLiquidity').replace('{amount}', formatCurrency(totals.cash)).replace('{months}', (totals.cash / monthlyExpenses).toFixed(1))}
                       </p>
                     )}
                   </div>
                   
                   <div>
                     <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-green-300' : 'text-green-700'}`}>
-                      Fondo Emergenza
+                                              {t('emergencyFundTitle')}
                     </label>
                     <select
                       value={`${emergencyFundAccount.section}-${emergencyFundAccount.id}`}
@@ -5888,7 +5870,7 @@ const NetWorthManager = () => {
                       }}
                       className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-green-800 border-green-600 text-green-100' : 'bg-white border-green-300'}`}
                     >
-                      <option value="">Nessun fondo designato</option>
+                                              <option value="">{t('noFundDesignated')}</option>
                       {assets.cash.map((item: AssetItem) => (
                         <option key={`cash-${item.id}`} value={`cash-${item.id}`}>
                           {item.name} ({formatCurrency(item.amount)})
@@ -6210,7 +6192,7 @@ const NetWorthManager = () => {
                     
                     <div>
                       <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Tipo Transazione
+                        {t('transactionType')}
                       </label>
                       <select
                         value={editingItem.transactionType || 'purchase'}
@@ -6424,6 +6406,18 @@ const NetWorthManager = () => {
           </div>
         )}
 
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span className="text-gray-700 dark:text-gray-300">Elaborazione in corso...</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Notification Toast */}
         {notification.visible && (
           <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${darkMode ? 'bg-black bg-opacity-50' : 'bg-black bg-opacity-30'}`}>
@@ -6461,4 +6455,10 @@ const NetWorthManager = () => {
   );
 };
 
-export default NetWorthManager;
+const AppWithErrorBoundary = () => (
+  <ErrorBoundary>
+    <NetWorthManager />
+  </ErrorBoundary>
+);
+
+export default AppWithErrorBoundary;

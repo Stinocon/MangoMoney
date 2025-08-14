@@ -211,31 +211,6 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 
 ---
 
-## 🆕 Novità Versione 3.0
-
-### **Funzionalità Avanzate**
-- 🔗 **Linking System**: Collegamento e validazione posizioni globali ↔ individuali
-- 📊 **Performance Analytics**: Calcoli transaction-based con CAGR
-- 🏗️ **Reconciliation**: Dashboard verifica coerenza dati
-- 📱 **Mobile Optimization**: Card view e layout responsive
-- 🎨 **Alternative Assets**: Gestione TCG, collezionabili, arte
-- ⚙️ **Settings Panel**: Configurazione fiscale e soglie personalizzate
-
-### **Miglioramenti UX**
-- 🔍 **Filtri Avanzati**: Ricerca e paginazione intelligente
-- 📋 **Mobile Cards**: Vista ottimizzata per smartphone
-- 🌐 **Multi-Language**: Supporto completo IT/EN
-- 💾 **Enhanced Export**: PDF, Excel, CSV dettagliati
-- 🎯 **Smart Validation**: Controlli real-time e sanitizzazione
-
-### **Stabilità e Performance**
-- ⚡ **Optimized Rendering**: useMemo e useCallback estensivi
-- 🛡️ **Error Handling**: Gestione robusta edge cases
-- 💾 **Auto-Save**: Persistenza automatica e intelligente
-- 🔒 **Security**: Input validation e XSS protection
-
----
-
 ## ⚠️ Dati e Privacy
 
 **I tuoi dati sono salvati SOLO nel browser** (localStorage).
