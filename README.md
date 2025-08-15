@@ -2,7 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live-Demo-green?style=for-the-badge)](https://stinocon.github.io/MangoMoney/)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-3.0-orange?style=for-the-badge)](https://github.com/Stinocon/MangoMoney)
+[![Version](https://img.shields.io/badge/Version-3.1-orange?style=for-the-badge)](https://github.com/Stinocon/MangoMoney)
 
 **Portfolio tracker completo e moderno, pensato per monitorare investimenti e patrimonio in modo (non)professionale, semplice e — soprattutto — senza che i tuoi dati vadano a spasso per Internet.**
 
@@ -12,7 +12,7 @@ L'idea nasce perché per anni ho gestito il mio *Net Worth* su Excel... e diciam
 
 L'ho condiviso per gentilezza e spirito divulgativo, non come prodotto commerciale finito. Eventuali *issue*? Potrei sistemarle… oppure no. 
 
-## 📛 Origine del Nome
+## Origine del Nome
 
 **MangoMoney** = gioco di parole da *"Mangano i money"* → *mancano i soldi*  
 Un nome simpatico per un problema serio: il portafoglio sempre vuoto! 🥭
@@ -21,7 +21,7 @@ Un nome simpatico per un problema serio: il portafoglio sempre vuoto! 🥭
 
 ## ✨ Caratteristiche Principali
 
-### 💰 **Gestione Patrimonio Avanzata**
+### 💰 Gestione Patrimonio Avanzata
 - **Liquidità Smart**: Conti bancari (corrente/deposito/cash) con fondo emergenza configurabile
 - **Investimenti Professionali**: 
   - Posizioni globali (broker/banche) + individuali (singoli titoli)
@@ -32,7 +32,7 @@ Un nome simpatico per un problema serio: il portafoglio sempre vuoto! 🥭
 - **Asset Alternativi**: TCG, collezionabili, arte, vinili, libri, fumetti
 - **Altri Asset**: Fondi pensione, debiti, crypto con categorizzazione avanzata
 
-### 📊 **Analisi Finanziarie Avanzate**
+### 📊 Analisi Finanziarie Avanzate
 - **Score di Rischio**: Basato su Modern Portfolio Theory (0-10) con pesi scientifici
 - **Metriche di Salute**: Debt-to-asset ratio, liquidity ratio, investment efficiency
 - **Safe Withdrawal Rate**: Simulazione prelievi sostenibili personalizzabile (0-10%)
@@ -42,14 +42,14 @@ Un nome simpatico per un problema serio: il portafoglio sempre vuoto! 🥭
   - Analisi costi e commissioni
 - **Reconciliation Dashboard**: Verifica coerenza tra posizioni globali e individuali
 
-### 🧮 **Metodologie di Calcolo**
+### 🧮 Metodologie di Calcolo
 - **Risk Score**: Media ponderata basata su allocazione e volatilità asset
 - **Performance**: Due modalità (manuale + transaction-based) con inclusione commissioni
 - **CAGR**: Formula compound con controllo distorsioni per periodi <1 mese
 - **SWR**: Calcolo sostenibilità prelievi su base scientifica
 - **Linking Validation**: Tolleranza dinamica (5% o soglia minima per valuta)
 
-### 🎨 **Esperienza Utente Premium**
+### 🎨 Esperienza Utente Premium
 - **Multi-Lingua**: Italiano e Inglese completo
 - **Multi-Valuta**: EUR, USD, GBP, CHF, JPY con formattazione locale
 - **Temi**: Modalità scura/chiara con transizioni fluide
@@ -59,26 +59,33 @@ Un nome simpatico per un problema serio: il portafoglio sempre vuoto! 🥭
   - Tablet: Layout ibrido adattivo
 - **Filtri Avanzati**: Ricerca, paginazione e ordinamento intelligente
 - **Auto-Save**: Salvataggio istantaneo ad ogni modifica
+- **Accessibilità Avanzata**: Aria-labels, navigazione tastiera, focus management
+- **Loading Intelligente**: Skeleton loading e stati granulari per operazioni specifiche
+- **Virtualizzazione**: Gestione ottimizzata di dataset grandi (1000+ elementi)
 
-### 🔄 **Import/Export Professionale**
+### 🔄 Import/Export Professionale
 - **Backup Completi**: JSON con metadati, impostazioni e validazione
+- **Backup Automatici**: Salvataggio intelligente con intervalli configurabili
 - **Export Multipli**: 
   - CSV dettagliato per analisi
   - Excel-compatible per spreadsheet
   - PDF professionale per report
-- **Importazione Sicura**: Validazione struttura, conferma e rollback
+- **Importazione Sicura**: Validazione robusta CSV con sanitizzazione e controlli XSS
+- **Gestione Errori**: Error boundaries per sezioni specifiche con recovery
 
-### ⚙️ **Configurazione Avanzata**
+### ⚙️ Configurazione Avanzata
 - **Impostazioni Fiscali**: Plusvalenze, bolli (preset Italia)
 - **Fondo Emergenza**: Soglie personalizzabili (ottimale/adeguato)
 - **Performance**: Controlli periodo e tolleranze linking
 - **Layout**: Forzatura mobile e preferenze display
+- **Validazione Form**: Controlli real-time con feedback immediato
+- **Notifiche Smart**: Sistema avanzato con durata personalizzabile
 
 ---
 
 ## 📐 Metodologie e Calcoli
 
-### 🎯 **Score di Rischio (0-10)**
+### Score di Rischio (0-10)
 Basato su **Modern Portfolio Theory** con pesi scientifici:
 
 ```
@@ -93,7 +100,7 @@ Pesi di Rischio:
 🎨 Beni alternativi: 5.0 (speculativi, alta volatilità)
 ```
 
-### 📈 **Performance degli Investimenti**
+### Performance degli Investimenti
 
 **Due modalità di calcolo per massima precisione:**
 
@@ -110,7 +117,7 @@ Rendimento = Valore Attuale - Cost Basis
 Rendimento % = (Rendimento / Cost Basis) × 100
 ```
 
-### 📊 **Rendimento Annualizzato (CAGR)**
+### Rendimento Annualizzato (CAGR)
 ```
 Formula: [(1 + Rendimento Totale/Investito)^(1/Anni)] - 1
 
@@ -120,7 +127,7 @@ Controlli di Sicurezza:
 - Basato sulla transazione più antica
 ```
 
-### 🛡️ **Fondo di Emergenza**
+### Fondo di Emergenza
 ```
 Mesi di Copertura = Valore Fondo Designato / Spese Mensili
 
@@ -130,7 +137,7 @@ Classificazione:
 ❌ Insufficiente: < 3 mesi
 ```
 
-### 💸 **Safe Withdrawal Rate (SWR)**
+### Safe Withdrawal Rate (SWR)
 Simulazione sostenibilità finanziaria basata su Trinity Study:
 ```
 Asset Liquidi Netti = Liquidità + Investimenti + Altri Conti
@@ -139,7 +146,7 @@ Prelievo Mensile = Prelievo Annuo / 12
 Anni di Sostentamento = Asset Liquidi / (Spese Mensili × 12)
 ```
 
-### 🔗 **Validazione Collegamenti**
+### Validazione Collegamenti
 Controllo coerenza tra posizioni globali (broker) e asset individuali:
 ```
 Tolleranza = max 5% del valore, soglia minima per valuta
@@ -148,7 +155,7 @@ Soglie: €10 (EUR), $10 (USD), £8 (GBP), ¥1000 (JPY), CHF10
 Status: ✅ Valido | ⚠️ Discrepanza oltre tolleranza
 ```
 
-### 💰 **Metriche Salute Finanziaria**
+### Metriche Salute Finanziaria
 ```
 Rapporto Debiti/Patrimonio = |Debiti| / Patrimonio Totale
 - Ottima: < 30% | Buona: < 50% | Attenzione: > 50%
@@ -165,21 +172,31 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 
 > **100% Privacy-Friendly**: Tutto nel tuo browser, zero server esterni.
 
+### Sicurezza Avanzata v3.1
 - ✅ **Elaborazione Locale**: Nessuna connessione esterna
 - ✅ **Zero Tracking**: Nessun analytics o raccolta dati  
-- ✅ **Input Sanitization**: Protezione XSS e injection
+- ✅ **Input Sanitization Avanzata**: Protezione XSS, injection e script malevoli
+- ✅ **Validazione Finanziaria**: Controlli robusi su importi e percentuali
+- ✅ **CSP Headers**: Content Security Policy per sicurezza web
 - ✅ **Type Safety**: TypeScript per robustezza
+- ✅ **Error Boundaries**: Isolamento errori per stabilità massima
 - ✅ **Open Source**: Codice trasparente su GitHub
 - ✅ **Uso Offline**: Scaricabile per uso locale
+
+### Backup e Resilienza
+- ✅ **Auto-Backup Intelligente**: Salvataggio automatico con checksum
+- ✅ **Gestione Backup Multipli**: Cronologia con pulizia automatica
+- ✅ **Validazione Import**: Controlli integrità e rollback automatico
+- ✅ **Recovery Errors**: Recupero automatico da stati inconsistenti
 
 ---
 
 ## 🚀 Come Iniziare
 
-### **Demo Online**
+### Demo Online
 👉 **[Prova MangoMoney](https://stinocon.github.io/MangoMoney/)** direttamente nel browser!
 
-### **Workflow Consigliato**
+### Workflow Consigliato
 1. **Configura**: Valuta, lingua, spese mensili e impostazioni fiscali
 2. **Liquidità**: Aggiungi conti bancari e designa il fondo emergenza  
 3. **Posizioni Globali**: Inserisci i valori totali presso broker/banche
@@ -187,9 +204,9 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 5. **Collegamenti**: Collega titoli individuali alle posizioni globali
 6. **Transazioni**: Registra acquisti/vendite per performance precise
 7. **Analizza**: Esplora statistiche, score di rischio e SWR
-8. **Backup**: Esporta regolarmente con JSON completo
+8. **Backup**: Sistema automatico + export manuali per sicurezza massima
 
-### **Utilizzo Locale (Raccomandato)**
+### Utilizzo Locale (Raccomandato)
 1. Scarica i file da GitHub  
 2. Apri `index.html` nel browser  
 3. Goditi l'app offline, al sicuro sul tuo PC
@@ -200,14 +217,14 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 
 | Sezione | Descrizione |
 |---------|-------------|
-| **🏠 Panoramica** | Dashboard completa con totali, grafici interattivi e Safe Withdrawal Rate |
-| **📈 Statistiche** | Score di rischio, salute finanziaria, metriche avanzate con basi teoriche |
-| **💰 Liquidità** | Conti bancari per tipo, configurazione fondo emergenza e autonomia |
-| **📊 Investimenti** | Posizioni globali/individuali, transazioni filtrate, reconciliation |
-| **🏠 Immobili** | Residenza principale e proprietà secondarie con indirizzi |
-| **🏦 Altri Asset** | Debiti, fondi pensione, crypto, asset alternativi categorizzati |
-| **⚙️ Impostazioni** | Valuta, imposte, soglie emergenza, configurazioni avanzate |
-| **ℹ️ Info** | Guida utilizzo, metodologie, privacy, supporto progetto |
+| **Panoramica** | Dashboard completa con totali, grafici interattivi e Safe Withdrawal Rate |
+| **Statistiche** | Score di rischio, salute finanziaria, metriche avanzate con basi teoriche |
+| **Liquidità** | Conti bancari per tipo, configurazione fondo emergenza e autonomia |
+| **Investimenti** | Posizioni globali/individuali, transazioni filtrate, reconciliation |
+| **Immobili** | Residenza principale e proprietà secondarie con indirizzi |
+| **Altri Asset** | Debiti, fondi pensione, crypto, asset alternativi categorizzati |
+| **Impostazioni** | Valuta, imposte, soglie emergenza, backup automatici |
+| **Info** | Guida utilizzo, metodologie, privacy, supporto progetto |
 
 ---
 
@@ -218,14 +235,17 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 **✅ Restano quando:** chiudi browser, riavvii PC, navighi altrove  
 **❌ Si perdono quando:** svuoti cache, modalità incognito, cambi browser
 
-💡 **Consiglio**: Fai backup regolari con l'export JSON completo!
+💡 **Novità v3.1**: Backup automatici intelligenti ogni 5 minuti + gestione cronologia backup!
 
 ---
 
 ## 🛠️ Tecnologie
 
-**Stack**: React 18 + TypeScript + Tailwind CSS + Recharts + Lucide Icons  
-**Performance**: useMemo, useCallback, debouncing, lazy loading  
+**Stack Core**: React 18 + TypeScript + Tailwind CSS + Recharts + Lucide Icons  
+**Performance**: useMemo, useCallback, debouncing, virtualizzazione, skeleton loading  
+**Qualità**: Error boundaries, form validation, input sanitization avanzata  
+**Accessibilità**: ARIA labels, keyboard navigation, focus management  
+**Sicurezza**: CSP headers, XSS protection, financial validation  
 **Hosting**: GitHub Pages (demo) + Download locale (privacy massima)  
 **Compatibility**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -237,19 +257,22 @@ Efficienza Investimenti = Investimenti / Patrimonio Totale
 **Performance**: Capital Asset Pricing Model (Sharpe, 1964)  
 **SWR**: Trinity Study su prelievi sostenibili  
 **Diversificazione**: Principi Bogle su allocazione asset  
-**Emergency Fund**: Best practices Financial Planning (Merton)
+**Emergency Fund**: Best practices Financial Planning (Merton)  
+**UX**: Web Content Accessibility Guidelines (WCAG 2.1)  
+**Security**: OWASP Top 10 Web Application Security
 
 ---
 
 ## ⚠️ Limitazioni e Disclaimer
 
-### **Limitazioni Tecniche**
+### Limitazioni Tecniche
 - 📊 Prezzi non aggiornati automaticamente (inserimento manuale)
 - 🌐 Nessuna connessione API di mercato (privacy > convenienza)
 - 📱 Funzionalità limitate in modalità incognito
 - 🧮 Calcoli indicativi, non sostituiscono consulenza professionale
+- 📈 Virtualizzazione attiva solo per dataset >100 elementi
 
-### **Disclaimer Finanziario**
+### Disclaimer Finanziario
 **MangoMoney è a scopo educativo e informativo. Non garantisco accuratezza dei dati e non fornisco consigli di investimento. Le performance passate non garantiscono risultati futuri. Uso a vostro rischio e responsabilità.**
 
 ---
@@ -264,7 +287,9 @@ Ogni contributo aiuta a mantenere il progetto gratuito e open source! 🙏
 
 ---
 
-## 📈 Roadmap Future - Senza alcuna garanzia di implementazione
+## 📈 Roadmap Future
+
+*Senza alcuna garanzia di implementazione*
 
 - [ ] **API Integration**: Prezzi automatici (opzionale)
 - [ ] **Advanced Charts**: Grafici storici performance
@@ -272,6 +297,11 @@ Ogni contributo aiuta a mantenere il progetto gratuito e open source! 🙏
 - [ ] **Tax Optimization**: Calcoli fiscali avanzati
 - [ ] **Mobile App**: PWA installabile
 - [ ] **Data Sync**: Backup cloud opzionale
+
+**In Sviluppo v3.2:**
+- [ ] **Undo/Redo System**: Cronologia modifiche
+- [ ] **Advanced Analytics**: Machine learning insights
+- [ ] **Multi-Portfolio**: Gestione portafogli multipli
 
 ---
 
@@ -285,7 +315,7 @@ Ogni contributo aiuta a mantenere il progetto gratuito e open source! 🙏
 
 ---
 
-### 🔗 Collegamenti Utili
+### Collegamenti Utili
 
 [📚 AwesomeFinanceITA](https://github.com/Stinocon/AwesomeFinanceITA) • [💼 LinkedIn](https://www.linkedin.com/in/stefanoconter/) • [🐙 GitHub](https://github.com/Stinocon)
 

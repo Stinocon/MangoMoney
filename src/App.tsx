@@ -1,7 +1,90 @@
 import React, { useState, useMemo, useEffect, useCallback, Component, ReactNode } from 'react';
+import { VirtualizedTable } from './components/VirtualizedTable';
+import { useAutoBackup } from './hooks/useAutoBackup';
 import { PlusCircle, Trash2, Download, Upload, RotateCcw, Moon, Sun, Calculator, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { translations, languages, type TranslationKey, type Language } from './translations';
+
+// Section Error Boundary Component
+interface SectionErrorBoundaryProps {
+  section: string;
+  children: React.ReactNode;
+  darkMode?: boolean;
+  onRetry?: () => void;
+}
+
+class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { hasError: boolean; error?: Error }> {
+  constructor(props: SectionErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error(`Error in section ${this.props.section}:`, error, errorInfo);
+    
+    // Opzionalmente invia errore a servizio di monitoring
+    // logErrorToService(error, { section: this.props.section, ...errorInfo });
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, error: undefined });
+    this.props.onRetry?.();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      const { section, darkMode = false } = this.props;
+      
+      return (
+        <div className={`${darkMode ? 'bg-red-900/20 border-red-700' : 'bg-red-50 border-red-200'} border rounded-lg p-6 text-center`}>
+          <div className={`text-4xl mb-4 ${darkMode ? 'text-red-400' : 'text-red-500'}`}>⚠️</div>
+          <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-red-200' : 'text-red-800'}`}>
+            Errore nella sezione {section}
+          </h3>
+          <p className={`text-sm mb-4 ${darkMode ? 'text-red-300' : 'text-red-600'}`}>
+            Si è verificato un errore durante il caricamento di questa sezione.
+          </p>
+          {this.state.error && (
+            <details className={`text-xs mb-4 ${darkMode ? 'text-red-400' : 'text-red-500'}`}>
+              <summary>Dettagli errore</summary>
+              <pre className="mt-2 text-left overflow-auto">
+                {this.state.error.message}
+              </pre>
+            </details>
+          )}
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={this.handleRetry}
+              className={`px-4 py-2 rounded transition-colors ${
+                darkMode 
+                  ? 'bg-red-600 text-white hover:bg-red-700' 
+                  : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
+            >
+              Riprova
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className={`px-4 py-2 rounded transition-colors ${
+                darkMode 
+                  ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                  : 'bg-gray-500 text-white hover:bg-gray-600'
+              }`}
+            >
+              Ricarica pagina
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Error Boundary Component
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -282,6 +365,118 @@ const validateAssets = (data: unknown): Assets | null => {
   return data as Assets;
 };
 
+// Skeleton loading components
+const TableSkeleton = React.memo(({ rows = 5, darkMode = false }: { rows?: number; darkMode?: boolean }) => (
+  <div className="animate-pulse space-y-2">
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className={`h-12 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded`} />
+    ))}
+  </div>
+));
+
+const StatsSkeleton = React.memo(({ darkMode = false }: { darkMode?: boolean }) => (
+  <div className="animate-pulse grid grid-cols-1 md:grid-cols-4 gap-4">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <div key={i} className={`h-20 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg`} />
+    ))}
+  </div>
+));
+
+// Custom hook for form validation
+interface ValidationRule<T> {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: RegExp;
+  custom?: (value: T) => string | null;
+}
+
+interface ValidationSchema {
+  [key: string]: ValidationRule<any>;
+}
+
+const useFormValidation = <T extends Record<string, any>>(schema: ValidationSchema) => {
+  const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
+
+  const validateField = useCallback((name: keyof T, value: any): string | null => {
+    const rule = schema[name as string];
+    if (!rule) return null;
+
+    if (rule.required && (!value || value === '')) {
+      return 'Campo obbligatorio';
+    }
+
+    if (rule.minLength && typeof value === 'string' && value.length < rule.minLength) {
+      return `Minimo ${rule.minLength} caratteri`;
+    }
+
+    if (rule.maxLength && typeof value === 'string' && value.length > rule.maxLength) {
+      return `Massimo ${rule.maxLength} caratteri`;
+    }
+
+    if (rule.min && typeof value === 'number' && value < rule.min) {
+      return `Valore minimo: ${rule.min}`;
+    }
+
+    if (rule.max && typeof value === 'number' && value > rule.max) {
+      return `Valore massimo: ${rule.max}`;
+    }
+
+    if (rule.pattern && typeof value === 'string' && !rule.pattern.test(value)) {
+      return 'Formato non valido';
+    }
+
+    if (rule.custom) {
+      return rule.custom(value);
+    }
+
+    return null;
+  }, [schema]);
+
+  const validateForm = useCallback((data: T): boolean => {
+    const newErrors: Partial<Record<keyof T, string>> = {};
+    let hasErrors = false;
+
+    Object.keys(schema).forEach(key => {
+      const error = validateField(key as keyof T, data[key]);
+      if (error) {
+        newErrors[key as keyof T] = error;
+        hasErrors = true;
+      }
+    });
+
+    setErrors(newErrors);
+    return !hasErrors;
+  }, [schema, validateField]);
+
+  const clearErrors = useCallback(() => {
+    setErrors({});
+    setTouched({});
+  }, []);
+
+  const setFieldTouched = useCallback((name: keyof T) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+  }, []);
+
+  const setFieldError = useCallback((name: keyof T, error: string | null) => {
+    setErrors(prev => ({ ...prev, [name]: error }));
+  }, []);
+
+  return {
+    errors,
+    touched,
+    validateField,
+    validateForm,
+    clearErrors,
+    setFieldTouched,
+    setFieldError,
+    hasErrors: Object.keys(errors).length > 0
+  };
+};
+
 const NetWorthManager = () => {
   // State management
   const [darkMode, setDarkMode] = useState(() => {
@@ -339,10 +534,24 @@ const NetWorthManager = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info', duration: number = 5000) => {
     setNotification({ message, type, visible: true });
-    setTimeout(() => setNotification(prev => ({ ...prev, visible: false })), 5000);
-  };
+    
+    // Auto-hide con possibilità di personalizzare durata
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, visible: false }));
+    }, duration);
+  }, []);
+
+  // Varianti per facilità d'uso
+  const showSuccess = useCallback((message: string, duration?: number) => 
+    showNotification(message, 'success', duration), [showNotification]);
+
+  const showError = useCallback((message: string, duration?: number) => 
+    showNotification(message, 'error', duration), [showNotification]);
+
+  const showInfo = useCallback((message: string, duration?: number) => 
+    showNotification(message, 'info', duration), [showNotification]);
 
 
 
@@ -366,6 +575,19 @@ const NetWorthManager = () => {
   
   // Debounced filters for performance optimization
   const debouncedTransactionFilters = useDebounce(transactionFilters, 300);
+  
+  // Show welcome message on app load
+  useEffect(() => {
+    const saved = localStorage.getItem('mangomoney-assets');
+    const hasShownWelcome = sessionStorage.getItem('mangomoney-welcome-shown');
+    
+    if (saved && !hasShownWelcome) {
+      showInfo('Dati caricati con successo dal backup locale');
+      sessionStorage.setItem('mangomoney-welcome-shown', 'true');
+    }
+  }, [showInfo]);
+
+
   
   const [currentTransactionPage, setCurrentTransactionPage] = useState(1);
   const transactionsPerPage = 10;
@@ -411,6 +633,33 @@ const NetWorthManager = () => {
     const saved = localStorage.getItem('mangomoney-emergency-fund-adequate-months');
     return saved ? safeParseJSON(saved, 3) : 3; // Default 3 months for adequate
   });
+
+  // Auto-backup system
+  const autoBackup = useAutoBackup(
+    assets,
+    {
+      capitalGainsTaxRate,
+      currentAccountStampDuty,
+      currentAccountStampDutyThreshold,
+      depositAccountStampDutyRate,
+      emergencyFundOptimalMonths,
+      emergencyFundAdequateMonths,
+      selectedCurrency,
+      selectedLanguage,
+      swrRate,
+      darkMode,
+      forceMobileLayout
+    },
+    {
+      emergencyFundAccount,
+      monthlyExpenses
+    },
+    {
+      intervalMs: 5 * 60 * 1000, // 5 minuti
+      maxBackups: 10,
+      sizeThreshold: 1024
+    }
+  );
   
   // Currency definitions
   const currencies = {
@@ -434,6 +683,48 @@ const NetWorthManager = () => {
       alternativeAssets: []
     };
   }
+
+  // Granular loading states
+  const [loadingStates, setLoadingStates] = useState({
+    importing: false,
+    exporting: false,
+    calculating: false,
+    saving: false,
+    deleting: false,
+    copying: false
+  });
+
+  // Custom hook for async operations with loading states
+  const useAsyncOperation = () => {
+    const updateLoadingState = useCallback((operation: keyof typeof loadingStates, isLoading: boolean) => {
+      setLoadingStates(prev => ({ ...prev, [operation]: isLoading }));
+    }, []);
+
+    const withLoading = useCallback(async <T,>(
+      operation: keyof typeof loadingStates,
+      asyncFn: () => Promise<T>,
+      onSuccess?: (result: T) => void,
+      onError?: (error: Error) => void
+    ): Promise<T | undefined> => {
+      updateLoadingState(operation, true);
+      try {
+        const result = await asyncFn();
+        onSuccess?.(result);
+        return result;
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error('Unknown error');
+        onError?.(err);
+        showError(`Errore durante ${operation}: ${err.message}`);
+        throw err;
+      } finally {
+        updateLoadingState(operation, false);
+      }
+    }, [updateLoadingState]);
+
+    return { loadingStates, withLoading };
+  };
+
+  const { withLoading } = useAsyncOperation();
 
 
   // Auto-save to localStorage
@@ -550,8 +841,16 @@ const NetWorthManager = () => {
           onClick={() => handleCopyRow('transactions', item.id)}
           className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
           title="Copia riga"
+          aria-label={`Duplica ${item.description || item.amount}`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleCopyRow('transactions', item.id);
+            }
+          }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
@@ -560,8 +859,16 @@ const NetWorthManager = () => {
           onClick={() => handleEditRow('transactions', item.id)}
           className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
           title="Modifica riga"
+          aria-label={`Modifica ${item.description || item.amount}`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleEditRow('transactions', item.id);
+            }
+          }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
@@ -569,8 +876,19 @@ const NetWorthManager = () => {
         <button
           onClick={() => handleDeleteItem('transactions', item.id)}
           className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+          title="Elimina riga"
+          aria-label={`Elimina ${item.description || item.amount}`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (window.confirm(`Eliminare ${item.description || item.amount}?`)) {
+                handleDeleteItem('transactions', item.id);
+              }
+            }
+          }}
         >
-          <Trash2 size={16} />
+          <Trash2 size={16} aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -610,8 +928,16 @@ const NetWorthManager = () => {
           onClick={() => handleEditRow('investmentPositions', item.id)}
           className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
           title="Modifica riga"
+          aria-label={`Modifica ${item.name}`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleEditRow('investmentPositions', item.id);
+            }
+          }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
@@ -620,8 +946,16 @@ const NetWorthManager = () => {
           onClick={() => handleCopyRow('investmentPositions', item.id)}
           className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
           title="Copia riga"
+          aria-label={`Duplica ${item.name}`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleCopyRow('investmentPositions', item.id);
+            }
+          }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
@@ -629,8 +963,19 @@ const NetWorthManager = () => {
         <button
           onClick={() => handleDeleteItem('investmentPositions', item.id)}
           className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+          title="Elimina riga"
+          aria-label={`Elimina ${item.name}`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (window.confirm(`Eliminare ${item.name}?`)) {
+                handleDeleteItem('investmentPositions', item.id);
+              }
+            }
+          }}
         >
-          <Trash2 size={16} />
+          <Trash2 size={16} aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -647,6 +992,34 @@ const NetWorthManager = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Focus management for modals
+  useEffect(() => {
+    if (editingItem) {
+      // Focus sul primo input quando si apre il modal
+      const timer = setTimeout(() => {
+        const firstInput = document.querySelector('input[type="text"], input[type="number"]') as HTMLInputElement;
+        if (firstInput) {
+          firstInput.focus();
+          firstInput.select();
+        }
+      }, 100);
+
+      // Gestione ESC per chiudere
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleCancelEdit();
+        }
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('keydown', handleEscape);
+      };
+    }
+  }, [editingItem]);
 
 
 
@@ -1560,30 +1933,53 @@ const NetWorthManager = () => {
     return input.trim().replace(/[^a-zA-Z0-9\s\-_.,()€$%£¥@#&+]/g, '');
   };
 
-  const sanitizeNumber = (input: string | number): number => {
+  const sanitizeNumber = (input: string | number, context: 'amount' | 'percentage' | 'price' = 'amount'): number => {
     if (typeof input === 'number') {
-      if (!validateFinancialValue(input)) {
+      const validation = validateFinancialAmount(input, context);
+      if (!validation.valid) {
+        console.warn(`Validation failed: ${validation.error}`);
         return 0;
       }
       return input;
     }
+    
     if (typeof input !== 'string') return 0;
     
-    // Remove any non-numeric characters except decimal point and minus sign
     const cleaned = input.replace(/[^0-9.-]/g, '');
     const parsed = parseFloat(cleaned);
     
-    if (!validateFinancialValue(parsed)) {
+    const validation = validateFinancialAmount(parsed, context);
+    if (!validation.valid) {
+      console.warn(`Validation failed: ${validation.error}`);
       return 0;
     }
+    
     return parsed;
   };
 
-  // Enhanced financial value validation
-  const validateFinancialValue = (value: number): boolean => {
-    return !isNaN(value) && isFinite(value) && 
-           value >= -Number.MAX_SAFE_INTEGER && 
-           value <= Number.MAX_SAFE_INTEGER;
+
+
+  // AGGIUNGERE QUESTA FUNZIONE
+  const validateFinancialAmount = (value: number, context: 'amount' | 'percentage' | 'price' = 'amount'): { valid: boolean; error?: string } => {
+    if (!Number.isFinite(value)) return { valid: false, error: 'Valore non valido o infinito' };
+    if (Number.isNaN(value)) return { valid: false, error: 'Valore non è un numero' };
+    
+    switch (context) {
+      case 'amount':
+        if (Math.abs(value) > 1e15) return { valid: false, error: 'Importo troppo elevato (max 1 quadrilione)' };
+        if (Math.abs(value) < 0.01 && value !== 0) return { valid: false, error: 'Importo troppo piccolo (min 0.01)' };
+        break;
+      case 'percentage':
+        if (value < -99.99) return { valid: false, error: 'Percentuale non può essere inferiore a -99.99%' };
+        if (value > 50000) return { valid: false, error: 'Percentuale non può superare 50000%' };
+        break;
+      case 'price':
+        if (value < 0) return { valid: false, error: 'Il prezzo non può essere negativo' };
+        if (value > 1e12) return { valid: false, error: 'Prezzo troppo elevato' };
+        break;
+    }
+    
+    return { valid: true };
   };
 
   const sanitizeInteger = (input: string | number): number => {
@@ -1624,9 +2020,8 @@ const NetWorthManager = () => {
   };
 
   // Export functionality
-  const exportToJSON = () => {
-    setIsLoading(true);
-    try {
+  const exportToJSON = useCallback(async () => {
+    await withLoading('exporting', async () => {
       // Calculate statistics for metadata
       const totalItems = Object.values(assets).reduce((sum: number, section: unknown) => sum + (Array.isArray(section) ? section.length : 0), 0);
       const totalValue = Object.entries(totals).reduce((sum: number, [key, value]) => {
@@ -1637,26 +2032,21 @@ const NetWorthManager = () => {
     const exportData: ExportData = {
       assets,
       settings: {
-        // Tax and fee settings
         capitalGainsTaxRate,
         currentAccountStampDuty,
         currentAccountStampDutyThreshold,
         depositAccountStampDutyRate,
-        // Emergency fund settings
         emergencyFundOptimalMonths,
         emergencyFundAdequateMonths,
-        // Currency and language settings
         selectedCurrency,
         selectedLanguage,
-        // SWR settings
         swrRate,
-        // UI settings
         darkMode,
         forceMobileLayout
       },
       metadata: {
         exportDate: new Date().toISOString(),
-        version: '2.3',
+          version: '3.0',
         appName: 'MangoMoney',
         totalItems,
         totalValue,
@@ -1677,18 +2067,16 @@ const NetWorthManager = () => {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-      link.download = `mangomoney-backup-${new Date().toISOString().split('T')[0]}-v2.3.json`;
+      link.download = `mangomoney-backup-${new Date().toISOString().split('T')[0]}-v3.0.json`;
     link.click();
     URL.revokeObjectURL(url);
       
-      // Show success message
-      showNotification(`Backup esportato con successo! ${totalItems} elementi salvati.`, 'success');
-    } catch (error) {
-      showNotification('Errore durante l\'esportazione del backup. Riprova.', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return { totalItems, success: true };
+    }, 
+    (result) => showSuccess(`Backup esportato con successo! ${result?.totalItems} elementi salvati.`),
+    (error) => showError('Errore durante l\'esportazione del backup.')
+    );
+  }, [withLoading, assets, totals, capitalGainsTaxRate, currentAccountStampDuty, currentAccountStampDutyThreshold, depositAccountStampDutyRate, emergencyFundOptimalMonths, emergencyFundAdequateMonths, selectedCurrency, selectedLanguage, swrRate, darkMode, forceMobileLayout, emergencyFundAccount, monthlyExpenses, showSuccess, showError]);
 
   const exportToCSV = () => {
     setIsLoading(true);
@@ -2286,128 +2674,189 @@ const NetWorthManager = () => {
     link.download = 'mangomoney-transactions-template.csv';
     link.click();
     URL.revokeObjectURL(url);
-    showNotification(t('downloadCSVTemplate'), 'success');
+          showSuccess(t('downloadCSVTemplate'));
   };
 
-  const importTransactionsFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // CSV validation utilities
+  const validateCSVContent = (content: string): { valid: boolean; error?: string } => {
+    // Controllo dimensione
+    if (content.length > 10 * 1024 * 1024) {
+      return { valid: false, error: 'File troppo grande (max 10MB)' };
+    }
+
+    // Controllo caratteri pericolosi
+    const dangerousPatterns = [
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      /javascript:/gi,
+      /on\w+\s*=/gi,
+      /data:text\/html/gi,
+      /vbscript:/gi,
+      /expression\s*\(/gi
+    ];
+
+    const hasDangerousContent = dangerousPatterns.some(pattern => pattern.test(content));
+    if (hasDangerousContent) {
+      return { valid: false, error: 'Contenuto potenzialmente pericoloso rilevato' };
+    }
+
+    // Controllo struttura base CSV
+    const lines = content.split('\n').filter(line => line.trim());
+    if (lines.length < 2) {
+      return { valid: false, error: 'File CSV deve contenere almeno header e una riga dati' };
+    }
+
+    return { valid: true };
+  };
+
+  const sanitizeCSVValue = (value: string): string => {
+    return value
+      .replace(/[<>]/g, '') // Rimuove < e >
+      .replace(/javascript:/gi, '') // Rimuove javascript:
+      .replace(/on\w+\s*=/gi, '') // Rimuove event handlers
+      .trim();
+  };
+
+  const importTransactionsFromCSV = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Check file type
+    await withLoading('importing', async () => {
+    // Validazione file
     if (!file.name.toLowerCase().endsWith('.csv')) {
-      showNotification(t('csvInvalidFormat'), 'error');
-      event.target.value = '';
-      return;
+      throw new Error('Per favore seleziona un file CSV valido.');
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      showNotification('Il file è troppo grande. Dimensione massima: 5MB', 'error');
-      event.target.value = '';
-      return;
+      throw new Error('Il file è troppo grande. Dimensione massima: 5MB');
     }
 
+    const result = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      try {
-        const result = e.target?.result;
-        if (typeof result !== 'string') {
-          throw new Error('Impossibile leggere il file');
-        }
+        const content = e.target?.result as string;
+        resolve(content);
+      };
+      reader.onerror = () => reject(new Error('Errore nella lettura del file'));
+      reader.readAsText(file);
+    });
 
-        // Parse CSV content
+    // Validazione contenuto
+    const contentValidation = validateCSVContent(result);
+    if (!contentValidation.valid) {
+      throw new Error(contentValidation.error);
+    }
+
+    // Parse CSV con sanitizzazione
         const lines = result.split('\n').filter(line => line.trim() !== '');
-        if (lines.length < 2) {
-          throw new Error(t('csvInvalidFormat'));
-        }
+    const header = lines[0].split(',').map(h => sanitizeCSVValue(h.replace(/"/g, '')));
 
-        // Parse header
-        const header = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
         const requiredFields = ['Nome', 'Ticker', 'ISIN', 'Tipo Transazione', 'Quantità', 'Importo', 'Commissioni', 'Data'];
-        
-        // Check if all required fields are present
         const missingFields = requiredFields.filter(field => !header.includes(field));
+    
         if (missingFields.length > 0) {
-          throw new Error(`${t('csvMissingRequiredFields')}: ${missingFields.join(', ')}`);
+      throw new Error(`Campi obbligatori mancanti: ${missingFields.join(', ')}`);
         }
 
         // Get field indices
-        const nameIndex = header.indexOf('Nome');
-        const tickerIndex = header.indexOf('Ticker');
-        const isinIndex = header.indexOf('ISIN');
-        const typeIndex = header.indexOf('Tipo Transazione');
-        const quantityIndex = header.indexOf('Quantità');
-        const amountIndex = header.indexOf('Importo');
-        const feesIndex = header.indexOf('Commissioni');
-        const dateIndex = header.indexOf('Data');
+    const indices = {
+      name: header.indexOf('Nome'),
+      ticker: header.indexOf('Ticker'),
+      isin: header.indexOf('ISIN'),
+      type: header.indexOf('Tipo Transazione'),
+      quantity: header.indexOf('Quantità'),
+      amount: header.indexOf('Importo'),
+      fees: header.indexOf('Commissioni'),
+      date: header.indexOf('Data')
+    };
 
-        // Parse data rows
+    // Parse data rows con validazione avanzata
         const newTransactions: Transaction[] = [];
+    const errors: string[] = [];
         let successCount = 0;
-        let errorCount = 0;
 
         for (let i = 1; i < lines.length; i++) {
           try {
-            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-            
-            // Validate required values
-            if (values.length < header.length) continue;
-            
-            const name = values[nameIndex];
-            const ticker = values[tickerIndex];
-            const isin = values[isinIndex];
-            const transactionType = values[typeIndex];
-            const quantity = values[quantityIndex];
-            const amount = values[amountIndex];
-            const fees = values[feesIndex];
-            const date = values[dateIndex];
+        const values = lines[i].split(',').map(v => sanitizeCSVValue(v.replace(/"/g, '')));
+        
+        if (values.length < header.length) {
+          errors.push(`Riga ${i + 1}: numero di colonne insufficiente`);
+          continue;
+        }
 
-            // Validate data
-            if (!name || !quantity || !amount || !date) {
-              errorCount++;
+        // Estrazione e validazione valori
+        const rowData = {
+          name: values[indices.name]?.trim(),
+          ticker: values[indices.ticker]?.trim(),
+          isin: values[indices.isin]?.trim(),
+          type: values[indices.type]?.trim().toLowerCase(),
+          quantity: values[indices.quantity]?.trim(),
+          amount: values[indices.amount]?.trim(),
+          fees: values[indices.fees]?.trim() || '0',
+          date: values[indices.date]?.trim()
+        };
+
+        // Validazioni specifiche
+        if (!rowData.name || rowData.name.length < 2) {
+          errors.push(`Riga ${i + 1}: nome mancante o troppo corto`);
               continue;
             }
 
-            // Parse and validate numeric values
-            const numQuantity = parseFloat(quantity);
-            const numAmount = parseFloat(amount);
-            const numFees = parseFloat(fees) || 0;
+        const numQuantity = parseFloat(rowData.quantity);
+        const numAmount = parseFloat(rowData.amount);
+        const numFees = parseFloat(rowData.fees);
 
-            if (isNaN(numQuantity) || isNaN(numAmount) || numQuantity <= 0 || numAmount <= 0) {
-              errorCount++;
+        if (isNaN(numQuantity) || numQuantity <= 0) {
+          errors.push(`Riga ${i + 1}: quantità non valida`);
               continue;
             }
 
-            // Validate date format (YYYY-MM-DD)
+        if (isNaN(numAmount) || numAmount <= 0) {
+          errors.push(`Riga ${i + 1}: importo non valido`);
+          continue;
+        }
+
+        if (isNaN(numFees) || numFees < 0) {
+          errors.push(`Riga ${i + 1}: commissioni non valide`);
+          continue;
+        }
+
+        // Validazione data
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateRegex.test(date)) {
-              errorCount++;
+        if (!dateRegex.test(rowData.date)) {
+          errors.push(`Riga ${i + 1}: formato data non valido (richiesto YYYY-MM-DD)`);
               continue;
             }
 
-            // Determine transaction type
-            let type: 'purchase' | 'sale';
-            if (transactionType.toLowerCase().includes('acquisto') || transactionType.toLowerCase().includes('purchase') || transactionType.toLowerCase().includes('buy')) {
-              type = 'purchase';
-            } else if (transactionType.toLowerCase().includes('vendita') || transactionType.toLowerCase().includes('sale') || transactionType.toLowerCase().includes('sell')) {
-              type = 'sale';
+        const transactionDate = new Date(rowData.date);
+        if (isNaN(transactionDate.getTime())) {
+          errors.push(`Riga ${i + 1}: data non valida`);
+          continue;
+        }
+
+        // Validazione tipo transazione
+        let transactionType: 'purchase' | 'sale';
+        if (rowData.type.includes('acquisto') || rowData.type.includes('purchase') || rowData.type.includes('buy')) {
+          transactionType = 'purchase';
+        } else if (rowData.type.includes('vendita') || rowData.type.includes('sale') || rowData.type.includes('sell')) {
+          transactionType = 'sale';
             } else {
-              errorCount++;
+          errors.push(`Riga ${i + 1}: tipo transazione non riconosciuto (${rowData.type})`);
               continue;
             }
 
-            // Create new transaction
+        // Creazione transazione
+        const maxId = Math.max(...assets.transactions.map((t: Transaction) => t.id), 0);
             const newTransaction: Transaction = {
-              id: Date.now() + Math.floor(Math.random() * 1000),
-              name: sanitizeString(name),
-              ticker: sanitizeString(ticker),
-              isin: sanitizeString(isin),
-              transactionType: type,
+          id: maxId + 1 + successCount,
+          name: sanitizeString(rowData.name),
+          ticker: sanitizeTicker(rowData.ticker),
+          isin: sanitizeISIN(rowData.isin),
+          transactionType,
               quantity: numQuantity,
               amount: numAmount,
               commissions: numFees,
-              date: date,
-              description: `${type === 'purchase' ? 'Acquisto' : 'Vendita'} di ${name}`,
+          date: rowData.date,
+          description: `${transactionType === 'purchase' ? 'Acquisto' : 'Vendita'} di ${rowData.name} (importato da CSV)`,
               linkedToAsset: undefined
             };
 
@@ -2415,44 +2864,391 @@ const NetWorthManager = () => {
             successCount++;
 
           } catch (error) {
-            errorCount++;
+        errors.push(`Riga ${i + 1}: errore generico - ${error instanceof Error ? error.message : 'errore sconosciuto'}`);
           }
         }
 
         if (newTransactions.length === 0) {
-          throw new Error(t('csvInvalidData'));
+      throw new Error(`Nessuna transazione valida trovata. Errori: ${errors.slice(0, 5).join('; ')}${errors.length > 5 ? '...' : ''}`);
         }
 
-        // Add new transactions to existing ones
+    // Aggiorna state
         setAssets(prev => ({
           ...prev,
           transactions: [...prev.transactions, ...newTransactions]
         }));
 
-        // Show success message
-        showNotification(`${t('csvImportSuccess')}: ${successCount} transazioni importate${errorCount > 0 ? `, ${errorCount} righe ignorate` : ''}`, 'success');
+    return { successCount, errorCount: errors.length, errors };
+  },
+  (result) => {
+    let message = `${result?.successCount} transazioni importate con successo`;
+    if (result?.errorCount && result.errorCount > 0) {
+      message += `, ${result.errorCount} righe ignorate`;
+    }
+    showSuccess(message);
+  },
+  (error) => showError(`Errore nell'importazione: ${error.message}`)
+  );
 
-      } catch (error) {
-        showNotification(`${t('csvImportError')}: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`, 'error');
-      }
-    };
-
-    reader.onerror = () => {
-      showNotification(t('csvImportError'), 'error');
-    };
-
-    reader.readAsText(file);
     event.target.value = '';
-  };
+}, [withLoading, assets.transactions, setAssets, showSuccess, showError, sanitizeString, sanitizeTicker, sanitizeISIN]);
 
   // Reset function (manual save removed - auto-save handles everything)
 
   const resetData = () => {
     if (window.confirm('Sei sicuro di voler ripristinare i dati originali?')) {
       setAssets(getInitialData());
-      showNotification('Dati ripristinati ai valori originali!', 'success');
+      showSuccess('Dati ripristinati ai valori originali!');
     }
   };
+
+  // Virtualized Transaction Table Component
+  const VirtualizedTransactionTable = React.memo(({ 
+    transactions, 
+    darkMode, 
+    formatCurrency,
+    handleEditRow,
+    handleCopyRow,
+    handleDeleteItem
+  }: { 
+    transactions: Transaction[]; 
+    darkMode: boolean;
+    formatCurrency: (amount: number) => string;
+    handleEditRow: (section: string, id: number) => void;
+    handleCopyRow: (section: string, id: number) => void;
+    handleDeleteItem: (section: string, id: number) => void;
+  }) => {
+    const renderTransactionRow = useCallback((transaction: Transaction, index: number, style: React.CSSProperties) => (
+      <div style={style} className={`flex items-center px-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="flex-1 grid grid-cols-8 gap-4 items-center">
+          <span className="truncate">{transaction.name}</span>
+          <span className="truncate">{transaction.ticker}</span>
+          <span className="truncate">{transaction.isin}</span>
+          <span className={`px-2 py-1 rounded text-xs ${transaction.transactionType === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {transaction.transactionType === 'purchase' ? 'Acquisto' : 'Vendita'}
+          </span>
+          <span className="text-right font-mono">{transaction.quantity.toLocaleString()}</span>
+          <span className="text-right font-mono">{formatCurrency(transaction.amount)}</span>
+          <span className="text-right font-mono">{formatCurrency(transaction.commissions)}</span>
+          <div className="flex justify-center gap-1">
+            <button 
+              onClick={() => handleEditRow('transactions', transaction.id)} 
+              className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`} 
+              title="Modifica riga" 
+              aria-label={`Modifica ${transaction.name}`} 
+              tabIndex={0} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') { 
+                  e.preventDefault(); 
+                  handleEditRow('transactions', transaction.id); 
+                } 
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button 
+              onClick={() => handleCopyRow('transactions', transaction.id)} 
+              className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`} 
+              title="Copia riga" 
+              aria-label={`Duplica ${transaction.name}`} 
+              tabIndex={0} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') { 
+                  e.preventDefault(); 
+                  handleCopyRow('transactions', transaction.id); 
+                } 
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+            <button 
+              onClick={() => handleDeleteItem('transactions', transaction.id)} 
+              className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`} 
+              title="Elimina riga" 
+              aria-label={`Elimina ${transaction.name}`} 
+              tabIndex={0} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') { 
+                  e.preventDefault(); 
+                  if (window.confirm(`Eliminare ${transaction.name}?`)) { 
+                    handleDeleteItem('transactions', transaction.id); 
+                  } 
+                } 
+              }}
+            >
+              <Trash2 size={14} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+    ), [darkMode, formatCurrency, handleEditRow, handleCopyRow, handleDeleteItem]);
+
+    const renderHeader = useCallback(() => (
+      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} px-4 py-2 border-b ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+        <div className="grid grid-cols-8 gap-4 text-xs font-medium">
+          <span>Nome</span>
+          <span>Ticker</span>
+          <span>ISIN</span>
+          <span>Tipo</span>
+          <span className="text-right">Quantità</span>
+          <span className="text-right">Importo</span>
+          <span className="text-right">Commissioni</span>
+          <span className="text-center">Azioni</span>
+        </div>
+      </div>
+    ), [darkMode]);
+
+    if (transactions.length > 100) { // Usa virtualizzazione solo per liste lunghe
+      return (
+        <VirtualizedTable
+          data={transactions}
+          rowHeight={48}
+          containerHeight={400}
+          renderRow={renderTransactionRow}
+          renderHeader={renderHeader}
+          className="border border-gray-200"
+        />
+      );
+    }
+
+    // Fallback per liste corte
+    return (
+      <div className="overflow-x-auto">
+        {renderHeader()}
+        {transactions.map((transaction, index) => (
+          <div key={transaction.id}>
+            {renderTransactionRow(transaction, index, { height: 48 })}
+          </div>
+        ))}
+      </div>
+    );
+  });
+
+  // Virtualized Investment Table Component
+  const VirtualizedInvestmentTable = React.memo(({ 
+    investments, 
+    darkMode, 
+    formatCurrency,
+    handleEditRow,
+    handleCopyRow,
+    handleDeleteItem
+  }: { 
+    investments: AssetItem[]; 
+    darkMode: boolean;
+    formatCurrency: (amount: number) => string;
+    handleEditRow: (section: string, id: number) => void;
+    handleCopyRow: (section: string, id: number) => void;
+    handleDeleteItem: (section: string, id: number) => void;
+  }) => {
+    const renderInvestmentRow = useCallback((investment: AssetItem, index: number, style: React.CSSProperties) => (
+      <div style={style} className={`flex items-center px-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="flex-1 grid grid-cols-7 gap-4 items-center">
+          <span className="truncate">{investment.name}</span>
+          <span className="truncate">{investment.sector}</span>
+          <span className="truncate">{investment.isin}</span>
+          <span className="text-right font-mono">{investment.quantity?.toLocaleString() || '-'}</span>
+          <span className="text-right font-mono">{formatCurrency(investment.amount)}</span>
+          <span className="text-right font-mono">{formatCurrency(investment.fees || 0)}</span>
+          <div className="flex justify-center gap-1">
+            <button 
+              onClick={() => handleEditRow('investments', investment.id)} 
+              className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`} 
+              title="Modifica riga" 
+              aria-label={`Modifica ${investment.name}`} 
+              tabIndex={0} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') { 
+                  e.preventDefault(); 
+                  handleEditRow('investments', investment.id); 
+                } 
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button 
+              onClick={() => handleCopyRow('investments', investment.id)} 
+              className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`} 
+              title="Copia riga" 
+              aria-label={`Duplica ${investment.name}`} 
+              tabIndex={0} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') { 
+                  e.preventDefault(); 
+                  handleCopyRow('investments', investment.id); 
+                } 
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+            <button 
+              onClick={() => handleDeleteItem('investments', investment.id)} 
+              className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`} 
+              title="Elimina riga" 
+              aria-label={`Elimina ${investment.name}`} 
+              tabIndex={0} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') { 
+                  e.preventDefault(); 
+                  if (window.confirm(`Eliminare ${investment.name}?`)) { 
+                    handleDeleteItem('investments', investment.id); 
+                  } 
+                } 
+              }}
+            >
+              <Trash2 size={14} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+    ), [darkMode, formatCurrency, handleEditRow, handleCopyRow, handleDeleteItem]);
+
+    const renderHeader = useCallback(() => (
+      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} px-4 py-2 border-b ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+        <div className="grid grid-cols-7 gap-4 text-xs font-medium">
+          <span>Nome</span>
+          <span>Settore</span>
+          <span>ISIN</span>
+          <span className="text-right">Quantità</span>
+          <span className="text-right">Valore</span>
+          <span className="text-right">Commissioni</span>
+          <span className="text-center">Azioni</span>
+        </div>
+      </div>
+    ), [darkMode]);
+
+    if (investments.length > 100) { // Usa virtualizzazione solo per liste lunghe
+      return (
+        <VirtualizedTable
+          data={investments}
+          rowHeight={48}
+          containerHeight={400}
+          renderRow={renderInvestmentRow}
+          renderHeader={renderHeader}
+          className="border border-gray-200"
+        />
+      );
+    }
+
+    // Fallback per liste corte
+    return (
+      <div className="overflow-x-auto">
+        {renderHeader()}
+        {investments.map((investment, index) => (
+          <div key={investment.id}>
+            {renderInvestmentRow(investment, index, { height: 48 })}
+          </div>
+        ))}
+      </div>
+    );
+  });
+
+  // Backup Manager Component
+  const BackupManager = React.memo(() => {
+    const [backups, setBackups] = useState(autoBackup.getBackups());
+    const [backupInfo, setBackupInfo] = useState(autoBackup.getBackupInfo());
+
+    const refreshBackups = useCallback(() => {
+      setBackups(autoBackup.getBackups());
+      setBackupInfo(autoBackup.getBackupInfo());
+    }, []);
+
+    useEffect(() => {
+      refreshBackups();
+    }, [refreshBackups]);
+
+    return (
+      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
+        <h4 className={`font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>🔄 Backup Automatici</h4>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="text-center">
+            <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{backupInfo.count}</div>
+            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Backup Salvati</div>
+          </div>
+          <div className="text-center">
+            <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+              {(backupInfo.totalSize / 1024).toFixed(1)}KB
+            </div>
+            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Spazio Usato</div>
+          </div>
+          <div className="text-center">
+            <div className={`text-sm font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+              {backupInfo.lastBackup ? new Date(backupInfo.lastBackup).toLocaleString() : 'Mai'}
+            </div>
+            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Ultimo Backup</div>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => {
+                autoBackup.performBackup();
+                refreshBackups();
+                showSuccess('Backup manuale creato');
+              }}
+              className={`px-3 py-1 ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded text-sm transition-colors`}
+            >
+              Backup Ora
+            </button>
+          </div>
+        </div>
+
+        <div className={`space-y-2 max-h-48 overflow-y-auto ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+          {backups.map((backup, index) => (
+            <div key={backup.timestamp} className={`flex justify-between items-center p-2 ${darkMode ? 'bg-gray-600' : 'bg-white'} rounded border ${darkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+              <div>
+                <div className="font-mono text-sm">
+                  {new Date(backup.timestamp).toLocaleString()}
+                </div>
+                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {(backup.size / 1024).toFixed(1)}KB • v{backup.version}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    const data = autoBackup.restoreFromBackup(backup.timestamp);
+                    if (data && window.confirm('Ripristinare questo backup? I dati attuali saranno sovrascritti.')) {
+                      // Implementa ripristino
+                      if (data.assets) {
+                        setAssets(data.assets);
+                        showSuccess('Backup ripristinato con successo');
+                      }
+                    }
+                  }}
+                  className={`px-2 py-1 ${darkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} text-white rounded text-xs transition-colors`}
+                >
+                  Ripristina
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm('Eliminare questo backup?')) {
+                      autoBackup.deleteBackup(backup.timestamp);
+                      refreshBackups();
+                      showSuccess('Backup eliminato');
+                    }
+                  }}
+                  className={`px-2 py-1 ${darkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white rounded text-xs transition-colors`}
+                >
+                  Elimina
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  });
 
   // Memoized BarChart component for better performance
   const MemoizedBarChart = React.memo(({ 
@@ -3841,6 +4637,9 @@ const NetWorthManager = () => {
                             <h2 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-4`}>📊 {t('advancedStatistics')}</h2>
             
             {/* Main Statistics Grid */}
+            {loadingStates.calculating ? (
+              <StatsSkeleton darkMode={darkMode} />
+            ) : (
             <div className={`grid gap-4 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
               {/* Risk Score */}
               <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-shadow`}>
@@ -3940,6 +4739,7 @@ const NetWorthManager = () => {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Metodologie e Basi Teoriche - SPOSTATO QUI ALLA FINE */}
             <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-indigo-50 to-purple-50'} rounded-lg shadow-lg p-6 border ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
@@ -4052,8 +4852,16 @@ const NetWorthManager = () => {
                               onClick={() => handleEditRow('investmentPositions', item.id)}
                               className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
                               title="Modifica riga"
+                              aria-label={`Modifica ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleEditRow('investmentPositions', item.id);
+                                }
+                              }}
                             >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                               </svg>
@@ -4062,8 +4870,16 @@ const NetWorthManager = () => {
                               onClick={() => handleCopyRow('investmentPositions', item.id)}
                               className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
                               title="Copia riga"
+                              aria-label={`Duplica ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleCopyRow('investmentPositions', item.id);
+                                }
+                              }}
                             >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                               </svg>
@@ -4071,8 +4887,19 @@ const NetWorthManager = () => {
                             <button 
                               onClick={() => handleDeleteItem('investmentPositions', item.id)}
                               className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                              title="Elimina riga"
+                              aria-label={`Elimina ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  if (window.confirm(`Eliminare ${item.name}?`)) {
+                                    handleDeleteItem('investmentPositions', item.id);
+                                  }
+                                }
+                              }}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={14} aria-hidden="true" />
                             </button>
                           </div>
                         </td>
@@ -4106,6 +4933,8 @@ const NetWorthManager = () => {
                   <p>{t('noIndividualAssetsRegistered')}</p>
                   <p className="text-sm mt-2">{t('addAssetsForTracking')}</p>
                 </div>
+              ) : loadingStates.exporting ? (
+                <TableSkeleton rows={5} darkMode={darkMode} />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
@@ -4166,8 +4995,16 @@ const NetWorthManager = () => {
                                 onClick={() => handleEditRow('investments', item.id)}
                                 className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
                                 title="Modifica riga"
+                                aria-label={`Modifica ${item.name}`}
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleEditRow('investments', item.id);
+                                  }
+                                }}
                               >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
@@ -4176,8 +5013,16 @@ const NetWorthManager = () => {
                                 onClick={() => handleCopyRow('investments', item.id)}
                                 className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
                                 title="Copia riga"
+                                aria-label={`Duplica ${item.name}`}
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleCopyRow('investments', item.id);
+                                  }
+                                }}
                               >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                 </svg>
@@ -4186,16 +5031,35 @@ const NetWorthManager = () => {
                                 onClick={() => handleEditRow('investments', item.id)}
                                 className={`${darkMode ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-500 hover:text-yellow-700'}`}
                                 title="Aggiorna Prezzo"
+                                aria-label={`Aggiorna prezzo ${item.name}`}
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleEditRow('investments', item.id);
+                                  }
+                                }}
                               >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                   <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                                 </svg>
                               </button>
                               <button 
                                 onClick={() => handleDeleteItem('investments', item.id)}
                                 className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                                title="Elimina riga"
+                                aria-label={`Elimina ${item.name}`}
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    if (window.confirm(`Eliminare ${item.name}?`)) {
+                                      handleDeleteItem('investments', item.id);
+                                    }
+                                  }
+                                }}
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={14} aria-hidden="true" />
                               </button>
                             </div>
                           </td>
@@ -4338,81 +5202,15 @@ const NetWorthManager = () => {
                     ))}
                   </div>
                 ) : (
-                  // Desktop table view
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nome</th>
-                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Ticker</th>
-                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>ISIN</th>
-                        <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo</th>
-                        <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Quantità</th>
-                        <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Importo</th>
-                        <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Commissioni</th>
-                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Descrizione</th>
-                        <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Data</th>
-                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('linkedToAsset')}</th>
-                        <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Azioni</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                          {paginatedTransactions.map((item: Transaction) => (
-                        <tr key={item.id} className={`hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.name}</td>
-                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.ticker}</td>
-                          <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.isin}</td>
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              <span className={`px-2 py-1 rounded text-xs ${item.transactionType === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                {item.transactionType === 'purchase' ? 'Acquisto' : 'Vendita'}
-                              </span>
-                            </td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity.toLocaleString()}</td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</td>
-                            <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.commissions)}</td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
-                            <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.date}</td>
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              {item.linkedToAsset ? 
-                                assets.investments.find((asset: AssetItem) => asset.id === item.linkedToAsset)?.name || 'Asset non trovato' 
-                                : 'Nessuno'
-                              }
-                            </td>
-                            <td className={`border px-2 py-1 text-center`}>
-                              <div className="flex justify-center gap-1">
-                                <button 
-                                  onClick={() => handleCopyRow('transactions', item.id)}
-                                  className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
-                                  title="Copia riga"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                  </svg>
-                                </button>
-                                <button 
-                                  onClick={() => handleEditRow('transactions', item.id)}
-                                  className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
-                                  title="Modifica riga"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteItem('transactions', item.id)}
-                                  className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  // Desktop table view - Virtualized for large datasets
+                  <VirtualizedTransactionTable
+                    transactions={paginatedTransactions}
+                    darkMode={darkMode}
+                    formatCurrency={formatCurrency}
+                    handleEditRow={handleEditRow}
+                    handleCopyRow={handleCopyRow}
+                    handleDeleteItem={handleDeleteItem}
+                  />
                 )}
                 
                 {/* Pagination */}
@@ -5029,8 +5827,16 @@ const NetWorthManager = () => {
                               onClick={() => handleEditRow('investments', item.id)}
                               className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
                               title="Modifica riga"
+                              aria-label={`Modifica ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleEditRow('investments', item.id);
+                                }
+                              }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                               </svg>
@@ -5039,8 +5845,16 @@ const NetWorthManager = () => {
                               onClick={() => handleCopyRow('investments', item.id)}
                               className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
                               title="Copia riga"
+                              aria-label={`Duplica ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleCopyRow('investments', item.id);
+                                }
+                              }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                               </svg>
@@ -5049,16 +5863,35 @@ const NetWorthManager = () => {
                               onClick={() => handleEditRow('investments', item.id)}
                               className={`${darkMode ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-500 hover:text-yellow-700'}`}
                               title="Aggiorna Prezzo"
+                              aria-label={`Aggiorna prezzo ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleEditRow('investments', item.id);
+                                }
+                              }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                               </svg>
                             </button>
                             <button 
                               onClick={() => handleDeleteItem('investments', item.id)}
                               className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                              title="Elimina riga"
+                              aria-label={`Elimina ${item.name}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  if (window.confirm(`Eliminare ${item.name}?`)) {
+                                    handleDeleteItem('investments', item.id);
+                                  }
+                                }
+                              }}
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={16} aria-hidden="true" />
                             </button>
                           </div>
                         </div>
@@ -5608,6 +6441,12 @@ const NetWorthManager = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Backup Management */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">🔄 Backup Management</h3>
+                  <BackupManager />
+                </div>
               </div>
             </div>
           </div>
@@ -5734,8 +6573,16 @@ const NetWorthManager = () => {
                                   onClick={() => handleEditRow(activeSection, item.id)}
                                   className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
                                   title="Modifica riga"
+                                  aria-label={`Modifica ${item.name}`}
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      handleEditRow(activeSection, item.id);
+                                    }
+                                  }}
                                 >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                   </svg>
@@ -5744,8 +6591,16 @@ const NetWorthManager = () => {
                                   onClick={() => handleCopyRow(activeSection, item.id)}
                                   className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
                                   title="Copia riga"
+                                  aria-label={`Duplica ${item.name}`}
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      handleCopyRow(activeSection, item.id);
+                                    }
+                                  }}
                                 >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                   </svg>
@@ -5753,8 +6608,19 @@ const NetWorthManager = () => {
                                 <button
                                   onClick={() => handleDeleteItem(activeSection, item.id)}
                                   className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                                  title="Elimina riga"
+                                  aria-label={`Elimina ${item.name}`}
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      if (window.confirm(`Eliminare ${item.name}?`)) {
+                                        handleDeleteItem(activeSection, item.id);
+                                      }
+                                    }
+                                  }}
                                 >
-                                  <Trash2 size={14} />
+                                  <Trash2 size={14} aria-hidden="true" />
                                 </button>
                               </div>
                             </td>
@@ -5927,6 +6793,7 @@ const NetWorthManager = () => {
 
         {/* Edit Modal */}
         {editingItem && (
+          <SectionErrorBoundary section="editModal" darkMode={darkMode}>
           <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
@@ -6404,6 +7271,7 @@ const NetWorthManager = () => {
               </div>
             </div>
           </div>
+          </SectionErrorBoundary>
         )}
 
         {/* Loading Overlay */}
