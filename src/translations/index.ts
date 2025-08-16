@@ -14,7 +14,7 @@ export type Language = keyof typeof translations;
 // Language configuration
 export const languages = {
   it: { name: 'Italiano', flag: '🇮🇹' },
-  en: { name: 'English', flag: '🇺🇸' }
+  en: { name: 'English', flag: '🇬🇧' }
 } as const;
 
 // Translation helper function type

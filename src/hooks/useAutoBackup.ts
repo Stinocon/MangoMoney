@@ -1,9 +1,23 @@
 import { useEffect, useCallback, useRef } from 'react';
 
 // Types for the backup system
+interface BackupMetadata {
+  exportDate: string;
+  version: string;
+  appName: string;
+  autoBackup: boolean;
+  [key: string]: any;
+}
+
+interface BackupData {
+  assets: any;
+  settings: any;
+  metadata: BackupMetadata;
+}
+
 interface BackupEntry {
   timestamp: string;
-  data: any;
+  data: BackupData;
   checksum: string;
   size: number;
   version: string;
@@ -83,31 +97,49 @@ export const useAutoBackup = (
     };
   }, [assets, settings, metadata, compressData, generateChecksum]);
 
-  // Salva backup in localStorage
+  // Salva backup in localStorage con retry logic
   const saveBackup = useCallback((backupEntry: BackupEntry) => {
-    try {
-      // Recupera backup esistenti
-      const existingBackupsStr = localStorage.getItem('mangomoney-auto-backups');
-      const existingBackups: BackupEntry[] = existingBackupsStr 
-        ? JSON.parse(existingBackupsStr) 
-        : [];
+    const maxRetries = 3;
+    let attempts = 0;
+    
+    const attemptSave = () => {
+      try {
+        // Recupera backup esistenti
+        const existingBackupsStr = localStorage.getItem('mangomoney-auto-backups');
+        const existingBackups: BackupEntry[] = existingBackupsStr 
+          ? JSON.parse(existingBackupsStr) 
+          : [];
 
-      // Aggiungi nuovo backup
-      const updatedBackups = [backupEntry, ...existingBackups];
+        // Aggiungi nuovo backup
+        const updatedBackups = [backupEntry, ...existingBackups];
 
-      // Mantieni solo i backup più recenti
-      const trimmedBackups = updatedBackups.slice(0, maxBackups);
+        // Mantieni solo i backup più recenti
+        const trimmedBackups = updatedBackups.slice(0, maxBackups);
 
-      // Salva
-      localStorage.setItem('mangomoney-auto-backups', JSON.stringify(trimmedBackups));
-      
-      // Aggiorna riferimento
-      lastBackupRef.current = backupEntry;
+        // Salva
+        localStorage.setItem('mangomoney-auto-backups', JSON.stringify(trimmedBackups));
+        
+        // Aggiorna timestamp ultimo backup
+        localStorage.setItem('mangomoney-last-backup-time', new Date().toISOString());
+        
+        // Aggiorna riferimento
+        lastBackupRef.current = backupEntry;
 
-      console.log(`Auto-backup salvato: ${backupEntry.timestamp} (${backupEntry.size} bytes)`);
-    } catch (error) {
-      console.error('Errore nel salvataggio auto-backup:', error);
-    }
+        console.log(`Auto-backup salvato: ${backupEntry.timestamp} (${backupEntry.size} bytes)`);
+      } catch (error) {
+        console.error(`Errore nel salvataggio auto-backup (tentativo ${attempts + 1}):`, error);
+        
+        if (++attempts < maxRetries) {
+          // Exponential backoff: wait 1s, 2s, 4s
+          setTimeout(attemptSave, 1000 * Math.pow(2, attempts - 1));
+        } else {
+          console.error('Auto-backup fallito dopo tutti i tentativi');
+          // Could trigger user notification here
+        }
+      }
+    };
+    
+    attemptSave();
   }, [maxBackups]);
 
   // Determina se fare backup

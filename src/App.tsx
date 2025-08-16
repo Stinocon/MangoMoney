@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback, Component, ReactNode } from 'react';
 import { VirtualizedTable } from './components/VirtualizedTable';
 import { useAutoBackup } from './hooks/useAutoBackup';
+import { useFormValidation, ValidationSchema } from './hooks/useFormValidation';
+import { safeCAGR, safeSubtract, safeAdd, safeMultiply, safeDivide, safePercentage, safeSWR } from './utils/financialCalculations';
 import { PlusCircle, Trash2, Download, Upload, RotateCcw, Moon, Sun, Calculator, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { translations, languages, type TranslationKey, type Language } from './translations';
@@ -11,6 +13,7 @@ interface SectionErrorBoundaryProps {
   children: React.ReactNode;
   darkMode?: boolean;
   onRetry?: () => void;
+  t: (key: any) => string;
 }
 
 class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { hasError: boolean; error?: Error }> {
@@ -37,20 +40,20 @@ class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { hasErr
 
   render() {
     if (this.state.hasError) {
-      const { section, darkMode = false } = this.props;
+      const { section, darkMode = false, t } = this.props;
       
       return (
         <div className={`${darkMode ? 'bg-red-900/20 border-red-700' : 'bg-red-50 border-red-200'} border rounded-lg p-6 text-center`}>
           <div className={`text-4xl mb-4 ${darkMode ? 'text-red-400' : 'text-red-500'}`}>⚠️</div>
-          <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-red-200' : 'text-red-800'}`}>
-            Errore nella sezione {section}
-          </h3>
-          <p className={`text-sm mb-4 ${darkMode ? 'text-red-300' : 'text-red-600'}`}>
-            Si è verificato un errore durante il caricamento di questa sezione.
-          </p>
+                          <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-red-200' : 'text-red-800'}`}>
+                  {t('errorInSection').replace('{section}', section)}
+                </h3>
+                <p className={`text-sm mb-4 ${darkMode ? 'text-red-300' : 'text-red-600'}`}>
+                  {t('errorLoadingSection')}
+                </p>
           {this.state.error && (
             <details className={`text-xs mb-4 ${darkMode ? 'text-red-400' : 'text-red-500'}`}>
-              <summary>Dettagli errore</summary>
+                              <summary>{t('errorDetails')}</summary>
               <pre className="mt-2 text-left overflow-auto">
                 {this.state.error.message}
               </pre>
@@ -65,7 +68,7 @@ class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { hasErr
                   : 'bg-red-500 text-white hover:bg-red-600'
               }`}
             >
-              Riprova
+              {t('retry')}
             </button>
             <button
               onClick={() => window.location.reload()}
@@ -75,7 +78,7 @@ class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { hasErr
                   : 'bg-gray-500 text-white hover:bg-gray-600'
               }`}
             >
-              Ricarica pagina
+                              {t('reloadPage')}
             </button>
           </div>
         </div>
@@ -87,8 +90,13 @@ class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { hasErr
 }
 
 // Error Boundary Component
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  t: (key: any) => string;
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, { hasError: boolean }> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -103,18 +111,19 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   
   render() {
     if (this.state.hasError) {
+      const { t } = this.props;
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
           <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
+            <h2 className="text-2xl font-bold text-red-600 mb-4">{t('somethingWentWrong')}</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              An unexpected error occurred. Please refresh the page to continue.
+              {t('unexpectedError')}
             </p>
             <button 
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
-              Refresh Page
+              {t('refreshPage')}
             </button>
           </div>
         </div>
@@ -383,99 +392,9 @@ const StatsSkeleton = React.memo(({ darkMode = false }: { darkMode?: boolean }) 
 ));
 
 // Custom hook for form validation
-interface ValidationRule<T> {
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  min?: number;
-  max?: number;
-  pattern?: RegExp;
-  custom?: (value: T) => string | null;
-}
 
-interface ValidationSchema {
-  [key: string]: ValidationRule<any>;
-}
 
-const useFormValidation = <T extends Record<string, any>>(schema: ValidationSchema) => {
-  const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
-  const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
 
-  const validateField = useCallback((name: keyof T, value: any): string | null => {
-    const rule = schema[name as string];
-    if (!rule) return null;
-
-    if (rule.required && (!value || value === '')) {
-      return 'Campo obbligatorio';
-    }
-
-    if (rule.minLength && typeof value === 'string' && value.length < rule.minLength) {
-      return `Minimo ${rule.minLength} caratteri`;
-    }
-
-    if (rule.maxLength && typeof value === 'string' && value.length > rule.maxLength) {
-      return `Massimo ${rule.maxLength} caratteri`;
-    }
-
-    if (rule.min && typeof value === 'number' && value < rule.min) {
-      return `Valore minimo: ${rule.min}`;
-    }
-
-    if (rule.max && typeof value === 'number' && value > rule.max) {
-      return `Valore massimo: ${rule.max}`;
-    }
-
-    if (rule.pattern && typeof value === 'string' && !rule.pattern.test(value)) {
-      return 'Formato non valido';
-    }
-
-    if (rule.custom) {
-      return rule.custom(value);
-    }
-
-    return null;
-  }, [schema]);
-
-  const validateForm = useCallback((data: T): boolean => {
-    const newErrors: Partial<Record<keyof T, string>> = {};
-    let hasErrors = false;
-
-    Object.keys(schema).forEach(key => {
-      const error = validateField(key as keyof T, data[key]);
-      if (error) {
-        newErrors[key as keyof T] = error;
-        hasErrors = true;
-      }
-    });
-
-    setErrors(newErrors);
-    return !hasErrors;
-  }, [schema, validateField]);
-
-  const clearErrors = useCallback(() => {
-    setErrors({});
-    setTouched({});
-  }, []);
-
-  const setFieldTouched = useCallback((name: keyof T) => {
-    setTouched(prev => ({ ...prev, [name]: true }));
-  }, []);
-
-  const setFieldError = useCallback((name: keyof T, error: string | null) => {
-    setErrors(prev => ({ ...prev, [name]: error }));
-  }, []);
-
-  return {
-    errors,
-    touched,
-    validateField,
-    validateForm,
-    clearErrors,
-    setFieldTouched,
-    setFieldError,
-    hasErrors: Object.keys(errors).length > 0
-  };
-};
 
 const NetWorthManager = () => {
   // State management
@@ -502,6 +421,11 @@ const NetWorthManager = () => {
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   const [forceMobileLayout, setForceMobileLayout] = useState(() => {
     const saved = localStorage.getItem('mangomoney-forceMobileLayout');
+    return saved ? safeParseJSON(saved, false) : false;
+  });
+
+  const [privacyMode, setPrivacyMode] = useState(() => {
+    const saved = localStorage.getItem('mangomoney-privacyMode');
     return saved ? safeParseJSON(saved, false) : false;
   });
   const [emergencyFundAccount, setEmergencyFundAccount] = useState<EmergencyFundAccount>(() => {
@@ -576,16 +500,50 @@ const NetWorthManager = () => {
   // Debounced filters for performance optimization
   const debouncedTransactionFilters = useDebounce(transactionFilters, 300);
   
-  // Show welcome message on app load
+  // Show welcome message only when data is actually restored from backup
   useEffect(() => {
-    const saved = localStorage.getItem('mangomoney-assets');
     const hasShownWelcome = sessionStorage.getItem('mangomoney-welcome-shown');
+    const wasRestoredFromBackup = sessionStorage.getItem('mangomoney-restored-from-backup');
     
-    if (saved && !hasShownWelcome) {
-      showInfo('Dati caricati con successo dal backup locale');
+    if (wasRestoredFromBackup && !hasShownWelcome) {
+              showInfo(t('dataLoadedSuccessfully'));
       sessionStorage.setItem('mangomoney-welcome-shown', 'true');
+      sessionStorage.removeItem('mangomoney-restored-from-backup');
     }
-  }, [showInfo]);
+  }, [showInfo, t]);
+
+  // Backup protection on browser close
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const lastBackupTime = localStorage.getItem('mangomoney-last-backup-time');
+      const lastSavedTime = localStorage.getItem('mangomoney-lastSaved');
+      
+      if (!lastBackupTime || !lastSavedTime) {
+        // Se non c'è mai stato un backup o salvataggio, mostra sempre l'avviso
+        event.preventDefault();
+        event.returnValue = t('dataNotSavedWarning');
+        return event.returnValue;
+      }
+      
+      const now = new Date().getTime();
+      const lastBackup = new Date(lastBackupTime).getTime();
+      const lastSaved = new Date(lastSavedTime).getTime();
+      const thirtySecondsAgo = now - (30 * 1000);
+      
+      // Controlla se l'ultimo backup o salvataggio è stato fatto negli ultimi 30 secondi
+      if (lastBackup < thirtySecondsAgo && lastSaved < thirtySecondsAgo) {
+        event.preventDefault();
+        event.returnValue = t('dataNotSavedRecentlyWarning');
+        return event.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [t]);
 
 
   
@@ -741,6 +699,10 @@ const NetWorthManager = () => {
   useEffect(() => {
     localStorage.setItem('mangomoney-forceMobileLayout', JSON.stringify(forceMobileLayout));
   }, [forceMobileLayout]);
+
+  useEffect(() => {
+    localStorage.setItem('mangomoney-privacyMode', JSON.stringify(privacyMode));
+  }, [privacyMode]);
 
   useEffect(() => {
     localStorage.setItem('mangomoney-emergencyFundAccount', JSON.stringify(emergencyFundAccount));
@@ -1028,17 +990,21 @@ const NetWorthManager = () => {
   // UI toggle functions
   const toggleDarkMode = () => setDarkMode(!darkMode);
   const toggleMobileLayout = () => setForceMobileLayout(!forceMobileLayout);
+  const togglePrivacyMode = () => setPrivacyMode(!privacyMode);
 
   // Financial calculations
   const totals = useMemo(() => {
-    const cash = assets.cash.reduce((sum: number, item: AssetItem) => sum + item.amount, 0);
-    const debts = assets.debts.reduce((sum: number, item: AssetItem) => sum + item.amount, 0);
-    const investments = assets.investments.reduce((sum: number, item: AssetItem) => sum + item.amount, 0);
-    const investmentPositions = assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0);
-    const realEstate = assets.realEstate.reduce((sum: number, item: RealEstate) => sum + item.value, 0);
-    const pensionFunds = assets.pensionFunds.reduce((sum: number, item: AssetItem) => sum + item.amount, 0);
-    const otherAccounts = assets.otherAccounts.reduce((sum: number, item: AssetItem) => sum + item.amount, 0);
-    const alternativeAssets = assets.alternativeAssets.reduce((sum: number, item: AssetItem) => sum + item.amount, 0);
+    const cash = assets.cash.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
+    const debts = assets.debts.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
+    const investments = assets.investments.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
+    const investmentPositions = assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => safeAdd(sum, item.amount), 0);
+    const realEstate = assets.realEstate.reduce((sum: number, item: RealEstate) => safeAdd(sum, item.value), 0);
+    const pensionFunds = assets.pensionFunds.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
+    const otherAccounts = assets.otherAccounts.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
+    const alternativeAssets = assets.alternativeAssets.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
+    
+    const total = safeAdd(safeAdd(safeAdd(safeAdd(cash, debts), safeAdd(investments, investmentPositions)), 
+                                 safeAdd(safeAdd(realEstate, pensionFunds), safeAdd(otherAccounts, alternativeAssets))), 0);
     
     return {
       cash,
@@ -1048,7 +1014,7 @@ const NetWorthManager = () => {
       pensionFunds,
       otherAccounts,
       alternativeAssets,
-      total: cash + debts + investments + investmentPositions + realEstate + pensionFunds + otherAccounts + alternativeAssets
+      total
     };
   }, [assets]);
 
@@ -1359,7 +1325,7 @@ const NetWorthManager = () => {
   */
 
   const handleDeleteItem = useCallback((section: string, id: number) => {
-    if (window.confirm('Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.')) {
+          if (window.confirm(t('confirmDelete'))) {
       if (section === 'investmentPositions') {
         setAssets({
           ...assets,
@@ -1382,7 +1348,7 @@ const NetWorthManager = () => {
         });
       }
     }
-  }, [assets]);
+  }, [assets, t]);
 
   // Add missing functions
   const handleEditRow = (section: string, id: number) => {
@@ -1681,41 +1647,34 @@ const NetWorthManager = () => {
       };
     }
 
-    // Calculate cost basis from transactions
+    // Calculate cost basis from transactions using safe operations
     let totalInvested = 0;
     let totalQuantity = 0;
     let totalCommissions = 0;
 
     linkedTransactions.forEach((transaction: Transaction) => {
       if (transaction.transactionType === 'purchase') {
-        totalInvested += transaction.amount;
-        totalQuantity += transaction.quantity;
-        totalCommissions += transaction.commissions;
+        totalInvested = safeAdd(totalInvested, transaction.amount);
+        totalQuantity = safeAdd(totalQuantity, transaction.quantity);
+        totalCommissions = safeAdd(totalCommissions, transaction.commissions);
       } else {
         // For sales, reduce the cost basis proportionally
         if (totalQuantity > 0) {
-          const saleRatio = transaction.quantity / totalQuantity;
-          totalInvested -= totalInvested * saleRatio;
-          totalQuantity -= transaction.quantity;
+          const saleRatio = safeDivide(transaction.quantity, totalQuantity);
+          totalInvested = safeSubtract(totalInvested, safeMultiply(totalInvested, saleRatio));
+          totalQuantity = safeSubtract(totalQuantity, transaction.quantity);
         }
-        totalCommissions += transaction.commissions;
+        totalCommissions = safeAdd(totalCommissions, transaction.commissions);
       }
     });
 
-    // Calculate current value and performance
-    const costBasis = totalInvested + totalCommissions;
-    const currentValue = asset.currentPrice * asset.quantity;
-    const totalReturn = currentValue - costBasis;
+    // Calculate current value and performance using safe operations
+    const costBasis = safeAdd(totalInvested, totalCommissions);
+    const currentValue = safeMultiply(asset.currentPrice, asset.quantity);
+    const totalReturn = safeSubtract(currentValue, costBasis);
     
-    // Prevent division by zero and handle edge cases
-    let percentageReturn = 0;
-    if (costBasis > 0) {
-      percentageReturn = (totalReturn / costBasis) * 100;
-      // Cap percentage return to reasonable values to prevent extreme numbers
-      // Allow for realistic investment scenarios (crypto, startups, leveraged products)
-      if (percentageReturn > 10000) percentageReturn = 10000; // 100x return (10000%)
-      if (percentageReturn < -99.9) percentageReturn = -99.9; // Cap negative returns at -99.9%
-    }
+    // Use safe percentage calculation
+    const percentageReturn = safePercentage(totalReturn, costBasis);
 
     // Additional validation for edge cases
     if (totalQuantity <= 0) {
@@ -1814,37 +1773,28 @@ const NetWorthManager = () => {
       };
     }
 
-    // Calculate total invested and current value
-    const totalInvested = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
-    const totalCommissions = investmentTransactions.reduce((sum: number, t: Transaction) => sum + t.commissions, 0);
+    // Calculate total invested and current value using safe operations
+    const totalInvested = investmentTransactions.reduce((sum: number, t: Transaction) => safeAdd(sum, t.amount), 0);
+    const totalCommissions = investmentTransactions.reduce((sum: number, t: Transaction) => safeAdd(sum, t.commissions), 0);
     
-    // Get current portfolio value
+    // Get current portfolio value using safe operations
     const currentPortfolioValue = assets.investments.reduce((sum: number, asset: AssetItem) => {
       if (asset.currentPrice && asset.quantity) {
-        return sum + (asset.currentPrice * asset.quantity);
+        return safeAdd(sum, safeMultiply(asset.currentPrice, asset.quantity));
       }
       return sum;
     }, 0);
 
-    const totalCost = totalInvested + totalCommissions;
-    const totalReturn = currentPortfolioValue - totalCost;
+    const totalCost = safeAdd(totalInvested, totalCommissions);
+    // totalReturn is calculated but not used in this context - removed to avoid unused variable warning
 
-    // Calculate annualized return using the formula: (1 + total_return/total_invested)^(1/years) - 1
-    // Note: This formula works well for periods >= 1 month, but becomes misleading for very short periods
+    // Use safe CAGR calculation
     let annualizedReturnPercentage = 0;
     if (totalCost > 0 && timeInYears > 0.083) { // Only calculate for periods >= 1 month
-      const totalReturnRatio = totalReturn / totalCost;
-      annualizedReturnPercentage = (Math.pow(1 + totalReturnRatio, 1 / timeInYears) - 1) * 100;
-      
-      // Cap extreme values to reasonable limits
-      // Allow for realistic investment scenarios (crypto, startups, leveraged products)
-      // Dynamic capping based on asset type and time period
-      const maxReturn = timeInYears < 1 ? 50000 : 10000; // Higher cap for short-term investments
-      if (annualizedReturnPercentage > maxReturn) annualizedReturnPercentage = maxReturn;
-      if (annualizedReturnPercentage < -99.9) annualizedReturnPercentage = -99.9; // Cap negative returns at -99.9%
+      annualizedReturnPercentage = safeCAGR(totalCost, currentPortfolioValue, timeInYears);
     }
 
-    const annualizedReturn = (totalCost * annualizedReturnPercentage) / 100;
+    const annualizedReturn = safeMultiply(totalCost, annualizedReturnPercentage / 100);
 
     return {
       annualizedReturn,
@@ -1892,20 +1842,20 @@ const NetWorthManager = () => {
   // Function to calculate Safe Withdrawal Rate simulation
   const calculateSWR = useCallback(() => {
     // Net liquid assets: cash + investments + other accounts
-    const netLiquidAssets = totals.cash + totals.investments + totals.otherAccounts;
+    const netLiquidAssets = safeAdd(safeAdd(totals.cash, totals.investments), totals.otherAccounts);
     
     // Annual withdrawal amount (SWR rate as percentage of net liquid assets)
-    const annualWithdrawal = (netLiquidAssets * swrRate) / 100;
+    const annualWithdrawal = safeSWR(netLiquidAssets, swrRate);
     
     // Monthly withdrawal amount (what the SWR percentage provides monthly)
-    const monthlyWithdrawal = annualWithdrawal / 12;
+    const monthlyWithdrawal = safeDivide(annualWithdrawal, 12);
     
     // Years of support based on monthly expenses and SWR rate
     // Formula: years = netLiquidAssets / (monthlyExpenses * 12 * (swrRate/100))
     // This calculates how long the assets would last if you withdraw the SWR percentage
     // instead of withdrawing 100% of monthly expenses
     const yearsOfSupport = monthlyExpenses > 100 ? 
-      netLiquidAssets / (monthlyExpenses * 12 * (swrRate / 100)) : 0;
+      safeDivide(netLiquidAssets, safeMultiply(safeMultiply(monthlyExpenses, 12), swrRate / 100)) : 0;
     
     return {
       netLiquidAssets,
@@ -1925,13 +1875,23 @@ const NetWorthManager = () => {
     }).format(amount);
   };
 
+  // Privacy mode helper functions
+  const formatCurrencyWithPrivacy = (amount: number): string => {
+    if (privacyMode) {
+      return '••••••••';
+    }
+    return formatCurrency(amount);
+  };
+
+
+
   // Input sanitization utilities
-  const sanitizeString = (input: string): string => {
+  const sanitizeString = useCallback((input: string): string => {
     if (typeof input !== 'string') return '';
     // Whitelist approach: only allow safe characters
     // Allow letters, numbers, spaces, common punctuation, and currency symbols
     return input.trim().replace(/[^a-zA-Z0-9\s\-_.,()€$%£¥@#&+]/g, '');
-  };
+  }, []);
 
   const sanitizeNumber = (input: string | number, context: 'amount' | 'percentage' | 'price' = 'amount'): number => {
     if (typeof input === 'number') {
@@ -2011,13 +1971,13 @@ const NetWorthManager = () => {
     return input;
   };
 
-  const sanitizeTicker = (input: string): string => {
+  const sanitizeTicker = useCallback((input: string): string => {
     return sanitizeString(input).toUpperCase().replace(/[^A-Z0-9.]/g, '');
-  };
+  }, [sanitizeString]);
 
-  const sanitizeISIN = (input: string): string => {
+  const sanitizeISIN = useCallback((input: string): string => {
     return sanitizeString(input).toUpperCase().replace(/[^A-Z0-9]/g, '');
-  };
+  }, [sanitizeString]);
 
   // Export functionality
   const exportToJSON = useCallback(async () => {
@@ -2028,6 +1988,9 @@ const NetWorthManager = () => {
         if (key === 'total') return sum;
         return sum + Math.abs(value);
       }, 0);
+      
+      // Aggiorna timestamp ultimo backup
+      localStorage.setItem('mangomoney-last-backup-time', new Date().toISOString());
 
     const exportData: ExportData = {
       assets,
@@ -2398,7 +2361,7 @@ const NetWorthManager = () => {
         <div class="header">
                           <h1>🥭 MangoMoney - {t('completeWealthReport')}</h1>
                       <p><strong>{t('dateAt').split(':')[0]}:</strong> ${currentDate} {t('dateAt').split(':')[1]} ${currentTime}</p>
-                      <p class="total">{t('netWorth')}: ${formatCurrency(totals.total)}</p>
+                      <p class="total">{t('netWorth')}: ${formatCurrencyWithPrivacy(totals.total)}</p>
         </div>
         
         <div class="summary">
@@ -2409,23 +2372,23 @@ const NetWorthManager = () => {
               <div class="summary-label">Elementi Totali</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${formatCurrency(totals.total)}</div>
+              <div class="summary-value">${formatCurrencyWithPrivacy(totals.total)}</div>
               <div class="summary-label">{t('netWorth')}</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${formatCurrency(Math.abs(totals.debts))}</div>
+              <div class="summary-value">${formatCurrencyWithPrivacy(Math.abs(totals.debts))}</div>
               <div class="summary-label">Debiti Totali</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${formatCurrency(totals.cash)}</div>
+              <div class="summary-value">${formatCurrencyWithPrivacy(totals.cash)}</div>
               <div class="summary-label">{t('liquidity')}</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${formatCurrency(totals.investments + assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}</div>
+              <div class="summary-value">${formatCurrencyWithPrivacy(totals.investments + assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}</div>
               <div class="summary-label">{t('investments')}</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${formatCurrency(totals.realEstate)}</div>
+              <div class="summary-value">${formatCurrencyWithPrivacy(totals.realEstate)}</div>
               <div class="summary-label">Immobili</div>
             </div>
           </div>
@@ -2591,6 +2554,8 @@ const NetWorthManager = () => {
 
         // Import the data
         setAssets(importedData.assets);
+        sessionStorage.setItem('mangomoney-restored-from-backup', 'true');
+        sessionStorage.removeItem('mangomoney-welcome-shown');
         
         // Import settings if available (backward compatibility)
         if (importedData.settings) {
@@ -2710,9 +2675,16 @@ const NetWorthManager = () => {
 
   const sanitizeCSVValue = (value: string): string => {
     return value
-      .replace(/[<>]/g, '') // Rimuove < e >
-      .replace(/javascript:/gi, '') // Rimuove javascript:
-      .replace(/on\w+\s*=/gi, '') // Rimuove event handlers
+      .replace(/[<>]/g, '') // Remove < and >
+      .replace(/javascript:/gi, '') // Remove javascript:
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .replace(/data:text\/html/gi, '') // Remove data:text/html
+      .replace(/vbscript:/gi, '') // Remove vbscript:
+      .replace(/expression\s*\(/gi, '') // Remove CSS expressions
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+      .replace(/&/g, '&amp;') // Encode ampersands
+      .replace(/"/g, '&quot;') // Encode quotes
+      .replace(/'/g, '&#x27;') // Encode apostrophes
       .trim();
   };
 
@@ -2928,8 +2900,8 @@ const NetWorthManager = () => {
             {transaction.transactionType === 'purchase' ? 'Acquisto' : 'Vendita'}
           </span>
           <span className="text-right font-mono">{transaction.quantity.toLocaleString()}</span>
-          <span className="text-right font-mono">{formatCurrency(transaction.amount)}</span>
-          <span className="text-right font-mono">{formatCurrency(transaction.commissions)}</span>
+                          <span className="text-right font-mono">{formatCurrencyWithPrivacy(transaction.amount)}</span>
+                <span className="text-right font-mono">{formatCurrencyWithPrivacy(transaction.commissions)}</span>
           <div className="flex justify-center gap-1">
             <button 
               onClick={() => handleEditRow('transactions', transaction.id)} 
@@ -2987,7 +2959,7 @@ const NetWorthManager = () => {
           </div>
         </div>
       </div>
-    ), [darkMode, formatCurrency, handleEditRow, handleCopyRow, handleDeleteItem]);
+    ), [darkMode, handleEditRow, handleCopyRow, handleDeleteItem]);
 
     const renderHeader = useCallback(() => (
       <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} px-4 py-2 border-b ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
@@ -3030,129 +3002,7 @@ const NetWorthManager = () => {
     );
   });
 
-  // Virtualized Investment Table Component
-  const VirtualizedInvestmentTable = React.memo(({ 
-    investments, 
-    darkMode, 
-    formatCurrency,
-    handleEditRow,
-    handleCopyRow,
-    handleDeleteItem
-  }: { 
-    investments: AssetItem[]; 
-    darkMode: boolean;
-    formatCurrency: (amount: number) => string;
-    handleEditRow: (section: string, id: number) => void;
-    handleCopyRow: (section: string, id: number) => void;
-    handleDeleteItem: (section: string, id: number) => void;
-  }) => {
-    const renderInvestmentRow = useCallback((investment: AssetItem, index: number, style: React.CSSProperties) => (
-      <div style={style} className={`flex items-center px-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className="flex-1 grid grid-cols-7 gap-4 items-center">
-          <span className="truncate">{investment.name}</span>
-          <span className="truncate">{investment.sector}</span>
-          <span className="truncate">{investment.isin}</span>
-          <span className="text-right font-mono">{investment.quantity?.toLocaleString() || '-'}</span>
-          <span className="text-right font-mono">{formatCurrency(investment.amount)}</span>
-          <span className="text-right font-mono">{formatCurrency(investment.fees || 0)}</span>
-          <div className="flex justify-center gap-1">
-            <button 
-              onClick={() => handleEditRow('investments', investment.id)} 
-              className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`} 
-              title="Modifica riga" 
-              aria-label={`Modifica ${investment.name}`} 
-              tabIndex={0} 
-              onKeyDown={(e) => { 
-                if (e.key === 'Enter' || e.key === ' ') { 
-                  e.preventDefault(); 
-                  handleEditRow('investments', investment.id); 
-                } 
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>
-            <button 
-              onClick={() => handleCopyRow('investments', investment.id)} 
-              className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`} 
-              title="Copia riga" 
-              aria-label={`Duplica ${investment.name}`} 
-              tabIndex={0} 
-              onKeyDown={(e) => { 
-                if (e.key === 'Enter' || e.key === ' ') { 
-                  e.preventDefault(); 
-                  handleCopyRow('investments', investment.id); 
-                } 
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h2"></path>
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-              </svg>
-            </button>
-            <button 
-              onClick={() => handleDeleteItem('investments', investment.id)} 
-              className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`} 
-              title="Elimina riga" 
-              aria-label={`Elimina ${investment.name}`} 
-              tabIndex={0} 
-              onKeyDown={(e) => { 
-                if (e.key === 'Enter' || e.key === ' ') { 
-                  e.preventDefault(); 
-                  if (window.confirm(`Eliminare ${investment.name}?`)) { 
-                    handleDeleteItem('investments', investment.id); 
-                  } 
-                } 
-              }}
-            >
-              <Trash2 size={14} aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </div>
-    ), [darkMode, formatCurrency, handleEditRow, handleCopyRow, handleDeleteItem]);
 
-    const renderHeader = useCallback(() => (
-      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} px-4 py-2 border-b ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
-        <div className="grid grid-cols-7 gap-4 text-xs font-medium">
-          <span>Nome</span>
-          <span>Settore</span>
-          <span>ISIN</span>
-          <span className="text-right">Quantità</span>
-          <span className="text-right">Valore</span>
-          <span className="text-right">Commissioni</span>
-          <span className="text-center">Azioni</span>
-        </div>
-      </div>
-    ), [darkMode]);
-
-    if (investments.length > 100) { // Usa virtualizzazione solo per liste lunghe
-      return (
-        <VirtualizedTable
-          data={investments}
-          rowHeight={48}
-          containerHeight={400}
-          renderRow={renderInvestmentRow}
-          renderHeader={renderHeader}
-          className="border border-gray-200"
-        />
-      );
-    }
-
-    // Fallback per liste corte
-    return (
-      <div className="overflow-x-auto">
-        {renderHeader()}
-        {investments.map((investment, index) => (
-          <div key={investment.id}>
-            {renderInvestmentRow(investment, index, { height: 48 })}
-          </div>
-        ))}
-      </div>
-    );
-  });
 
   // Backup Manager Component
   const BackupManager = React.memo(() => {
@@ -3170,35 +3020,57 @@ const NetWorthManager = () => {
 
     return (
       <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
-        <h4 className={`font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>🔄 Backup Automatici</h4>
+                        <h4 className={`font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>🔄 {t('automaticBackups')}</h4>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div className="text-center">
             <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{backupInfo.count}</div>
-            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Backup Salvati</div>
+                            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('savedBackups')}</div>
           </div>
           <div className="text-center">
             <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
               {(backupInfo.totalSize / 1024).toFixed(1)}KB
             </div>
-            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Spazio Usato</div>
+                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('usedSpace')}</div>
           </div>
           <div className="text-center">
             <div className={`text-sm font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-              {backupInfo.lastBackup ? new Date(backupInfo.lastBackup).toLocaleString() : 'Mai'}
+              {backupInfo.lastBackup ? new Date(backupInfo.lastBackup).toLocaleString() : t('never')}
             </div>
-            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Ultimo Backup</div>
+                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('lastBackup')}</div>
+            {(() => {
+              const lastBackupTime = localStorage.getItem('mangomoney-last-backup-time');
+              const lastSavedTime = localStorage.getItem('mangomoney-lastSaved');
+              const now = new Date().getTime();
+              const thirtySecondsAgo = now - (30 * 1000);
+              
+              if (lastBackupTime && lastSavedTime) {
+                const lastBackup = new Date(lastBackupTime).getTime();
+                const lastSaved = new Date(lastSavedTime).getTime();
+                
+                if (lastBackup < thirtySecondsAgo && lastSaved < thirtySecondsAgo) {
+                  return (
+                    <div className={`text-xs ${darkMode ? 'text-yellow-400' : 'text-yellow-600'} mt-1`}>
+                      ⚠️ Backup consigliato
+                    </div>
+                  );
+                }
+              }
+              return null;
+            })()}
           </div>
           <div className="text-center">
             <button
-              onClick={() => {
-                autoBackup.performBackup();
-                refreshBackups();
-                showSuccess('Backup manuale creato');
-              }}
+                          onClick={() => {
+              autoBackup.performBackup();
+              // Aggiorna timestamp ultimo backup manuale
+              localStorage.setItem('mangomoney-last-backup-time', new Date().toISOString());
+              refreshBackups();
+              showSuccess('Backup manuale creato');
+            }}
               className={`px-3 py-1 ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded text-sm transition-colors`}
             >
-              Backup Ora
+                                {t('backupNow')}
             </button>
           </div>
         </div>
@@ -3222,6 +3094,8 @@ const NetWorthManager = () => {
                       // Implementa ripristino
                       if (data.assets) {
                         setAssets(data.assets);
+                        sessionStorage.setItem('mangomoney-restored-from-backup', 'true');
+                        sessionStorage.removeItem('mangomoney-welcome-shown');
                         showSuccess('Backup ripristinato con successo');
                       }
                     }
@@ -3316,127 +3190,46 @@ const NetWorthManager = () => {
     });
     const [transactionType, setTransactionType] = useState<'purchase' | 'sale'>('purchase');
     const [propertyType, setPropertyType] = useState<'primary' | 'secondary'>('primary');
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    // Validation schemas for different sections
+    const getValidationSchema = (section: string): ValidationSchema => {
+      const baseSchema: ValidationSchema = {
+        name: { required: true, minLength: 2, maxLength: 100 },
+        amount: { required: true, section },
+        description: { maxLength: 500 },
+        notes: { maxLength: 1000 }
+      };
 
-    // Enhanced input validation functions
-    const validateAmount = (amount: string, section: string): { isValid: boolean; error?: string } => {
-      if (amount === '') return { isValid: false, error: 'L\'importo è obbligatorio' };
-      
-      const numAmount = parseFloat(amount);
-      if (isNaN(numAmount)) return { isValid: false, error: t('amountMustBeValid') };
-      
-      // Prevent zero amounts
-      if (numAmount === 0) return { isValid: false, error: 'L\'importo non può essere zero' };
-      
-      // Debt-specific validation
-      if (section === 'debts') {
-        if (numAmount > 0) return { isValid: false, error: 'I debiti devono essere inseriti come importi negativi' };
-        if (numAmount < -1000000000) return { isValid: false, error: 'L\'importo del debito è troppo elevato' };
-      } else {
-        // Asset validation (non-debts)
-        if (numAmount < 0) return { isValid: false, error: t('amountMustBePositive') };
-        if (numAmount > 1000000000) return { isValid: false, error: 'L\'importo è troppo elevato' };
+      switch (section) {
+        case 'transactions':
+          return {
+            ...baseSchema,
+            quantity: { required: true },
+            date: { required: true },
+            fees: { max: 1000000 }
+          };
+        case 'investments':
+          return {
+            ...baseSchema,
+            quantity: { required: true },
+            avgPrice: { fieldName: 'Prezzo medio', max: 1000000 },
+            currentPrice: { fieldName: 'Prezzo attuale', max: 1000000 },
+            fees: { max: 1000000 }
+          };
+        case 'realEstate':
+          return {
+            ...baseSchema,
+            amount: { required: true, section: 'realEstate' }
+          };
+        default:
+          return baseSchema;
       }
-      
-      return { isValid: true };
     };
 
-    const validateQuantity = (quantity: string): { isValid: boolean; error?: string } => {
-      if (quantity === '') return { isValid: false, error: t('quantityRequired') };
-      
-      const numQuantity = parseInt(quantity);
-      if (isNaN(numQuantity)) return { isValid: false, error: t('quantityMustBeInteger') };
-      
-              if (numQuantity <= 0) return { isValid: false, error: t('quantityMustBePositive') };
-      if (numQuantity > 1000000000) return { isValid: false, error: t('quantityTooHigh') };
-      
-      return { isValid: true };
-    };
-
-    const validatePrice = (price: string, fieldName: string): { isValid: boolean; error?: string } => {
-      if (price === '') return { isValid: true }; // Optional field
-      
-      const numPrice = parseFloat(price);
-      if (isNaN(numPrice)) return { isValid: false, error: `${fieldName} deve essere un numero valido` };
-      
-      if (numPrice < 0) return { isValid: false, error: `${fieldName} non può essere negativo` };
-      if (numPrice > 1000000) return { isValid: false, error: `${fieldName} è troppo elevato` };
-      
-      return { isValid: true };
-    };
-
-    const validateDate = (date: string | undefined): { isValid: boolean; error?: string } => {
-      if (!date) return { isValid: true }; // Optional field
-      
-      const transactionDate = new Date(date);
-      if (isNaN(transactionDate.getTime())) return { isValid: false, error: 'Data non valida' };
-      
-      const today = new Date();
-      today.setHours(23, 59, 59, 999); // End of today
-      if (transactionDate > today) return { isValid: false, error: 'La data della transazione non può essere nel futuro' };
-      
-      return { isValid: true };
-    };
+    // Use centralized form validation hook
+    const validation = useFormValidation(getValidationSchema(section), (key: string) => t(key as any));
 
     const validateForm = () => {
-      const newErrors: { [key: string]: string } = {};
-      
-      // Name validation
-      if (!formData.name.trim()) {
-        newErrors.name = 'Il nome è obbligatorio';
-      } else if (formData.name.trim().length < 2) {
-        newErrors.name = 'Il nome deve contenere almeno 2 caratteri';
-      } else if (formData.name.trim().length > 100) {
-        newErrors.name = 'Il nome non può superare i 100 caratteri';
-      }
-      
-      // Amount validation with business rules
-      const amountValidation = validateAmount(formData.amount, section);
-      if (!amountValidation.isValid) {
-        newErrors.amount = amountValidation.error!;
-      }
-      
-      // Quantity validation for transactions
-      if (section === 'transactions') {
-        const quantityValidation = validateQuantity(formData.quantity);
-        if (!quantityValidation.isValid) {
-          newErrors.quantity = quantityValidation.error!;
-        }
-      }
-      
-      // Price validations for investments
-      if (section === 'investments') {
-        const avgPriceValidation = validatePrice(formData.avgPrice, 'Prezzo medio');
-        if (!avgPriceValidation.isValid) {
-          newErrors.avgPrice = avgPriceValidation.error!;
-        }
-        
-        const currentPriceValidation = validatePrice(formData.currentPrice, 'Prezzo attuale');
-        if (!currentPriceValidation.isValid) {
-          newErrors.currentPrice = currentPriceValidation.error!;
-        }
-      }
-      
-      // Date validation for transactions
-      if (section === 'transactions') {
-        const dateValidation = validateDate(formData.date);
-        if (!dateValidation.isValid) {
-          newErrors.date = dateValidation.error!;
-        }
-      }
-      
-      // Description length validation
-      if (formData.description && formData.description.length > 500) {
-        newErrors.description = 'La descrizione non può superare i 500 caratteri';
-      }
-      
-      // Notes length validation
-      if (formData.notes && formData.notes.length > 1000) {
-        newErrors.notes = 'Le note non possono superare i 1000 caratteri';
-      }
-      
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
+      return validation.validateForm(formData, { section });
     };
 
     const handleSubmit = () => {
@@ -3529,7 +3322,7 @@ const NetWorthManager = () => {
         setTransactionType('purchase');
         setPropertyType('primary');
         setShowForm(false);
-        setErrors({});
+        validation.clearErrors();
       }
     };
 
@@ -3538,7 +3331,7 @@ const NetWorthManager = () => {
       setFormData({ name: '', amount: '', description: '', notes: '', fees: '', quantity: '', avgPrice: '', currentPrice: '', linkedToAsset: undefined, sector: '', date: new Date().toISOString().split('T')[0], accountType: 'current', assetType: 'other' });
       setTransactionType('purchase');
       setPropertyType('primary');
-      setErrors({});
+      validation.clearErrors();
     };
 
     if (!showForm) {
@@ -3568,7 +3361,7 @@ const NetWorthManager = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-              Nome *
+              {t('name')} *
             </label>
             <input
               type="text"
@@ -3576,15 +3369,15 @@ const NetWorthManager = () => {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className={`w-full px-3 py-2 border rounded-md text-sm ${
                 darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
-              } ${errors.name ? 'border-red-500' : ''}`}
+              } ${validation.errors.name ? 'border-red-500' : ''}`}
               placeholder="Inserisci il nome"
             />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+            {validation.errors.name && <p className="text-red-500 text-xs mt-1">{validation.errors.name}</p>}
           </div>
 
           <div>
             <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-              {section === 'transactions' ? 'Ticker' : section === 'realEstate' ? 'Valore *' : 'Importo *'}
+              {section === 'transactions' ? t('ticker') : section === 'realEstate' ? t('valueLabel') + ' *' : t('amount') + ' *'}
             </label>
             {section === 'transactions' ? (
               <input
@@ -3603,17 +3396,17 @@ const NetWorthManager = () => {
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
                   darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
-                } ${errors.amount ? 'border-red-500' : ''}`}
+                } ${validation.errors.amount ? 'border-red-500' : ''}`}
                 placeholder="0.00"
                 step="0.01"
               />
             )}
-            {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+            {validation.errors.amount && <p className="text-red-500 text-xs mt-1">{validation.errors.amount}</p>}
           </div>
 
           <div>
             <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-              {section === 'transactions' ? 'ISIN' : section === 'realEstate' ? 'Descrizione' : 'Descrizione'}
+              {section === 'transactions' ? t('isin') : section === 'realEstate' ? t('description') : t('description')}
             </label>
             <input
               type="text"
@@ -3641,14 +3434,14 @@ const NetWorthManager = () => {
                   darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
                 }`}
               >
-                <option value="purchase">Acquisto</option>
-                <option value="sale">Vendita</option>
+                <option value="purchase">{t('purchase')}</option>
+                <option value="sale">{t('sale')}</option>
               </select>
             </div>
           ) : section === 'realEstate' ? (
             <div>
               <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Tipo Proprietà *
+                {t('propertyType')} *
               </label>
               <select
                 value={propertyType}
@@ -3657,14 +3450,14 @@ const NetWorthManager = () => {
                   darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
                 }`}
               >
-                <option value="primary">Residenza Principale</option>
-                <option value="secondary">Proprietà Secondaria</option>
+                <option value="primary">{t('primaryResidence')}</option>
+                <option value="secondary">{t('secondaryProperty')}</option>
               </select>
             </div>
           ) : (
             <div>
               <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Note
+                {t('notes')}
               </label>
               <input
                 type="text"
@@ -3682,7 +3475,7 @@ const NetWorthManager = () => {
             <>
               <div>
                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Quantità *
+                  {t('quantity')} *
                 </label>
                 <input
                   type="number"
@@ -3690,16 +3483,16 @@ const NetWorthManager = () => {
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
                     darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
-                  } ${errors.quantity ? 'border-red-500' : ''}`}
+                  } ${validation.errors.quantity ? 'border-red-500' : ''}`}
                   placeholder="0"
                   step="1"
                 />
-                {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+                {validation.errors.quantity && <p className="text-red-500 text-xs mt-1">{validation.errors.quantity}</p>}
               </div>
 
               <div>
                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Importo *
+                  {t('amount')} *
                 </label>
                 <input
                   type="number"
@@ -3707,16 +3500,16 @@ const NetWorthManager = () => {
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
                     darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
-                  } ${errors.amount ? 'border-red-500' : ''}`}
+                  } ${validation.errors.amount ? 'border-red-500' : ''}`}
                   placeholder="0.00"
                   step="0.01"
                 />
-                {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+                {validation.errors.amount && <p className="text-red-500 text-xs mt-1">{validation.errors.amount}</p>}
               </div>
 
               <div>
                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Commissioni
+                  {t('fees')}
                 </label>
                 <input
                   type="number"
@@ -3732,7 +3525,7 @@ const NetWorthManager = () => {
 
               <div>
                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Descrizione
+                  {t('description')}
                 </label>
                 <input
                   type="text"
@@ -3747,7 +3540,7 @@ const NetWorthManager = () => {
 
               <div>
                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Data *
+                  {t('date')} *
                 </label>
                 <input
                   type="date"
@@ -3892,9 +3685,9 @@ const NetWorthManager = () => {
                   darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
                 }`}
               >
-                                        <option value="current">Conto corrente</option>
-                        <option value="deposit">Conto deposito</option>
-                <option value="cash">Cash</option>
+                                        <option value="current">{t('currentAccount')}</option>
+                        <option value="deposit">{t('depositAccount')}</option>
+                <option value="cash">{t('cashAccountType')}</option>
               </select>
             </div>
           )}
@@ -3911,15 +3704,15 @@ const NetWorthManager = () => {
                   darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
                 }`}
               >
-                <option value="tcg">TCG</option>
-                <option value="stamps">Francobolli</option>
-                <option value="alcohol">Alcolici</option>
-                <option value="collectibles">Collezionabili</option>
-                <option value="vinyl">Vinili</option>
-                <option value="books">Libri</option>
-                <option value="comics">Fumetti</option>
-                <option value="art">Arte</option>
-                <option value="other">Altro</option>
+                <option value="tcg">{t('tcg')}</option>
+                <option value="stamps">{t('stamps')}</option>
+                <option value="alcohol">{t('alcohol')}</option>
+                <option value="collectibles">{t('collectibles')}</option>
+                <option value="vinyl">{t('vinyl')}</option>
+                <option value="books">{t('books')}</option>
+                <option value="comics">{t('comics')}</option>
+                <option value="art">{t('art')}</option>
+                <option value="other">{t('other')}</option>
               </select>
             </div>
           )}
@@ -3958,17 +3751,9 @@ const NetWorthManager = () => {
         {section === 'realEstate' && '🏠'}
       </div>
       <h3 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-        {t('welcomeMessage')} {sections[section as keyof typeof sections]}
+        Benvenuto nella sezione {sections[section as keyof typeof sections]}
       </h3>
-      <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-        {section === 'cash' && t('welcomeCash')}
-        {section === 'debts' && t('welcomeDebts')}
-        {section === 'investments' && t('welcomeInvestments')}
-        {section === 'pensionFunds' && t('welcomePensionFunds')}
-        {section === 'otherAccounts' && t('welcomeOtherAccounts')}
-        {section === 'realEstate' && t('welcomeRealEstate')}
-        {section === 'alternativeAssets' && t('welcomeAlternativeAssets')}
-      </p>
+
       <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
         {t('addYourAssets')}
       </p>
@@ -4064,9 +3849,15 @@ const NetWorthManager = () => {
         <div className="max-w-7xl mx-auto px-3 py-3">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
             <div>
-              <h1 className={`text-2xl md:text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>🥭 MangoMoney</h1>
+              <div className="flex items-center">
+                <img 
+                  src={require('./images/logo.png')} 
+                  alt="MangoMoney" 
+                  className="h-10 md:h-14 w-auto object-contain"
+                />
+              </div>
               <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
-                {t('totalAssets')}: <span className={`text-lg md:text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrency(totals.total)}</span>
+                {t('totalAssets')}: <span className={`text-lg md:text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrencyWithPrivacy(totals.total)}</span>
               </p>
               <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 {t('lastSaved')}: {lastSaved.toLocaleTimeString()}
@@ -4077,20 +3868,59 @@ const NetWorthManager = () => {
             <div className="flex flex-wrap gap-1 md:hidden">
               <button
                 onClick={toggleDarkMode}
-                className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'} p-2 rounded h-8 w-8 flex items-center justify-center`}
+                className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'} p-2 rounded h-8 w-8 flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110 hover:rotate-12`}
               >
                 {darkMode ? <Sun size={14} /> : <Moon size={14} />}
               </button>
               
               <button
                 onClick={toggleMobileLayout}
-                className={`px-2 py-1 rounded text-xs transition-colors h-8 ${
+                className={`px-2 py-1 rounded text-xs transition-all duration-300 ease-in-out transform hover:scale-110 hover:rotate-12 h-8 w-8 flex items-center justify-center ${
                   forceMobileLayout 
                     ? 'bg-green-500 text-white hover:bg-green-600' 
                     : (darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-blue-100 text-blue-800 hover:bg-blue-200')
                 }`}
               >
-                {forceMobileLayout ? '📱' : (isMobileView ? '📱' : '💻')}
+                {forceMobileLayout ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                ) : (isMobileView ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                ))}
+              </button>
+
+              <button
+                onClick={togglePrivacyMode}
+                className={`px-2 py-1 rounded text-xs transition-all duration-300 ease-in-out transform hover:scale-110 hover:rotate-12 h-8 w-8 flex items-center justify-center ${
+                  privacyMode 
+                    ? 'bg-red-500 text-white hover:bg-red-600' 
+                    : (darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-blue-100 text-blue-800 hover:bg-blue-200')
+                }`}
+                title={privacyMode ? 'Disattiva modalità privacy' : 'Attiva modalità privacy'}
+              >
+                {privacyMode ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <circle cx="12" cy="16" r="1"></circle>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                )}
               </button>
               
 
@@ -4132,7 +3962,7 @@ const NetWorthManager = () => {
                 />
                 <label
                   htmlFor="import-file-mobile"
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 flex items-center justify-center cursor-pointer h-8 w-8"
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 flex items-center justify-center cursor-pointer h-8 w-8 transition-all duration-300 ease-in-out transform hover:scale-110"
                   title="Importa backup JSON di MangoMoney"
                 >
                   <Upload size={14} />
@@ -4140,14 +3970,14 @@ const NetWorthManager = () => {
               </div>
               
               <div className="relative group">
-                <button className="bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600 flex items-center justify-center h-8 w-8">
+                <button className="bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600 flex items-center justify-center h-8 w-8 transition-all duration-300 ease-in-out transform hover:scale-110">
                   <Download size={14} />
                 </button>
                 <div className={`absolute right-0 mt-2 w-32 ${darkMode ? 'bg-gray-900' : 'bg-white'} rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
                   <div className="py-1">
                     <button
                       onClick={() => exportToJSON()}
-                      className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                      className={`block w-full text-left px-3 py-2 text-sm transition-all duration-200 ease-in-out transform hover:scale-105 ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                     >
                       📄 {t('export')} JSON
                     </button>
@@ -4172,30 +4002,69 @@ const NetWorthManager = () => {
             <div className="hidden md:flex gap-1 md:gap-2">
               <button
                 onClick={toggleDarkMode}
-                className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'} p-2 rounded h-10 w-10 flex items-center justify-center`}
+                className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'} p-2 rounded h-10 w-10 flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110 hover:rotate-12`}
               >
                 {darkMode ? <Sun size={16} /> : <Moon size={16} />}
               </button>
               
               <button
                 onClick={toggleMobileLayout}
-                className={`px-3 py-2 rounded text-xs transition-colors h-10 ${
+                className={`px-3 py-2 rounded text-xs transition-all duration-300 ease-in-out transform hover:scale-105 hover:rotate-12 h-10 w-10 flex items-center justify-center ${
                   forceMobileLayout 
                     ? 'bg-green-500 text-white hover:bg-green-600' 
                     : (darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-blue-100 text-blue-800 hover:bg-blue-200')
                 }`}
               >
-                {forceMobileLayout ? '📱 Mobile' : (isMobileView ? '📱 Auto' : '💻 Desktop')}
+                {forceMobileLayout ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                ) : (isMobileView ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                ))}
+              </button>
+
+              <button
+                onClick={togglePrivacyMode}
+                className={`px-3 py-2 rounded text-xs transition-all duration-300 ease-in-out transform hover:scale-105 hover:rotate-12 h-10 w-10 flex items-center justify-center ${
+                  privacyMode 
+                    ? 'bg-red-500 text-white hover:bg-red-600' 
+                    : (darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-blue-100 text-blue-800 hover:bg-blue-200')
+                }`}
+                title={privacyMode ? 'Disattiva modalità privacy' : 'Attiva modalità privacy'}
+              >
+                {privacyMode ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <circle cx="12" cy="16" r="1"></circle>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                )}
               </button>
               
 
               
               {/* Language Selector */}
               <div className="relative group">
-                <button className={`px-3 py-2 rounded text-xs transition-colors h-10 ${
+                <button className={`px-3 py-2 rounded text-xs transition-all duration-300 ease-in-out transform hover:scale-105 h-10 ${
                   darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-green-100 text-green-800 hover:bg-green-200'
                 }`}>
-                  {languages[selectedLanguage as keyof typeof languages].flag} {selectedLanguage.toUpperCase()}
+                  {languages[selectedLanguage as keyof typeof languages].flag}
                 </button>
                 <div className={`absolute right-0 mt-2 w-32 ${darkMode ? 'bg-gray-900' : 'bg-white'} rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
                   <div className="py-1">
@@ -4228,16 +4097,16 @@ const NetWorthManager = () => {
                 />
                 <label
                   htmlFor="import-file"
-                  className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 flex items-center gap-1 cursor-pointer h-10"
+                  className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 flex items-center gap-1 cursor-pointer h-10 transition-all duration-300 ease-in-out transform hover:scale-105"
                   title="Importa backup JSON di MangoMoney"
                 >
                   <Upload size={16} />
-                  <span className="hidden md:inline">{t('import')} Backup</span>
+                  <span className="hidden md:inline">{t('import')} backup</span>
                 </label>
               </div>
               
               <div className="relative group">
-                <button className="bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 flex items-center gap-1 h-10">
+                <button className="bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 flex items-center gap-1 h-10 transition-all duration-300 ease-in-out transform hover:scale-105">
                   <Download size={16} />
                   <span className="hidden md:inline">{t('export')}</span>
                 </button>
@@ -4248,28 +4117,28 @@ const NetWorthManager = () => {
                       className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                       title="Backup completo con tutti i dati e impostazioni"
                     >
-                      💾 JSON Backup Completo
+                      JSON Backup
                     </button>
                     <button
                       onClick={exportToCSV}
                       className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                       title="Esporta dati dettagliati in formato CSV"
                     >
-                      📊 CSV Dettagliato
+                      {t('detailedCSV')}
                     </button>
                     <button
                       onClick={exportToExcel}
                       className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                       title="Esporta dati in formato Excel-compatibile"
                     >
-                      📈 Excel (CSV)
+                      Excel (CSV)
                     </button>
                     <button
                       onClick={exportToPDF}
                       className={`block w-full text-left px-3 py-2 text-sm ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
                       title="Genera report PDF stampabile"
                     >
-                      📄 PDF Report
+                      PDF Report
                     </button>
                   </div>
                 </div>
@@ -4277,7 +4146,7 @@ const NetWorthManager = () => {
               
               <button
                 onClick={resetData}
-                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 flex items-center gap-1 h-10"
+                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 flex items-center gap-1 h-10 transition-all duration-300 ease-in-out transform hover:scale-105"
               >
                 <RotateCcw size={16} />
                 <span className="hidden md:inline">{t('reset')}</span>
@@ -4294,7 +4163,7 @@ const NetWorthManager = () => {
               <button
                 key={section}
                 onClick={() => setActiveSection(section)}
-                className={`py-3 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap ${
+                className={`py-3 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap transition-all duration-300 ease-in-out transform hover:scale-105 ${
                   activeSection === section
                     ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
                     : `border-transparent ${darkMode ? 'text-gray-400 hover:text-gray-300 hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
@@ -4308,7 +4177,7 @@ const NetWorthManager = () => {
             <div className="flex-1"></div>
             <button
               onClick={() => setActiveSection('settings')}
-              className={`py-3 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap ${
+              className={`py-3 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap transition-all duration-300 ease-in-out transform hover:scale-105 ${
                 activeSection === 'settings'
                   ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
                   : `border-transparent ${darkMode ? 'text-gray-400 hover:text-gray-300 hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
@@ -4318,7 +4187,7 @@ const NetWorthManager = () => {
             </button>
             <button
               onClick={() => setActiveSection('info')}
-              className={`py-3 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap ${
+              className={`py-3 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap transition-all duration-300 ease-in-out transform hover:scale-105 ${
                 activeSection === 'info'
                   ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
                   : `border-transparent ${darkMode ? 'text-gray-400 hover:text-gray-300 hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
@@ -4332,7 +4201,7 @@ const NetWorthManager = () => {
 
       <main className="max-w-7xl mx-auto px-3 py-4">
         {activeSection === 'overview' && (
-          <div>
+          <div className="animate-fadeIn">
             {/* Welcome message when no data */}
             {totals.total === 0 ? (
               <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-8 text-center`}>
@@ -4353,8 +4222,8 @@ const NetWorthManager = () => {
               <>
                 <div className="space-y-4 mb-6">
                   <div className={`grid gap-3 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-4'}`}>
-                    {Object.entries(totals).slice(0, 4).map(([key, value]) => (
-                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-shadow`}>
+                    {Object.entries(totals).slice(0, 4).map(([key, value], index) => (
+                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 animate-scaleIn`} style={{ animationDelay: `${index * 100}ms` }}>
                         <h4 className={`text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1`}>
                           {sections[key as keyof typeof sections] || key}
                       </h4>
@@ -4370,8 +4239,8 @@ const NetWorthManager = () => {
                     </div>
                     
                   <div className={`grid gap-3 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-3'}`}>
-                    {Object.entries(totals).slice(4, 7).map(([key, value]) => (
-                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-shadow`}>
+                    {Object.entries(totals).slice(4, 7).map(([key, value], index) => (
+                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 animate-scaleIn`} style={{ animationDelay: `${(index + 4) * 100}ms` }}>
                         <h4 className={`text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1`}>
                           {sections[key as keyof typeof sections] || key}
                       </h4>
@@ -4405,7 +4274,7 @@ const NetWorthManager = () => {
                                 : 'bg-blue-500 text-white hover:bg-blue-600'
                             }`}
                           >
-                            💼 Aggiungi Investimenti
+                            💼 {t('addInvestments')}
                           </button>
                           <button 
                             onClick={() => setActiveSection('realEstate')}
@@ -4415,7 +4284,7 @@ const NetWorthManager = () => {
                                 : 'bg-green-500 text-white hover:bg-green-600'
                             }`}
                           >
-                            🏠 Aggiungi Immobili
+                            🏠 {t('addRealEstate')}
                           </button>
                           <button 
                             onClick={() => setActiveSection('cash')}
@@ -4564,7 +4433,7 @@ const NetWorthManager = () => {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
                           <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                            {formatCurrency(swrData.netLiquidAssets)}
+                            {formatCurrencyWithPrivacy(swrData.netLiquidAssets)}
                           </div>
                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             {t('swrNetLiquidAssets')}
@@ -4573,7 +4442,7 @@ const NetWorthManager = () => {
                         
                         <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
                           <div className={`text-2xl font-bold ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                            {formatCurrency(swrData.annualWithdrawal)}
+                            {formatCurrencyWithPrivacy(swrData.annualWithdrawal)}
                           </div>
                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             {t('swrAnnualWithdrawal')} ({swrRate}%)
@@ -4582,7 +4451,7 @@ const NetWorthManager = () => {
                         
                         <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
                           <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                            {formatCurrency(swrData.monthlyWithdrawal)}
+                            {formatCurrencyWithPrivacy(swrData.monthlyWithdrawal)}
                           </div>
                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             {t('swrMonthlyWithdrawal')}
@@ -4603,7 +4472,7 @@ const NetWorthManager = () => {
                         <div className={`${darkMode ? 'bg-blue-900/20' : 'bg-blue-50'} rounded-lg p-4 mb-4 border ${darkMode ? 'border-blue-800' : 'border-blue-200'}`}>
                           <div className="text-center">
                             <div className={`text-sm ${darkMode ? 'text-blue-300' : 'text-blue-700'} mb-2`}>
-                              <strong>Confronto:</strong> Con spese mensili di {formatCurrency(monthlyExpenses)}, il prelievo del {swrRate}% degli asset liquidi ({formatCurrency(swrData.monthlyWithdrawal)}/mese) 
+                              <strong>Confronto:</strong> Con spese mensili di {formatCurrencyWithPrivacy(monthlyExpenses)}, il prelievo del {privacyMode ? '••••••••' : swrRate}% degli asset liquidi ({formatCurrencyWithPrivacy(swrData.monthlyWithdrawal)}/mese) 
                               {swrData.monthlyWithdrawal >= monthlyExpenses ? ' copre' : ' non copre'} le tue spese
                             </div>
                             <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
@@ -4633,7 +4502,7 @@ const NetWorthManager = () => {
         )}
 
         {activeSection === 'statistics' && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-slideIn">
                             <h2 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-4`}>📊 {t('advancedStatistics')}</h2>
             
             {/* Main Statistics Grid */}
@@ -4642,7 +4511,7 @@ const NetWorthManager = () => {
             ) : (
             <div className={`grid gap-4 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
               {/* Risk Score */}
-              <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-shadow`}>
+              <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 animate-scaleIn`}>
                 <div className="flex items-center">
                   <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} mr-3`}>
                     <Calculator className={`h-6 w-6 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
@@ -4802,7 +4671,7 @@ const NetWorthManager = () => {
         )}
 
         {activeSection === 'investments' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-slideIn">
             {/* Global Positions (Broker Accounts) - At the top */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
               <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
@@ -4843,14 +4712,14 @@ const NetWorthManager = () => {
                     {assets.investmentPositions.map((item: InvestmentPosition) => (
                       <tr key={item.id} className={`hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                         <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.name}</td>
-                        <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</td>
+                        <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrencyWithPrivacy(item.amount)}</td>
                         <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.description}</td>
                         <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.notes}</td>
                         <td className={`border px-2 py-1 text-center`}>
                           <div className="flex justify-center gap-1">
                             <button 
                               onClick={() => handleEditRow('investmentPositions', item.id)}
-                              className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
+                              className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'} transition-all duration-200 ease-in-out transform hover:scale-110`}
                               title="Modifica riga"
                               aria-label={`Modifica ${item.name}`}
                               tabIndex={0}
@@ -4868,7 +4737,7 @@ const NetWorthManager = () => {
                             </button>
                             <button 
                               onClick={() => handleCopyRow('investmentPositions', item.id)}
-                              className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
+                              className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'} transition-all duration-200 ease-in-out transform hover:scale-110`}
                               title="Copia riga"
                               aria-label={`Duplica ${item.name}`}
                               tabIndex={0}
@@ -4886,7 +4755,7 @@ const NetWorthManager = () => {
                             </button>
                             <button 
                               onClick={() => handleDeleteItem('investmentPositions', item.id)}
-                              className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                              className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'} transition-all duration-200 ease-in-out transform hover:scale-110`}
                               title="Elimina riga"
                               aria-label={`Elimina ${item.name}`}
                               tabIndex={0}
@@ -4911,7 +4780,7 @@ const NetWorthManager = () => {
                 )}
               <div className="mt-2 text-right">
                 <span className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                      {t('totalLabel')} {formatCurrency(assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}
+                      {t('totalLabel')} {formatCurrencyWithPrivacy(assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0))}
                 </span>
               </div>
                 </>
@@ -4961,16 +4830,16 @@ const NetWorthManager = () => {
                           <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.sector || '-'}</td>
                           <td className={`border px-2 py-1 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.isin || '-'}</td>
                           <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.quantity?.toLocaleString() || '-'}</td>
-                          <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrency(item.amount)}</td>
+                          <td className={`border px-2 py-1 text-right font-mono text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{formatCurrencyWithPrivacy(item.amount)}</td>
                           <td className={`border px-2 py-1 text-right font-mono text-xs`}>
                             {linkedTransactions.length > 0 ? (
                               <div className={`${transactionPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                <div>{formatCurrency(transactionPerformance.totalReturn)}</div>
+                                <div>{formatCurrencyWithPrivacy(transactionPerformance.totalReturn)}</div>
                                 <div className="text-xs">{transactionPerformance.percentageReturn.toFixed(1)}% (T)</div>
                               </div>
                             ) : manualPerformance.totalReturn !== 0 ? (
                               <div className={`${manualPerformance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                <div>{formatCurrency(manualPerformance.totalReturn)}</div>
+                                <div>{formatCurrencyWithPrivacy(manualPerformance.totalReturn)}</div>
                                 <div className="text-xs">{manualPerformance.percentageReturn.toFixed(1)}% (M)</div>
                               </div>
                             ) : '-'}
@@ -5719,7 +5588,7 @@ const NetWorthManager = () => {
         )}
 
         {activeSection === 'investmentPositions' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-slideIn">
             {/* Individual Positions (Assets) Table */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
               <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
@@ -5746,7 +5615,7 @@ const NetWorthManager = () => {
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <button 
                       onClick={() => setActiveSection('investments')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105 ${
                         darkMode 
                           ? 'bg-blue-600 text-white hover:bg-blue-700' 
                           : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -5756,7 +5625,7 @@ const NetWorthManager = () => {
                     </button>
                     <button 
                       onClick={() => setActiveSection('overview')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105 ${
                         darkMode 
                           ? 'bg-gray-600 text-white hover:bg-gray-700' 
                           : 'bg-gray-500 text-white hover:bg-gray-600'
@@ -6045,157 +5914,82 @@ const NetWorthManager = () => {
 
 
         {activeSection === 'info' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fadeIn">
             <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg shadow-lg p-6 border ${darkMode ? 'border-slate-700' : 'border-blue-200'}`}>
-              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-blue-200' : 'text-blue-800'} flex items-center`}>
-                🥭 MangoMoney <span className="text-sm font-normal ml-2">v3.0</span>
-              </h2>
+              <div className="flex justify-center mb-6">
+                <img 
+                  src={require('./images/mango.png')} 
+                  alt="MangoMoney" 
+                  className="h-16 md:h-20 w-auto object-contain"
+                />
+              </div>
               
               <div className={`space-y-6 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">{t('projectPurposeTitle')}</h3>
+                  <h3 className="text-xl font-semibold mb-4">{t('whatIsMangoMoney')}</h3>
                   <p className="text-lg leading-relaxed mb-4">
-                    {t('projectPurposeText')}
+                    {t('whatIsMangoMoneyDesc')}
+                  </p>
+                  <p className="text-sm italic mb-4">
+                    {t('nameOrigin')}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">{t('mainFeaturesTitle')}</h3>
-                  
-                  <div className="space-y-4">
+                  <h3 className="text-xl font-semibold mb-4">{t('howItWorks')}</h3>
+                  <p className="text-lg leading-relaxed mb-4">
+                    {t('howItWorksDesc')}
+                  </p>
+                  <p className="text-lg leading-relaxed mb-4">
+                    {t('investmentsTracking')}
+                  </p>
+                    </div>
+
                     <div>
-                      <h4 className="text-lg font-medium mb-2">💰 {t('liquidityManagementHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                                                  <li>{t('bankAccountsCashInstruments')}</li>
-                                                  <li>{t('emergencyFundConfiguration')}</li>
-                                                  <li>{t('financialAutonomyCalculation')}</li>
-                                                  <li>{t('accountTypeDistinction')}</li>
+                  <h3 className="text-xl font-semibold mb-4">{t('usefulThings')}</h3>
+                  <ul className="list-disc list-inside space-y-2 text-lg">
+                    <li>{t('totalPrivacy')}</li>
+                    <li>{t('automaticBackupsDesc')}</li>
+                    <li>{t('multiCurrencyLanguages')}</li>
+                    <li>{t('responsive')}</li>
                       </ul>
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-medium mb-2">📈 {t('investmentManagementHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>{t('globalIndividualPositions')}</li>
-                        <li>{t('transactionHistoryAdvanced')}</li>
-                        <li>{t('performanceTrackingAnnualized')}</li>
-                        <li>{t('transactionPositionLinking')}</li>
-                        <li>{t('performanceChartsTrends')}</li>
-                      </ul>
+                  <h3 className="text-xl font-semibold mb-4">{t('howToStart')}</h3>
+                  <p className="text-lg leading-relaxed mb-4">
+                    {t('howToStartDesc')}
+                  </p>
+                  <p className="text-lg leading-relaxed mb-4">
+                    {t('settingsConfig')}
+                  </p>
                     </div>
 
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">🏠 {t('realEstateManagementHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>{t('primarySecondaryProperties')}</li>
-                        <li>{t('realEstateValuations')}</li>
-                        <li>{t('addressNotesManagement')}</li>
-                      </ul>
+                <div className={`${darkMode ? 'bg-gradient-to-br from-orange-900 to-amber-800' : 'bg-gradient-to-br from-orange-50 to-amber-50'} rounded-lg p-6 border ${darkMode ? 'border-orange-700' : 'border-orange-200'} text-center shadow-lg`}>
+                  <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-orange-200' : 'text-orange-800'}`}>{t('limitationsDisclaimer')}</h3>
+                  <p className={`mb-4 ${darkMode ? 'text-orange-100' : 'text-orange-900'}`}>
+                    {t('limitationsDesc')}
+                  </p>
+                  <p className={`text-sm italic ${darkMode ? 'text-orange-100' : 'text-orange-900'}`}>
+                    {t('practicalNote')}
+                  </p>
                     </div>
 
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">📊 {t('advancedAnalyticsHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>{t('riskScore010')}</li>
-                        <li>{t('financialHealthMetrics')}</li>
-                        <li>{t('swrSimulationList')}</li>
-                        <li>{t('emergencyFundAnalysis')}</li>
-                        <li>{t('commissionCostStatistics')}</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">🔗 {t('assetLinking')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>{t('linkingGlobalIndividualPositions')}</li>
-                        <li>{t('automaticValidationTolerance')}</li>
-                        <li>{t('discrepancyVerificationStatus')}</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">💾 {t('backupSecurityHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                                                  <li>{t('jsonCsvExcelPdfExport')}</li>
-                                                  <li>{t('secureImportValidation')}</li>
-                                                  <li>{t('automaticLocalSaving')}</li>
-                                                  <li>{t('completelyLocalData')}</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">🎨 {t('advancedInterfaceHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                                                  <li>{t('darkLightMode')}</li>
-                                                  <li>{t('responsiveMobileLayout')}</li>
-                                                  <li>{t('advancedFiltersPagination')}</li>
-                                                  <li>{t('centeredNotifications')}</li>
-                                                  <li>{t('dedicatedSettingsSection')}</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">⚙️ {t('configurationHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                                                  <li>{t('taxSettings')}</li>
-                                                  <li>{t('currencySelection')}</li>
-                                                  <li>{t('quickItalyConfiguration')}</li>
-                                                  <li>{t('alternativeAssetsManagement')}</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">{t('dataEntryTitle')}</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">📊 {t('dataCategoriesHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>{t('globalIndividualPositions')}</li>
-                        <li>{t('transactionsPurchasesSales')}</li>
-                        <li>{t('stocksEtfsBondsCrypto')}</li>
-                        <li>{t('realEstateAlternativeAssets')}</li>
-                        <li>{t('bankAccountsLiquidity')}</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-medium mb-2">💡 {t('bestPracticesHeading')}</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>{t('enterGlobalPositionsFirst')}</li>
-                        <li>{t('linkIndividualPositions')}</li>
-                        <li>{t('recordAllTransactions')}</li>
-                        <li>{t('updateCurrentPrices')}</li>
-                        <li>{t('useFiltersForLargeDatasets')}</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-
-
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">{t('privacyTitle')}</h3>
-                  <div className={`p-4 ${darkMode ? 'bg-green-900' : 'bg-green-50'} rounded-lg border-l-4 ${darkMode ? 'border-green-600' : 'border-green-400'}`}>
-                    <h4 className={`text-lg font-medium mb-2 ${darkMode ? 'text-green-200' : 'text-green-800'}`}>🛡️ {t('localData')}</h4>
-                    <ul className={`text-sm space-y-1 ${darkMode ? 'text-green-100' : 'text-green-700'}`}>
-                      <li>• {t('localDataText1')}</li>
-                      <li>• {t('localDataText2')}</li>
-                      <li>• {t('localDataText3')}</li>
-                      <li>• {t('localDataText4')}</li>
-                      <li>• {t('localDataText5')}</li>
-                      <li>• {t('localDataText6')}</li>
-                    </ul>
-                  </div>
+                <div className={`${darkMode ? 'bg-gradient-to-br from-blue-900 to-indigo-800' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg p-6 border ${darkMode ? 'border-blue-700' : 'border-blue-200'} text-center shadow-lg`}>
+                  <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-blue-200' : 'text-blue-800'}`}>{t('privacySecurity')}</h3>
+                  <p className={`mb-4 ${darkMode ? 'text-blue-100' : 'text-blue-900'}`}>
+                    {t('privacyDesc')}
+                  </p>
+                  <p className={`${darkMode ? 'text-blue-100' : 'text-blue-900'}`}>
+                    {t('securityChecks')}
+                  </p>
                 </div>
 
                 {/* Sezione Donazione PayPal */}
                 <div className={`${darkMode ? 'bg-gradient-to-br from-emerald-900 to-teal-800' : 'bg-gradient-to-br from-emerald-50 to-teal-50'} rounded-lg p-6 border ${darkMode ? 'border-emerald-700' : 'border-emerald-200'} text-center shadow-lg`}>
-                  <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-emerald-200' : 'text-emerald-800'}`}>{t('supportTitle')}</h3>
+                  <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-emerald-200' : 'text-emerald-800'}`}>{t('projectSupport')}</h3>
                   <p className={`mb-4 ${darkMode ? 'text-emerald-100' : 'text-emerald-900'}`}>
-                    {t('supportText')}
+                    {t('projectSupportDesc')}
                   </p>
                   <a 
                     href="https://www.paypal.com/paypalme/stefanoconter" 
@@ -6205,43 +5999,47 @@ const NetWorthManager = () => {
                   >
                     💳 {t('donatePayPal')}
                   </a>
-                  <p className={`text-xs mt-3 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>
-                    {t('supportNote')}
-                  </p>
                 </div>
 
-                <div className={`p-4 ${darkMode ? 'bg-yellow-900' : 'bg-yellow-50'} rounded-lg border-l-4 ${darkMode ? 'border-yellow-600' : 'border-yellow-400'}`}>
-                  <h4 className={`text-lg font-medium mb-2 ${darkMode ? 'text-yellow-200' : 'text-yellow-800'}`}>{t('disclaimerTitle')}</h4>
-                  <p className={`text-sm ${darkMode ? 'text-yellow-100' : 'text-yellow-700'}`}>
-                    {t('disclaimerText')}
-                  </p>
-                </div>
-                
-
-
-                <div className="text-center pt-4">
-                  <p className="text-sm opacity-80">
-                    {t('developedWith')}
-                  </p>
-                  <p className="text-sm mt-2">
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">{t('usefulLinks')}</h3>
+                  <div className="space-y-3">
+                    <p className="text-lg">
+                      <a 
+                        href="https://github.com/Stinocon/AwesomeFinanceITA" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`underline hover:no-underline ${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-800'}`}
+                      >
+                        📚 {t('italianFinanceResources')}
+                      </a>
+                    </p>
+                    <p className="text-lg">
                     <a 
                       href="https://www.linkedin.com/in/stefanoconter/" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className={`underline hover:no-underline ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}
                     >
-                      Stefano Conter su LinkedIn
+                        {t('linkedin')}
                     </a>
                   </p>
-                  <p className="text-sm mt-3">
+                    <p className="text-lg">
                     <a 
-                      href="https://github.com/Stinocon/AwesomeFinanceITA" 
+                        href="https://github.com/Stinocon" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className={`underline hover:no-underline ${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-800'}`}
-                    >
-                      📚 {t('usefulFinancialResources')}
-                    </a>
+                        className={`underline hover:no-underline ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800'}`}
+                      >
+                        {t('github')}
+                      </a>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center pt-4">
+                  <p className="text-sm opacity-80">
+                    {t('developedWith')}
                   </p>
                 </div>
               </div>
@@ -6250,7 +6048,7 @@ const NetWorthManager = () => {
         )}
 
         {activeSection === 'settings' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fadeIn">
             <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg shadow-lg p-6 border ${darkMode ? 'border-slate-700' : 'border-blue-200'}`}>
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-blue-200' : 'text-blue-800'} flex items-center`}>
                 ⚙️ {t('settings')}
@@ -6453,7 +6251,7 @@ const NetWorthManager = () => {
         )}
 
         {(activeSection !== 'overview' && activeSection !== 'statistics' && activeSection !== 'info' && activeSection !== 'settings' && activeSection !== 'investments') && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-slideIn">
             {/* Welcome message or data table */}
             {(() => {
               const sectionAssets = activeSection === 'alternativeAssets' ? paginatedAlternativeAssets : assets[activeSection as keyof typeof assets] as AssetItem[];
@@ -6498,16 +6296,16 @@ const NetWorthManager = () => {
                         onChange={(e) => setAlternativeAssetFilter(e.target.value)}
                         className={`w-full md:w-64 text-sm px-3 py-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
                       >
-                        <option value="all">Tutti i tipi</option>
-                        <option value="tcg">TCG</option>
-                        <option value="stamps">Francobolli</option>
-                        <option value="alcohol">Alcolici</option>
-                        <option value="collectibles">Collezionabili</option>
-                        <option value="vinyl">Vinili</option>
-                        <option value="books">Libri</option>
-                        <option value="comics">Fumetti</option>
-                        <option value="art">Arte</option>
-                        <option value="other">Altro</option>
+                        <option value="all">{t('allTypes')}</option>
+                        <option value="tcg">{t('tcg')}</option>
+                        <option value="stamps">{t('stamps')}</option>
+                        <option value="alcohol">{t('alcohol')}</option>
+                        <option value="collectibles">{t('collectibles')}</option>
+                        <option value="vinyl">{t('vinyl')}</option>
+                        <option value="books">{t('books')}</option>
+                        <option value="comics">{t('comics')}</option>
+                        <option value="art">{t('art')}</option>
+                        <option value="other">{t('other')}</option>
                       </select>
                     </div>
                   )}
@@ -6518,10 +6316,10 @@ const NetWorthManager = () => {
                           <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('name')}</th>
                           <th className={`border px-2 py-1 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('amount')}</th>
                           {activeSection === 'cash' && (
-                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo conto</th>
+                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('accountType')}</th>
                           )}
                           {activeSection === 'alternativeAssets' && (
-                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo asset</th>
+                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('assetType')}</th>
                           )}
                           <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('description')}</th>
                           <th className={`border px-2 py-1 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('notes')}</th>
@@ -6542,21 +6340,21 @@ const NetWorthManager = () => {
                             {activeSection === 'cash' && (
                               <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
                                 <span className={`px-2 py-1 rounded text-xs ${item.accountType === 'current' ? 'bg-blue-100 text-blue-800' : item.accountType === 'deposit' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                  {item.accountType === 'current' ? 'Corrente' : item.accountType === 'deposit' ? 'Deposito' : item.accountType === 'cash' ? 'Cash' : t('notAvailable')}
+                                  {item.accountType === 'current' ? t('currentAccountType') : item.accountType === 'deposit' ? t('depositAccountType') : item.accountType === 'cash' ? t('cashAccountType') : t('notAvailable')}
                                 </span>
                               </td>
                             )}
                             {activeSection === 'alternativeAssets' && (
                               <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
                                 <span className={`px-2 py-1 rounded text-xs ${darkMode ? 'bg-purple-700 text-purple-100' : 'bg-purple-100 text-purple-800'}`}>
-                                  {item.assetType === 'tcg' ? 'TCG' : 
-                                   item.assetType === 'stamps' ? 'Francobolli' :
-                                   item.assetType === 'alcohol' ? 'Alcolici' :
-                                   item.assetType === 'collectibles' ? 'Collezionabili' :
-                                   item.assetType === 'vinyl' ? 'Vinili' :
-                                   item.assetType === 'books' ? 'Libri' :
-                                   item.assetType === 'comics' ? 'Fumetti' :
-                                   item.assetType === 'art' ? 'Arte' :
+                                  {item.assetType === 'tcg' ? t('tcg') : 
+                                   item.assetType === 'stamps' ? t('stamps') :
+                                   item.assetType === 'alcohol' ? t('alcohol') :
+                                   item.assetType === 'collectibles' ? t('collectibles') :
+                                   item.assetType === 'vinyl' ? t('vinyl') :
+                                   item.assetType === 'books' ? t('books') :
+                                   item.assetType === 'comics' ? t('comics') :
+                                   item.assetType === 'art' ? t('art') :
                                    item.assetType === 'other' ? t('other') : t('notAvailable')}
                                 </span>
                               </td>
@@ -6571,7 +6369,7 @@ const NetWorthManager = () => {
                               <div className="flex justify-center gap-1">
                                 <button 
                                   onClick={() => handleEditRow(activeSection, item.id)}
-                                  className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'}`}
+                                  className={`${darkMode ? 'text-green-400 hover:text-green-300' : 'text-green-500 hover:text-green-700'} transition-all duration-200 ease-in-out transform hover:scale-110`}
                                   title="Modifica riga"
                                   aria-label={`Modifica ${item.name}`}
                                   tabIndex={0}
@@ -6589,7 +6387,7 @@ const NetWorthManager = () => {
                                 </button>
                                 <button 
                                   onClick={() => handleCopyRow(activeSection, item.id)}
-                                  className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'}`}
+                                  className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-700'} transition-all duration-200 ease-in-out transform hover:scale-110`}
                                   title="Copia riga"
                                   aria-label={`Duplica ${item.name}`}
                                   tabIndex={0}
@@ -6607,7 +6405,7 @@ const NetWorthManager = () => {
                                 </button>
                                 <button
                                   onClick={() => handleDeleteItem(activeSection, item.id)}
-                                  className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                                  className={`${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'} transition-all duration-200 ease-in-out transform hover:scale-110`}
                                   title="Elimina riga"
                                   aria-label={`Elimina ${item.name}`}
                                   tabIndex={0}
@@ -6644,15 +6442,15 @@ const NetWorthManager = () => {
                         Nessun asset trovato
                       </p>
                       <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        Non ci sono asset di tipo "{alternativeAssetFilter === 'tcg' ? 'TCG' : 
-                                                   alternativeAssetFilter === 'stamps' ? 'Francobolli' :
-                                                   alternativeAssetFilter === 'alcohol' ? 'Alcolici' :
-                                                   alternativeAssetFilter === 'collectibles' ? 'Collezionabili' :
-                                                   alternativeAssetFilter === 'vinyl' ? 'Vinili' :
-                                                   alternativeAssetFilter === 'books' ? 'Libri' :
-                                                   alternativeAssetFilter === 'comics' ? 'Fumetti' :
-                                                   alternativeAssetFilter === 'art' ? 'Arte' :
-                                                   alternativeAssetFilter === 'other' ? 'Altro' : 'Selezionato'}" nel tuo portfolio.
+                                                {t('noAssetsOfType').replace('{type}', alternativeAssetFilter === 'tcg' ? t('tcg') :
+                          alternativeAssetFilter === 'stamps' ? t('stamps') :
+                          alternativeAssetFilter === 'alcohol' ? t('alcohol') :
+                          alternativeAssetFilter === 'collectibles' ? t('collectibles') :
+                          alternativeAssetFilter === 'vinyl' ? t('vinyl') :
+                          alternativeAssetFilter === 'books' ? t('books') :
+                          alternativeAssetFilter === 'comics' ? t('comics') :
+                          alternativeAssetFilter === 'art' ? t('art') :
+                          alternativeAssetFilter === 'other' ? t('other') : t('selected'))}
                       </p>
                       <button
                         onClick={() => setAlternativeAssetFilter('all')}
@@ -6714,7 +6512,7 @@ const NetWorthManager = () => {
                     />
                     {monthlyExpenses > 0 && (
                       <p className={`text-xs mt-1 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                        💰 {t('withTotalLiquidity').replace('{amount}', formatCurrency(totals.cash)).replace('{months}', (totals.cash / monthlyExpenses).toFixed(1))}
+                        💰 {t('withTotalLiquidity').replace('{amount}', formatCurrencyWithPrivacy(totals.cash)).replace('{months}', privacyMode ? '••••••••' : (totals.cash / monthlyExpenses).toFixed(1))}
                       </p>
                     )}
                   </div>
@@ -6793,18 +6591,18 @@ const NetWorthManager = () => {
 
         {/* Edit Modal */}
         {editingItem && (
-          <SectionErrorBoundary section="editModal" darkMode={darkMode}>
+          <SectionErrorBoundary section="editModal" darkMode={darkMode} t={t}>
           <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-                Modifica Elemento
+                {t('editItem')}
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* Common Fields */}
                 <div>
                   <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Nome *
+                    {t('name')} *
                   </label>
                   <input
                     type="text"
@@ -6818,7 +6616,7 @@ const NetWorthManager = () => {
                 
                 <div>
                   <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {editingItem.section === 'realEstate' ? 'Valore' : 'Importo'} *
+                    {editingItem.section === 'realEstate' ? t('valueLabel') : t('amount')} *
                   </label>
                   <input
                     type="number"
@@ -6840,7 +6638,7 @@ const NetWorthManager = () => {
                 
                 <div>
                   <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Descrizione
+                    {t('description')}
                   </label>
                   <input
                     type="text"
@@ -7220,9 +7018,9 @@ const NetWorthManager = () => {
                       darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
                     }`}
                   >
-                                            <option value="current">Conto corrente</option>
-                        <option value="deposit">Conto deposito</option>
-                    <option value="cash">Cash</option>
+                                            <option value="current">{t('currentAccount')}</option>
+                        <option value="deposit">{t('depositAccount')}</option>
+                    <option value="cash">{t('cashAccountType')}</option>
                   </select>
                 </div>
               )}
@@ -7240,15 +7038,15 @@ const NetWorthManager = () => {
                       darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
                     }`}
                   >
-                    <option value="tcg">TCG</option>
-                    <option value="stamps">Francobolli</option>
-                    <option value="alcohol">Alcolici</option>
-                    <option value="collectibles">Collezionabili</option>
-                    <option value="vinyl">Vinili</option>
-                    <option value="books">Libri</option>
-                    <option value="comics">Fumetti</option>
-                    <option value="art">Arte</option>
-                    <option value="other">Altro</option>
+                    <option value="tcg">{t('tcg')}</option>
+                    <option value="stamps">{t('stamps')}</option>
+                    <option value="alcohol">{t('alcohol')}</option>
+                    <option value="collectibles">{t('collectibles')}</option>
+                    <option value="vinyl">{t('vinyl')}</option>
+                    <option value="books">{t('books')}</option>
+                    <option value="comics">{t('comics')}</option>
+                    <option value="art">{t('art')}</option>
+                    <option value="other">{t('other')}</option>
                   </select>
                 </div>
               )}
@@ -7258,7 +7056,7 @@ const NetWorthManager = () => {
                   onClick={handleSaveEdit}
                   className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
                 >
-                  Salva
+                  {t('save')}
                 </button>
                 <button
                   onClick={handleCancelEdit}
@@ -7266,7 +7064,7 @@ const NetWorthManager = () => {
                     darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  Annulla
+                  {t('cancel')}
                 </button>
               </div>
             </div>
@@ -7280,11 +7078,13 @@ const NetWorthManager = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
               <div className="flex items-center space-x-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                <span className="text-gray-700 dark:text-gray-300">Elaborazione in corso...</span>
+                <span className="text-gray-700 dark:text-gray-300">{t('processing')}</span>
               </div>
             </div>
           </div>
         )}
+
+
 
         {/* Notification Toast */}
         {notification.visible && (
@@ -7323,10 +7123,23 @@ const NetWorthManager = () => {
   );
 };
 
-const AppWithErrorBoundary = () => (
-  <ErrorBoundary>
+const AppWithErrorBoundary = () => {
+  // Create a simple translation function for the error boundary
+  const t = (key: string): string => {
+    // Default to English for error boundary messages
+    const translations: Record<string, string> = {
+      'somethingWentWrong': 'Something went wrong',
+      'unexpectedError': 'An unexpected error occurred. Please refresh the page to continue.',
+      'refreshPage': 'Refresh Page'
+    };
+    return translations[key] || key;
+  };
+
+  return (
+    <ErrorBoundary t={t}>
     <NetWorthManager />
   </ErrorBoundary>
 );
+};
 
 export default AppWithErrorBoundary;

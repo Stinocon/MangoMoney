@@ -50,13 +50,7 @@ export function VirtualizedTable<T>({
     onScroll?.(newScrollTop);
   }, [onScroll]);
 
-  // Scroll to item
-  const scrollToItem = useCallback((index: number) => {
-    const targetScrollTop = index * rowHeight;
-    if (scrollElementRef.current) {
-      scrollElementRef.current.scrollTop = targetScrollTop;
-    }
-  }, [rowHeight]);
+
 
   const totalHeight = data.length * rowHeight;
   const offsetY = visibleRange.start * rowHeight;
