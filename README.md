@@ -5,7 +5,7 @@
  * https://creativecommons.org/licenses/by-nc-sa/4.0/
 -->
 
-<img width="1229" height="322" alt="logo" src="https://github.com/user-attachments/assets/4cba8264-cf64-447b-aed1-96d7c38d1027" />
+<img width="1229" height="376" alt="logo" src="https://github.com/user-attachments/assets/2e6cae76-f5bf-4ed9-81a2-7cea45fa919c" />
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://stinocon.github.io/MangoMoney/) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) [![Privacy](https://img.shields.io/badge/privacy-100%25%20offline-brightgreen)](docs/legal/privacy-policy.md)
 
