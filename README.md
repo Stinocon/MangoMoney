@@ -34,8 +34,8 @@ Un tracker di patrimonio pensato per chi vuole tenere sotto controllo i propri s
 
 Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma mi diverte! 😄
 
-Nota per i puristi del codice artigianale: io non sono uno sviluppatore, non so scrivere codice ed è una skill che francamente non mi interessa. Ho fatto largo, larghissimo uso di IA per questo progetto. Se vi va bene è così, se non vi va bene è così comunque. 
-Potrebbero quindi esserci inesattezze, accrocchi di codice, errori o altro... Il progetto è qui open apposta. Se ci sono problemi fatemelo sapere che posso provare a fixarlo o ancora meglio potete fixarlo voi :) 
+**Nota per i puristi del codice artigianale: io non sono uno sviluppatore, non so scrivere codice ed è una skill che francamente non mi interessa. Ho fatto largo, larghissimo uso di IA per questo progetto. Se vi va bene è così, se non vi va bene è così comunque. 
+Potrebbero quindi esserci inesattezze, accrocchi di codice, errori o altro... Il progetto è qui open apposta. Se ci sono problemi fatemelo sapere che posso provare a fixarlo o ancora meglio potete fixarlo voi :)**
 
 ### Come funziona
 
