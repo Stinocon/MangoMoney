@@ -776,6 +776,7 @@ export const it = {
   dataLoadedSuccessfully: 'Dati caricati con successo dal backup locale',
   dataNotSavedWarning: 'I tuoi dati potrebbero non essere stati salvati. Sei sicuro di voler chiudere il browser?',
   dataNotSavedRecentlyWarning: 'I tuoi dati potrebbero non essere stati salvati negli ultimi 30 secondi. Ti ricordiamo di fare un backup prima di chiudere il browser.',
+  transactionCopiedSuccess: 'Transazione copiata con successo. Filtri resettati per visualizzare la nuova transazione.',
   
   // UI messages
   noAssetsOfType: 'Non ci sono asset di tipo "{type}" nel tuo portfolio.',

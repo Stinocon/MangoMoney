@@ -2960,6 +2960,13 @@ const NetWorthManager = () => {
           ...assets,
           transactions: [...assets.transactions, newItem]
         });
+        
+        // Reset filters and pagination to show the new transaction
+        setTransactionFilters({ type: 'all', ticker: '', isin: '' });
+        setCurrentTransactionPage(1);
+        
+        // Show success notification
+        showNotification(t('transactionCopiedSuccess'), 'success');
       }
     } else if (section === 'realEstate') {
       itemToCopy = assets.realEstate.find((item: RealEstate) => item.id === itemId);
