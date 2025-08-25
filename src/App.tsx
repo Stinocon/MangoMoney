@@ -1827,6 +1827,18 @@ const NetWorthManager = () => {
     return saved ? safeParseJSON(saved, 3) : 3; // Default 3 months for adequate
   });
 
+  // Helper function for numeric input fields that allows empty values
+  const handleNumericInputChange = useCallback((setter: (value: number) => void, value: string) => {
+    if (value === '' || value === null || value === undefined) {
+      setter(0);
+    } else {
+      const parsed = parseFloat(value);
+      if (!isNaN(parsed)) {
+        setter(parsed);
+      }
+    }
+  }, []);
+
   // Auto-backup system
   const autoBackup = useAutoBackup(
     assets,
@@ -8476,8 +8488,8 @@ const NetWorthManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={monthlyExpenses}
-                    onChange={(e) => setMonthlyExpenses(parseFloat(e.target.value) || 0)}
+                    value={monthlyExpenses || ''}
+                    onChange={(e) => handleNumericInputChange(setMonthlyExpenses, e.target.value)}
                     className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                     placeholder="0"
                     step="50"
@@ -10538,8 +10550,8 @@ const NetWorthManager = () => {
                           step="0.1"
                           min="0"
                           max="100"
-                          value={capitalGainsTaxRate}
-                          onChange={(e) => setCapitalGainsTaxRate(parseFloat(e.target.value) || 0)}
+                          value={capitalGainsTaxRate || ''}
+                          onChange={(e) => handleNumericInputChange(setCapitalGainsTaxRate, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10560,8 +10572,8 @@ const NetWorthManager = () => {
                           step="0.1"
                           min="0"
                           max="100"
-                          value={whitelistBondsTaxRate}
-                          onChange={(e) => setWhitelistBondsTaxRate(parseFloat(e.target.value) || 0)}
+                          value={whitelistBondsTaxRate || ''}
+                          onChange={(e) => handleNumericInputChange(setWhitelistBondsTaxRate, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10581,8 +10593,8 @@ const NetWorthManager = () => {
                           type="number"
                           step="0.01"
                           min="0"
-                          value={currentAccountStampDuty}
-                          onChange={(e) => setCurrentAccountStampDuty(parseFloat(e.target.value) || 0)}
+                          value={currentAccountStampDuty || ''}
+                          onChange={(e) => handleNumericInputChange(setCurrentAccountStampDuty, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10602,8 +10614,8 @@ const NetWorthManager = () => {
                           type="number"
                           step="100"
                           min="0"
-                          value={currentAccountStampDutyThreshold}
-                          onChange={(e) => setCurrentAccountStampDutyThreshold(parseFloat(e.target.value) || 0)}
+                          value={currentAccountStampDutyThreshold || ''}
+                          onChange={(e) => handleNumericInputChange(setCurrentAccountStampDutyThreshold, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10624,8 +10636,8 @@ const NetWorthManager = () => {
                           step="0.01"
                           min="0"
                           max="10"
-                          value={depositAccountStampDutyRate}
-                          onChange={(e) => setDepositAccountStampDutyRate(parseFloat(e.target.value) || 0)}
+                          value={depositAccountStampDutyRate || ''}
+                          onChange={(e) => handleNumericInputChange(setDepositAccountStampDutyRate, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10646,8 +10658,8 @@ const NetWorthManager = () => {
                           step="0.1"
                           min="0"
                           max="50"
-                          value={inflationRate}
-                          onChange={(e) => setInflationRate(parseFloat(e.target.value) || 0)}
+                          value={inflationRate || ''}
+                          onChange={(e) => handleNumericInputChange(setInflationRate, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10795,8 +10807,8 @@ const NetWorthManager = () => {
                           step="0.5"
                           min="1"
                           max="24"
-                          value={emergencyFundOptimalMonths}
-                          onChange={(e) => setEmergencyFundOptimalMonths(parseFloat(e.target.value) || 6)}
+                          value={emergencyFundOptimalMonths || ''}
+                          onChange={(e) => handleNumericInputChange(setEmergencyFundOptimalMonths, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -10815,8 +10827,8 @@ const NetWorthManager = () => {
                           step="0.5"
                           min="1"
                           max="24"
-                          value={emergencyFundAdequateMonths}
-                          onChange={(e) => setEmergencyFundAdequateMonths(parseFloat(e.target.value) || 3)}
+                          value={emergencyFundAdequateMonths || ''}
+                          onChange={(e) => handleNumericInputChange(setEmergencyFundAdequateMonths, e.target.value)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
                             darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -11489,9 +11501,9 @@ const NetWorthManager = () => {
                     </label>
                     <input
                       type="number"
-                      value={monthlyExpenses}
-                      onChange={(e) => setMonthlyExpenses(parseFloat(e.target.value) || 0)}
-                      className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-green-800 border-green-600 text-green-100' : 'bg-white border-green-300'}`}
+                      value={monthlyExpenses || ''}
+                      onChange={(e) => handleNumericInputChange(setMonthlyExpenses, e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-green-800 border-green-600 text-green-100' : 'bg-white border-green-300 text-gray-900'}`}
                       step="50"
                     />
                     {monthlyExpenses > 0 && (
