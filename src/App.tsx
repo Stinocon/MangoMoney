@@ -9749,7 +9749,7 @@ const NetWorthManager = () => {
                                   <div key={asset.id} className="space-y-1">
                                     <div className="flex justify-between text-xs">
                                                                               <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                         {asset.ticker || asset.name.substring(0, 12)}{(asset.ticker || asset.name).length > 12 ? '...' : ''}
+                                         {asset.ticker || asset.sector || asset.name.substring(0, 12)}{(asset.ticker || asset.sector || asset.name).length > 12 ? '...' : ''}
                                         </span>
                                       <span className={`font-medium ${percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         {percentage.toFixed(1)}%
