@@ -1,242 +1,303 @@
-# 📖 MangoMoney - Manuale Utente Completo
+<!--
+ * MangoMoney - Portfolio Tracker
+ * Copyright (c) 2025 Stefano Conter
+ * Licensed under CC BY-NC-SA 4.0
+ * https://creativecommons.org/licenses/by-nc-sa/4.0/
+-->
 
-**Versione:** 3.2.0  
-**Data:** 24 Agosto 2025  
-**Lingua:** Italiano  
+<img width="1229" height="376" alt="logo" src="https://github.com/user-attachments/assets/2e6cae76-f5bf-4ed9-81a2-7cea45fa919c" />
+
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://stinocon.github.io/MangoMoney/) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) [![Privacy](https://img.shields.io/badge/privacy-100%25%20offline-brightgreen)](docs/legal/privacy-policy.md)
 
 ---
 
-## 🚀 Guida Rapida (5 minuti)
+## 🌍 Who can use MangoMoney? | Chi può usare MangoMoney?
 
-### Primo Accesso
-1. **Apri l'applicazione**: Vai su [GitHub](https://stinocon.github.io/MangoMoney/)
-2. **Benvenuto**: L'app è completamente offline - i tuoi dati restano sul tuo dispositivo
-3. **Primo asset**: Clicca "Aggiungi Asset" per iniziare
+**🇮🇹 For Italian investors (main target)** | **🇮🇹 Per investitori italiani (target principale)**
+Designed specifically for Italian tax system: automatic capital gains calculation (26% standard, 12.5% whitelist bonds), stamp duty, EUR currency.
+Pensato specificatamente per il sistema fiscale italiano: calcolo automatico plusvalenze (26% standard, 12.5% obbligazioni whitelist), bollo, valuta EUR.
 
-### Il Tuo Primo Portfolio
+**🌐 For international investors (full support)** | **🌐 Per investitori internazionali (supporto completo)**  
+Complete English interface, multiple currencies (USD, GBP, CHF, JPY, EUR), universal calculations (CAGR, SWR, Risk Score), customizable tax rates.
+Interfaccia inglese completa, valute multiple (USD, GBP, CHF, JPY, EUR), calcoli universali (CAGR, SWR, Risk Score), aliquote tasse personalizzabili.
+
+---
+
+## 🚀 **[Prova subito l'app](https://stinocon.github.io/MangoMoney/)**
+*Niente registrazioni, niente server, i tuoi dati restano sul tuo dispositivo*
+
+---
+
+## Cos'è MangoMoney?
+
+Un tracker di patrimonio pensato per chi vuole tenere sotto controllo i propri soldi senza complicazioni. Nato perché gestire tutto su Excel non è il massimo esteticamente, e i servizi online... beh, preferisco tenere i miei dati per me.
+
+Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma mi diverte! 😄
+
+**Nota per i puristi del codice artigianale: io non sono uno sviluppatore, non so scrivere codice ed è una skill che francamente non mi interessa. Ho fatto largo, larghissimo uso di IA per questo progetto. Se vi va bene è così, se non vi va bene è così comunque. 
+Potrebbero quindi esserci inesattezze, accrocchi di codice, errori o altro... Il progetto è qui open apposta. Se ci sono problemi fatemelo sapere che posso provare a fixarlo o ancora meglio potete fixarlo voi :)**
+
+### Come funziona
+
+Inserisci tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento. L'app calcola automaticamente il tuo patrimonio netto e ti dà statistiche interessanti come:
+
+- Quanto potresti "prelevare" ogni mese senza intaccare il capitale (SWR)
+- Quanto durerebbe il tuo fondo di emergenza  
+- Il rischio del tuo portfolio (con calcoli veri, non a caso)
+- Le tasse che dovrai pagare sui tuoi guadagni (per Italia)
+- Performance reali dei tuoi investimenti (CAGR)
+
+## ✨ Caratteristiche principali
+
+### 🔒 **Privacy Assoluta**
+- **100% offline** - I tuoi dati non escono mai dal tuo dispositivo (se scarichi l'app localmente)
+- **Niente tracking** - Zero analytics, zero cookie, zero spying  
+- **Crittografia AES-256** - Dati sensibili protetti localmente
+
+### 💰 **Gestione Completa Portfolio**
+
+#### **Liquidità & Contanti**
+- **Conti bancari**: Correnti, depositi, libretti postali
+- **Contanti**: Wallet, cassaforte, contanti in casa
+- **Fondo di emergenza**: Configurazione automatica con calcolo mesi di autonomia
+- **Spese mensili**: Tracciamento per calcoli di sicurezza finanziaria
+
+#### **Investimenti Avanzati** 
+- **Posizioni globali**: Vista aggregata per broker/banca (es. "Totale su Fineco: €50.000")
+- **Asset individuali**: Singoli titoli con ticker, ISIN, quantità, prezzi (es. "VWCE: 100 pezzi @ €105")
+- **Storico transazioni**: Registro completo acquisti/vendite con commissioni
+- **Collegamento intelligente**: Verifica automatica posizioni vs transazioni
+- **Tipologie complete**: Azioni, ETF, Obbligazioni, Obbligazioni whitelist
+- **Performance tracking**: CAGR, rendimenti lordi/netti
+
+#### **Immobili**
+- **Proprietà multiple**: Casa principale, seconde case, investimenti
+- **Valutazioni aggiornabili**: Prezzi di mercato, stime, perizie
+- **Indirizzi e dettagli**: Gestione completa informazioni
+
+#### **Debiti & Passività**
+- **Mutui**: Casa, investimenti, ristrutturazioni  
+- **Prestiti personali**: Rate auto, prestiti famiglia
+- **Carte di credito**: Saldi e limiti
+
+### 📊 **Calcoli Finanziari Intelligenti**
+
+#### **CAGR (Compound Annual Growth Rate)**
+Rendimento annualizzato reale dei tuoi investimenti:
 ```javascript
-// Esempio pratico: Portfolio bilanciato italiano
-const portfolioEsempio = {
-  liquidità: {
-    contoCorrente: 10000,      // €10,000 BNL/Intesa
-    contoDeposito: 15000       // €15,000 FCA Bank 3.5%
-  },
-  investimenti: {
-    vwce: 30000,               // €30,000 VANGUARD FTSE All-World
-    btps: 20000,               // €20,000 BTP Italia 2030
-    etfEmergenti: 5000         // €5,000 ETF Mercati Emergenti
-  },
-  immobili: {
-    casaPrincipale: 300000     // €300,000 Residenza principale Milano
-  }
-};
-
-// Risultato automatico:
-// - Patrimonio Netto: €380,000
-// - Risk Score: 6.5/10 (moderato-aggressivo)
-// - SWR: €1,267/mese (4% regola)
-// - Fondo Emergenza: 8.3 mesi (ottimale)
+// Calcolo con gestione edge cases e precisione finanziaria
+const cagr = safeCAGR(initialValue, finalValue, years);
+// Gestisce casi limite: valori negativi, zero, periodi brevi
+```
+```
+Investiti €10.000 → Dopo 5 anni hai €15.000
+CAGR = 8.45% annuo
 ```
 
----
+#### **SWR (Safe Withdrawal Rate)** 
+Quanto puoi prelevare senza finire mai i soldi (regola del 4%):
+```javascript
+// Basato su Trinity Study con inflazione e tasse
+const swr = calculateSWR(portfolioData, swrRate, inflationRate, monthlyExpenses);
+// Calcola prelievo sicuro mensile considerando inflazione e tasse
+```
+```
+Portfolio €500.000 × 4% = €20.000/anno
+€1.667/mese prelevabili per 30+ anni
+```
 
-## 📊 Capire i Tuoi Dati
+#### **Risk Score Intelligente** 
+Analisi rischio basata su **Modern Portfolio Theory**:
+```javascript
+// Basato su Modern Portfolio Theory
+const riskScore = calculatePortfolioRiskScore(assets);
+// Analizza volatilità, correlazioni e allocazione
+```
+- Usa volatilità storiche **reali** (liquidità 0.5%, azioni 18%, immobili 15%)
+- Considera **correlazioni** tra asset diversi  
+- Punteggio 0-10: Conservativo (0-3), Moderato (4-6), Aggressivo (7-10)
 
-### CAGR (Rendimento Annualizzato)
-> **Cosa significa:** Quanto è cresciuto il tuo investimento "in media" ogni anno
-> 
-> **Esempio pratico:** Hai investito €10,000 e dopo 5 anni hai €15,000
-> - CAGR = 8.45% annuo
-> - Significa: "Come se avessi guadagnato 8.45% ogni anno per 5 anni"
->
-> **⚠️ Importante:** È una media! Alcuni anni +20%, altri anni -10%
->
-> **🎯 Benchmark Italia 2024:**
-> - Azioni italiane (FTSE MIB): ~12% CAGR
-> - BTP 10 anni: ~4% CAGR  
-> - Conti deposito: ~3.5% CAGR
+#### **Emergency Fund Metrics**
+Analisi del fondo di emergenza:
+```javascript
+// Calcolo autonomia finanziaria e adeguatezza fondo
+const metrics = calculateEmergencyFundMetrics(assets, monthlyExpenses);
+// Valuta se il fondo copre i mesi ottimali/adeguati
+```
+- **3-6 mesi**: Adeguato per la maggior parte delle persone
+- **6+ mesi**: Ottimale per massima sicurezza finanziaria
 
-### SWR (Tasso Prelievo Sicuro)
-> **Cosa significa:** Quanto puoi prelevare ogni anno senza finire mai i soldi
->
-> **La Regola del 4%:** Da €1 milione puoi prelevare €40,000/anno (€3,333/mese) per 30+ anni
->
-> **🧮 Come lo calcoliamo:**
-> ```
-> Portfolio: €500,000
-> SWR 4%: €20,000/anno = €1,667/mese
-> 
-> Se le tue spese sono €2,000/mese:
-> - Ti servono €600,000 per essere "finanziariamente libero"
-> ```
->
-> **⚠️ Adattamenti Italia:**
-> - Inflazione più alta: SWR ridotto a 3.5%
-> - Tasse capital gains 26%: SWR ridotto
-> - Portfolio più prudente: SWR aumentato leggermente
+#### **Sistema Fiscale Italiano Integrato** 🇮🇹
+- **Calcolo automatico plusvalenze** su vendite in profitto
+- **Aliquote differenziate**: 26% standard, 12.5% obbligazioni whitelist
+- **Monitoraggio capital gains** per anno fiscale
+- **Bollo evidenziato** in rosso (0.20% su depositi titoli)
+- **Rendimenti netti** al netto tasse
 
-### Risk Score (Punteggio Rischio)
-> **Cosa significa:** Quanto è volatile il tuo portfolio (0-10)
->
-> **Interpretazione:**
-> - **0-3:** Conservativo (bassa volatilità)
-> - **4-6:** Moderato (volatilità media)
-> - **7-10:** Aggressivo (alta volatilità)
->
-> **🎯 Target consigliato:** 5-7 per la maggior parte delle persone
->
-> **⚠️ Attenzione:** Alto rischio = potenziali perdite maggiori, non solo guadagni
+### 🎨 **Interfaccia & Usabilità**
 
----
+#### **Design Moderno**
+- **Dark/Light mode** - Per i cultori dello schermo nero
+- **Responsive design** - Perfetto su desktop, tablet, smartphone
+- **Accessibilità WCAG 2.1 AA** - Supporto screen reader completo
 
-## 🔧 Funzionalità Avanzate
+#### **Grafici & Visualizzazioni**
+- **Grafici a torta interattivi** - Distribuzione patrimonio
+- **Grafici a barre** - Confronti tra categorie  
+- **Charts performance** - Trend nel tempo
+- **Colori coordinati** - Consistenti in tutta l'app
 
-### Import/Export Portfolio
-1. **Esporta i tuoi dati**:
-   - Formato JSON (backup completo)
-   - Formato CSV (per Excel/Google Sheets)
-   - Formato PDF (per commercialista)
+#### **Export & Backup**
+- **Export PDF professionale** - Report per commercialista
+- **Export CSV** - Analisi su Excel/Google Sheets
+- **Backup JSON completo** - Tutti i dati con metadata
+- **Backup automatico** - Salvataggio ogni 5 minuti
+- **Template CSV** - Import facile dei tuoi dati esistenti
 
-2. **Importa da Excel/CSV**:
-   - Template scaricabile
-   - Mappatura automatica colonne
-   - Validazione dati
+### 🛡️ **Sicurezza Avanzata**
 
-### Calcolo Tasse Automatico
-> **🇮🇹 Specializzato per Italia:**
-> - Capital Gains: 26% su plusvalenze
-> - Obbligazioni whitelist: 12.5% 
-> - Bollo conto corrente: €34.20 se giacenza >€5,000
-> - Bollo conto deposito: 0.2% annuo
+#### **Protezione Dati**
+- **Input sanitization** completa (prevenzione XSS)
+- **CSV injection protection** 
+- **Content Security Policy** headers
+- **Audit trail** per operazioni critiche
+- **Checksum verification** integrità dati
 
-### Cost Basis FIFO/LIFO
-> **Perché importante:** Per calcolare tasse su vendite parziali
->
-> **FIFO (First In First Out):** Vendi prima quello che hai comprato per primo
-> **LIFO (Last In First Out):** Vendi prima quello che hai comprato per ultimo
->
-> **💡 Suggerimento Italia:** LIFO spesso più conveniente fiscalmente
+#### **Validazioni Smart**
+- **Controllo collegamenti** posizioni ↔ transazioni (tolleranza 5%)
+- **Validazione import** con sanitizzazione
+- **Controllo integrità** backup e restore
+- **Error logging** avanzato per debugging
 
----
+### 🌐 **Internazionalizzazione**
 
-## 🆘 Risoluzione Problemi
+#### **Lingue Supportate**
+- **🇮🇹 Italiano** (default) - Sistema fiscale italiano completo
+- **🇬🇧 English** - Traduzioni complete, calcoli universali
 
-### Problemi Comuni
+#### **Valute Multiple**
+- **EUR** (default per Italia)
+- **USD, GBP, CHF, JPY** per mercati internazionali
+- **Configurazione tasse** personalizzabile per ogni paese
 
-**❓ "Il mio CAGR è negativo, è normale?"**
-- ✅ Sì, se hai perso soldi il CAGR sarà negativo
-- ✅ Guarda il periodo: 1-2 anni possono essere volatili
-- ⚠️ Se negativo per >5 anni, rivedi la strategia
+## 💻 Per sviluppatori
 
-**❓ "Il Risk Score è 9/10, devo preoccuparmi?"**
-- ⚠️ Portfolio molto aggressivo
-- 💡 Considera di aggiungere obbligazioni/liquidità
-- 🎯 Target 5-7/10 per la maggior parte delle persone
+### **Setup Rapido**
+```bash
+git clone https://github.com/Stinocon/MangoMoney.git
+cd MangoMoney
+npm install
+npm start
+```
 
-**❓ "L'SWR dice €500/mese ma spendo €3,000"**
-- 📊 Significa che non hai abbastanza capitale per sostenerti
-- 🎯 Ti servono circa €900,000 per €3,000/mese
-- 💡 Continua ad investire e/o riduci le spese
+### **Stack Tecnologico**
+- **React 18 + TypeScript** in strict mode
+- **Tailwind CSS** per styling responsivo
+- **Recharts** per grafici accessibili  
+- **Decimal.js** per precisione finanziaria
+- **CryptoJS** per crittografia locale
+- **jsPDF + html2canvas** per export PDF
+- **Bundle size**: 406 kB (ottimizzato con tree shaking)
 
-**❓ "Come aggiungere un nuovo asset?"**
-- 📱 Clicca "Aggiungi Asset" in alto a destra
-- 📝 Compila i campi richiesti (nome, valore, categoria)
-- 💾 Clicca "Salva" - i dati si salvano automaticamente
+### **Architecture Highlights**
+- **Modern Portfolio Theory** per calcoli rischio
+- **Trinity Study** per calcoli SWR
+- **Cost basis methods**: FIFO, LIFO, Average Cost
+- **Accessibility-first**: Focus trap, keyboard navigation, ARIA labels
+- **Privacy-by-design**: Zero data leakage, tutto localStorage
 
-**❓ "I miei dati sono sicuri?"**
-- 🔒 Sì, tutto rimane sul tuo dispositivo
-- 🚫 Nessun dato viene inviato ai nostri server
-- 💾 Puoi fare backup manuali quando vuoi
+### **Testing**
+```bash
+npm test                 # Test interattivo
+npm run test:coverage    # Con coverage report  
+npm run lint            # Code quality check
+npm run type-check      # TypeScript validation
+```
 
----
+## 📱 Come iniziare
 
-## 📱 Guida Mobile
+### **Quick Start (5 minuti)**
+1. **Apri** [stinocon.github.io/MangoMoney](https://stinocon.github.io/MangoMoney/)
+2. **Scegli la tua lingua** (🇮🇹 Italiano / 🇬🇧 English) 
+3. **Configura le impostazioni** - Per Italia c'è un setup automatico
+4. **Aggiungi il tuo primo asset** - Inizia dalla liquidità
+5. **Guarda le statistiche** aggiornarsi in tempo reale
 
-### Ottimizzazioni Mobile
-- **Touch-friendly:** Tutti i bottoni sono grandi abbastanza per il touch
-- **Responsive:** L'interfaccia si adatta automaticamente al tuo schermo
-- **Offline:** Funziona senza connessione internet
-- **Backup:** I tuoi dati sono sempre salvati localmente
+### **Configurazione Avanzata**
+- **Import da CSV**: Scarica i template dall'app per il formato corretto
+- **Collegamento posizioni**: Collega posizioni globali ↔ individuali ↔ transazioni  
+- **Fondo emergenza**: Configura spese mensili per calcoli automatici
+- **Tasse personalizzate**: Imposta le tue aliquote fiscali
 
-### Suggerimenti Mobile
-- **Orizzontale:** Ruota il telefono per vedere meglio le tabelle
-- **Zoom:** Usa il pinch-to-zoom per i dettagli
-- **Scrolling:** Scorri orizzontalmente nelle tabelle grandi
+## 🎯 Funzionalità Avanzate
 
----
+### **Smart Insights** 
+L'app genera automaticamente insights intelligenti:
+- **Performance alerts**: "Portfolio +15% vs periodo precedente"
+- **Risk warnings**: "Rischio troppo alto, diversifica"  
+- **Emergency fund alerts**: "Fondo emergenza sotto 3 mesi"
+- **Tax optimization**: "Plusvalenze €5K, tasse stimate €1.3K"
 
-## 🔒 Sicurezza e Privacy
+### **Riconciliazione Automatica**
+- **Verifica discrepanze** tra posizioni e transazioni
+- **Tolleranza configurabile** (default 5%)
+- **Highlighting problemi** con suggerimenti correzione
+- **Calcolo cost basis** multipli (FIFO, LIFO, Average)
 
-### I Tuoi Dati Sono Sicuri
-- **Crittografia:** I dati sensibili sono crittografati
-- **Locale:** Tutto rimane sul tuo dispositivo
-- **Nessun tracking:** Non raccogliamo dati personali
-- **Controllo completo:** Tu decidi quando eliminare i dati
+### **Analisi Fiscali Avanzate** 
+Per utenti italiani:
+- **Capital gains per anno** fiscale
+- **Breakdown per tipo asset** (standard vs whitelist)  
+- **Simulazione vendite** con calcolo tasse
+- **Regime amministrato vs dichiarativo**
 
-### Backup e Ripristino
-1. **Backup automatico:** I dati si salvano automaticamente
-2. **Backup manuale:** Menu → Export → JSON
-3. **Ripristino:** Menu → Import → Seleziona file JSON
-4. **Reset completo:** Menu → Impostazioni → Reset Completo
+## 🆘 Supporto & Documentazione
 
----
+### **Documentazione**
+- 📖 **[Manuale completo](docs/user-manual/README.md)** - Guida step-by-step
+- 🛠️ **[Developer docs](docs/developers/README.md)** - Per gli smanettoni
+- ⚖️ **[Privacy Policy](docs/legal/privacy-policy.md)** - Trasparenza totale
 
-## 🎯 Suggerimenti per l'Uso
+## 🔗 Risorse Utili
 
-### Best Practices
-1. **Aggiorna regolarmente:** Inserisci i valori attuali ogni mese
-2. **Diversifica:** Non concentrare tutto in un asset
-3. **Monitora il rischio:** Mantieni il Risk Score sotto controllo
-4. **Fondo emergenza:** Mantieni 3-6 mesi di spese in liquidità
-5. **Consulenza:** Consulta un professionista per decisioni importanti
+**[📚 AwesomeFinanceITA](https://github.com/Stinocon/AwesomeFinanceITA)** - Raccolta di risorse finanziarie per investitori italiani
 
-### Pianificazione Finanziaria
-- **Obiettivi:** Definisci i tuoi obiettivi finanziari
-- **Orizzonte:** Considera il tuo orizzonte temporale
-- **Tolleranza rischio:** Sii onesto sulla tua tolleranza al rischio
-- **Revisione:** Rivedi il portfolio periodicamente
+## ☕ Supporta il Progetto
 
----
+Se MangoMoney ti è utile e vuoi supportare lo sviluppo, puoi offrirmi un caffè! ☕
 
-## 📞 Supporto
+**[💝 Dona su PayPal](https://www.paypal.com/paypalme/stefanoconter)**
 
-### Come Ottenere Aiuto
-- **📖 Documentazione:** Questa guida e le sezioni di aiuto in-app
-- **🐛 Bug report:** GitHub Issues per problemi tecnici
-- **💡 Suggerimenti:** GitHub Discussions per idee e feedback
-- **📧 Email:** support@mangomoney.app per supporto diretto
+Ogni contributo, anche piccolo, aiuta a:
+- ✅ Mantenere il progetto **gratuito** e **open source**
+- ✅ Aggiungere **nuove funzionalità** 
+- ✅ Migliorare **sicurezza** e **performance**
+- ✅ Supportare **hosting** e **domini**
 
-### Community
-- **GitHub:** [Repository ufficiale](https://github.com/Stinocon/MangoMoney)
-- **Discussions:** Condividi esperienze con altri utenti
-- **Contributi:** Aiuta a migliorare l'applicazione
-
----
-
-## 📋 Changelog
-
-### Versione 3.2.0 (23 Agosto 2025)
-- ✅ **Nuovo:** Sistema di sicurezza avanzato con crittografia
-- ✅ **Migliorato:** Accessibilità completa (WCAG 2.1 AA)
-- ✅ **Nuovo:** Design system responsive mobile-first
-- ✅ **Migliorato:** Calcoli finanziari più precisi
-- ✅ **Nuovo:** Smart insights automatici
-- ✅ **Migliorato:** Documentazione completa
-
-### Versioni Precedenti
-- **3.1.0:** Calcoli SWR avanzati e cost basis methods
-- **3.0.0:** Riscrittura completa con React e TypeScript
-- **2.0.0:** Aggiunta calcoli fiscali italiani
-- **1.0.0:** Prima versione pubblica
+*Grazie a tutti quelli che hanno già contribuito! 🙏*
 
 ---
 
-## ⚖️ Disclaimer
+## ⚖️ Disclaimer & Licenza
 
-**⚠️ IMPORTANTE:** MangoMoney è uno strumento di monitoraggio portfolio. Non fornisce consigli di investimento e non sostituisce la consulenza di un professionista qualificato. I calcoli sono indicativi e basati su dati storici. Consulta sempre un consulente finanziario per decisioni importanti.
+### **⚠️ IMPORTANTE** 
+MangoMoney è uno strumento di **monitoraggio**, non fornisce consigli di investimento. I calcoli sono indicativi e basati su dati storici. Per decisioni importanti consulta sempre un **consulente finanziario qualificato**.
 
-**🔒 Privacy:** I tuoi dati rimangono sempre sul tuo dispositivo. Non raccogliamo o condividiamo alcuna informazione personale.
+### **📄 Licenza**
+Rilasciato sotto **Creative Commons BY-NC-SA 4.0**. 
+
+✅ **Puoi:** Usare, modificare, distribuire liberamente  
+❌ **Non puoi:** Rivendere o usare per scopi commerciali  
+🔄 **Condizione:** Le modifiche devono mantenere la stessa licenza
+
+[Testo completo della licenza](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 ---
 
-*Ultimo aggiornamento: 24 Agosto 2025*
+**💡 Ti è utile?** Lascia una ⭐ su GitHub!
+
+*P.S. Se ti piace l'idea di tenere i tuoi dati finanziari per te, condividi MangoMoney con chi pensi possa interessare. La privacy finanziaria è importante!* 
+
+---
+
+*Ultimo aggiornamento: 23 Agosto 2025 - Versione 3.2.0*

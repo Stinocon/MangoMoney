@@ -7198,7 +7198,7 @@ const NetWorthManager = () => {
                 value={formData.assetType || 'ETF'}
                 onChange={(e) => setFormData({ ...formData, assetType: e.target.value as 'Azione' | 'ETF' | 'Obbligazione whitelist' | 'Obbligazione' })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
                 required
               >
@@ -7213,7 +7213,7 @@ const NetWorthManager = () => {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className={`w-full px-3 py-2 border rounded-md text-sm ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
               } ${validation.errors.name ? 'border-red-500' : ''}`}
               placeholder="Inserisci il nome"
               aria-describedby={validation.errors.name ? `name-error-${section}` : undefined}
@@ -7234,7 +7234,7 @@ const NetWorthManager = () => {
                 value={formData.sector}
                 onChange={(e) => setFormData({ ...formData, sector: sanitizeTicker(e.target.value) })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
                 placeholder="es. AAPL, VWCE"
               />
@@ -7244,7 +7244,7 @@ const NetWorthManager = () => {
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 } ${validation.errors.amount ? 'border-red-500' : ''}`}
                 placeholder="0.00"
                 step="0.01"
@@ -7268,7 +7268,7 @@ const NetWorthManager = () => {
                 : setFormData({ ...formData, description: e.target.value })
               }
               className={`w-full px-3 py-2 border rounded-md text-sm ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
               }`}
               placeholder={section === 'transactions' ? 'es. US0378331005' : 'Breve descrizione'}
             />
@@ -7283,7 +7283,7 @@ const NetWorthManager = () => {
                 value={transactionType}
                 onChange={(e) => setTransactionType(e.target.value as 'purchase' | 'sale')}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
               >
                 <option value="purchase">{t('purchase')}</option>
@@ -7299,7 +7299,7 @@ const NetWorthManager = () => {
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value as 'primary' | 'secondary')}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
               >
                 <option value="primary">{t('primaryResidence')}</option>
@@ -7316,7 +7316,7 @@ const NetWorthManager = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
                 placeholder="Note aggiuntive"
               />
@@ -7334,7 +7334,7 @@ const NetWorthManager = () => {
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   } ${validation.errors.quantity ? 'border-red-500' : ''}`}
                   placeholder="0"
                   step="1"
@@ -7351,7 +7351,7 @@ const NetWorthManager = () => {
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   } ${validation.errors.amount ? 'border-red-500' : ''}`}
                   placeholder="0.00"
                   step="0.01"
@@ -7368,7 +7368,7 @@ const NetWorthManager = () => {
                   value={formData.fees}
                   onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="0.00"
                   step="0.01"
@@ -7384,7 +7384,7 @@ const NetWorthManager = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="Descrizione della transazione"
                 />
@@ -7399,7 +7399,7 @@ const NetWorthManager = () => {
                   value={formData.date || new Date().toISOString().split('T')[0]}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                 />
               </div>
@@ -7412,7 +7412,7 @@ const NetWorthManager = () => {
                   value={formData.linkedToAsset || ''}
                   onChange={(e) => setFormData({ ...formData, linkedToAsset: e.target.value ? parseInt(e.target.value) : undefined })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                 >
                   <option value="">Nessuno</option>
@@ -7437,7 +7437,7 @@ const NetWorthManager = () => {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="Indirizzo dell'immobile"
                 />
@@ -7449,7 +7449,7 @@ const NetWorthManager = () => {
                   id="excludeFromTotal"
                   checked={formData.excludeFromTotal || false}
                   onChange={(e) => setFormData({ ...formData, excludeFromTotal: e.target.checked })}
-                  className={`w-4 h-4 mr-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                  className={`w-4 h-4 mr-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300 text-gray-900'}`}
                 />
                 <label htmlFor="excludeFromTotal" className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   {t('excludeFromTotal')}
@@ -7469,7 +7469,7 @@ const NetWorthManager = () => {
                   value={formData.sector}
                   onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="es. AAPL, VWCE"
                 />
@@ -7484,7 +7484,7 @@ const NetWorthManager = () => {
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="0"
                   step="1"
@@ -7500,7 +7500,7 @@ const NetWorthManager = () => {
                   value={formData.avgPrice}
                   onChange={(e) => setFormData({ ...formData, avgPrice: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="0.00"
                   step="0.01"
@@ -7516,7 +7516,7 @@ const NetWorthManager = () => {
                   value={formData.currentPrice}
                   onChange={(e) => setFormData({ ...formData, currentPrice: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="0.00"
                   step="0.01"
@@ -7533,7 +7533,7 @@ const NetWorthManager = () => {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md text-sm ${
-                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                    darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                   }`}
                   placeholder="es. US0378331005"
                 />
@@ -7550,7 +7550,7 @@ const NetWorthManager = () => {
                 value={formData.accountType || 'current'}
                 onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'current' | 'deposit' | 'remunerated' | 'cash' })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
               >
                                         <option value="current">{t('currentAccount')}</option>
@@ -7578,7 +7578,7 @@ const NetWorthManager = () => {
                 })}
                 placeholder="es: 3.50"
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -7596,7 +7596,7 @@ const NetWorthManager = () => {
                 value={formData.assetType || 'other'}
                 onChange={(e) => setFormData({ ...formData, assetType: e.target.value as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other' })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
-                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                  darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
               >
                 <option value="tcg">{t('tcg')}</option>
@@ -8478,7 +8478,7 @@ const NetWorthManager = () => {
                     type="number"
                     value={monthlyExpenses}
                     onChange={(e) => setMonthlyExpenses(parseFloat(e.target.value) || 0)}
-                    className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                    className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                     placeholder="0"
                     step="50"
                   />
@@ -9018,7 +9018,7 @@ const NetWorthManager = () => {
                             <select
                               value={item.linkedToGlobalPosition || ''}
                               onChange={(e) => handleLinkToGlobalPosition(item.id, e.target.value ? parseInt(e.target.value) : null)}
-                              className={`text-xs px-1 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                              className={`text-xs px-1 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                             >
                               <option value="">Nessuno</option>
                               {assets.investmentPositions.map((globalPosition: InvestmentPosition) => (
@@ -9140,7 +9140,7 @@ const NetWorthManager = () => {
                       setTransactionFilters(prev => ({ ...prev, type: e.target.value }));
                       setCurrentTransactionPage(1);
                     }}
-                    className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                    className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                   >
                     <option value="all">{t('allTransactions')}</option>
                     <option value="purchase">{t('purchases')}</option>
@@ -9159,7 +9159,7 @@ const NetWorthManager = () => {
                       setTransactionFilters(prev => ({ ...prev, ticker: e.target.value }));
                       setCurrentTransactionPage(1);
                     }}
-                    className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                    className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                   />
                 </div>
                 <div>
@@ -9174,7 +9174,7 @@ const NetWorthManager = () => {
                       setTransactionFilters(prev => ({ ...prev, isin: e.target.value }));
                       setCurrentTransactionPage(1);
                     }}
-                    className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                    className={`w-full text-xs px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                   />
                 </div>
                 <div className="flex items-end">
@@ -9991,7 +9991,7 @@ const NetWorthManager = () => {
                               <select
                                 value={item.linkedToGlobalPosition || ''}
                                 onChange={(e) => handleLinkToGlobalPosition(item.id, e.target.value ? parseInt(e.target.value) : null)}
-                                className={`text-xs px-1 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                                className={`text-xs px-1 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                               >
                                 <option value="">Nessuno</option>
                                 {assets.investmentPositions.map((globalPosition: InvestmentPosition) => (
@@ -10500,7 +10500,7 @@ const NetWorthManager = () => {
                       value={selectedCurrency}
                       onChange={(e) => setSelectedCurrency(e.target.value)}
                       className={`w-full md:w-64 px-3 py-2 border rounded-md text-sm ${
-                        darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                        darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                       }`}
                     >
                       {Object.entries(currencies).map(([code, currency]) => (
@@ -10541,7 +10541,7 @@ const NetWorthManager = () => {
                           value={capitalGainsTaxRate}
                           onChange={(e) => setCapitalGainsTaxRate(parseFloat(e.target.value) || 0)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                       </div>
@@ -10563,7 +10563,7 @@ const NetWorthManager = () => {
                           value={whitelistBondsTaxRate}
                           onChange={(e) => setWhitelistBondsTaxRate(parseFloat(e.target.value) || 0)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                       </div>
@@ -10584,7 +10584,7 @@ const NetWorthManager = () => {
                           value={currentAccountStampDuty}
                           onChange={(e) => setCurrentAccountStampDuty(parseFloat(e.target.value) || 0)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                       </div>
@@ -10605,7 +10605,7 @@ const NetWorthManager = () => {
                           value={currentAccountStampDutyThreshold}
                           onChange={(e) => setCurrentAccountStampDutyThreshold(parseFloat(e.target.value) || 0)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                       </div>
@@ -10627,7 +10627,7 @@ const NetWorthManager = () => {
                           value={depositAccountStampDutyRate}
                           onChange={(e) => setDepositAccountStampDutyRate(parseFloat(e.target.value) || 0)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                       </div>
@@ -10649,7 +10649,7 @@ const NetWorthManager = () => {
                           value={inflationRate}
                           onChange={(e) => setInflationRate(parseFloat(e.target.value) || 0)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                       </div>
@@ -10798,7 +10798,7 @@ const NetWorthManager = () => {
                           value={emergencyFundOptimalMonths}
                           onChange={(e) => setEmergencyFundOptimalMonths(parseFloat(e.target.value) || 6)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -10818,7 +10818,7 @@ const NetWorthManager = () => {
                           value={emergencyFundAdequateMonths}
                           onChange={(e) => setEmergencyFundAdequateMonths(parseFloat(e.target.value) || 3)}
                           className={`w-full px-3 py-2 border rounded-md text-sm ${
-                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300'
+                            darkMode ? 'bg-gray-600 border-gray-500 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         />
                         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -11209,7 +11209,7 @@ const NetWorthManager = () => {
                       <select
                         value={alternativeAssetFilter}
                         onChange={(e) => setAlternativeAssetFilter(e.target.value)}
-                        className={`w-full md:w-64 text-sm px-3 py-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'}`}
+                        className={`w-full md:w-64 text-sm px-3 py-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
                       >
                         <option value="all">{t('allTypes')}</option>
                         <option value="tcg">{t('tcg')}</option>
@@ -11614,7 +11614,7 @@ const NetWorthManager = () => {
                       value={localFieldValues.assetType !== undefined ? localFieldValues.assetType : (editingItem.data as Transaction).assetType || 'ETF'}
                       onChange={(e) => handleUncontrolledFieldChange('assetType', e)}
                       className={`w-full px-3 py-2 border rounded-md ${
-                        darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                        darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                       }`}
                     >
                       <option value="Azione">{t('azione')}</option>
@@ -11628,7 +11628,7 @@ const NetWorthManager = () => {
                       value={localFieldValues.name !== undefined ? localFieldValues.name : ((editingItem.data as any).name || '')}
                     onChange={(e) => handleUncontrolledFieldChange('name', e)}
                     className={`w-full px-3 py-2 border rounded-md ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
                     placeholder="Nome dell'elemento"
                   />
@@ -11647,7 +11647,7 @@ const NetWorthManager = () => {
                       }
                       onChange={(e) => handleUncontrolledFieldChange(editingItem.section === 'realEstate' ? 'value' : 'amount', e)}
                       className={`w-full px-3 py-2 border rounded-md ${
-                        darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                        darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                       }`}
                       step="0.01"
                       placeholder="0.00"
@@ -11662,7 +11662,7 @@ const NetWorthManager = () => {
                     value={localFieldValues.description !== undefined ? localFieldValues.description : ((editingItem.data as any).description || '')}
                     onChange={(e) => handleUncontrolledFieldChange('description', e)}
                     className={`w-full px-3 py-2 border rounded-md resize-none ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
                     placeholder="Descrizione dell'elemento"
                     rows={3}
@@ -11678,7 +11678,7 @@ const NetWorthManager = () => {
                     value={localFieldValues.notes !== undefined ? localFieldValues.notes : ((editingItem.data as any).notes || '')}
                     onChange={(e) => handleUncontrolledFieldChange('notes', e)}
                     className={`w-full px-3 py-2 border rounded-md resize-none ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
                     placeholder="Note aggiuntive"
                     rows={3}
@@ -11704,7 +11704,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as AssetItem).sector || ''}
                         onChange={(e) => handleEditFieldChange('sector', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         placeholder="es. AAPL, VWCE"
                       />
@@ -11719,7 +11719,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as AssetItem).isin || ''}
                         onChange={(e) => handleEditFieldChange('isin', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         placeholder="es. US0378331005"
                       />
@@ -11734,7 +11734,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as AssetItem).quantity !== undefined && (editingItem.data as AssetItem).quantity !== null ? (editingItem.data as AssetItem).quantity : ''}
                         onChange={(e) => handleEditIntegerChange('quantity', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         step="1"
                         placeholder="0"
@@ -11752,7 +11752,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as AssetItem).avgPrice !== undefined && (editingItem.data as AssetItem).avgPrice !== null ? (editingItem.data as AssetItem).avgPrice : ''}
                         onChange={(e) => handleEditNumberChange('avgPrice', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         step="0.01"
                         placeholder="0.00"
@@ -11768,7 +11768,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as AssetItem).currentPrice !== undefined && (editingItem.data as AssetItem).currentPrice !== null ? (editingItem.data as AssetItem).currentPrice : ''}
                         onChange={(e) => handleEditNumberChange('currentPrice', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         step="0.01"
                         placeholder="0.00"
@@ -11792,7 +11792,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).ticker || ''}
                         onChange={(e) => handleEditFieldChange('ticker', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         placeholder="es. AAPL, VWCE"
                       />
@@ -11807,7 +11807,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).isin || ''}
                         onChange={(e) => handleEditFieldChange('isin', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         placeholder="es. US0378331005"
                       />
@@ -11821,7 +11821,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).transactionType || 'purchase'}
                         onChange={(e) => handleEditFieldChange('transactionType', e.target.value as 'purchase' | 'sale')}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                       >
                         <option value="purchase">Acquisto</option>
@@ -11838,7 +11838,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).quantity !== undefined && (editingItem.data as Transaction).quantity !== null ? (editingItem.data as Transaction).quantity : ''}
                         onChange={(e) => handleEditIntegerChange('quantity', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         step="1"
                         placeholder="0"
@@ -11854,7 +11854,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).commissions !== undefined && (editingItem.data as Transaction).commissions !== null ? (editingItem.data as Transaction).commissions : ''}
                         onChange={(e) => handleEditNumberChange('commissions', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         step="0.01"
                         placeholder="0.00"
@@ -11870,7 +11870,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).date || ''}
                         onChange={(e) => handleEditFieldChange('date', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                       />
                     </div>
@@ -11883,7 +11883,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as Transaction).linkedToAsset || ''}
                         onChange={(e) => handleEditOptionalIntegerChange('linkedToAsset', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                       >
                         <option value="">Nessuno</option>
@@ -11908,7 +11908,7 @@ const NetWorthManager = () => {
                         value={(editingItem.data as RealEstate).type || 'primary'}
                         onChange={(e) => handleEditFieldChange('type', e.target.value as 'primary' | 'secondary')}
                         className={`w-full px-3 py-2 border rounded-md ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                       >
                         <option value="primary">Residenza Principale</option>
@@ -11925,7 +11925,7 @@ const NetWorthManager = () => {
                         onChange={(e) => handleUncontrolledFieldChange('address', e)}
 
                         className={`w-full px-3 py-2 border rounded-md resize-none ${
-                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                          darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                         placeholder="Indirizzo dell'immobile"
                         rows={2}
@@ -11943,7 +11943,7 @@ const NetWorthManager = () => {
                             excludeFromTotal: e.target.checked ? 'true' : 'false'
                           }));
                         }}
-                        className={`w-4 h-4 mr-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                        className={`w-4 h-4 mr-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300 text-gray-900'}`}
                       />
                       <label htmlFor="excludeFromTotal" className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         {t('excludeFromTotal')}
@@ -11967,7 +11967,7 @@ const NetWorthManager = () => {
                     value={(editingItem.data as AssetItem).accountType || 'current'}
                     onChange={(e) => handleEditFieldChange('accountType', e.target.value as 'current' | 'deposit' | 'remunerated' | 'cash')}
                     className={`w-full md:w-1/2 px-3 py-2 border rounded-md ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
                   >
                                             <option value="current">{t('currentAccount')}</option>
@@ -11993,7 +11993,7 @@ const NetWorthManager = () => {
                     onChange={(e) => handleUncontrolledFieldChange('interestRate', e)}
                     placeholder="es: 3.50"
                     className={`w-full md:w-1/2 px-3 py-2 border rounded-md ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -12012,7 +12012,7 @@ const NetWorthManager = () => {
                     value={(editingItem.data as AssetItem).assetType || 'other'}
                     onChange={(e) => handleEditFieldChange('assetType', e.target.value as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other')}
                     className={`w-full md:w-1/2 px-3 py-2 border rounded-md ${
-                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                      darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
                   >
                     <option value="tcg">{t('tcg')}</option>
@@ -12176,7 +12176,7 @@ const NetWorthManager = () => {
                       onChange={(e) => setClearTransactionsPassword(e.target.value)}
                       placeholder="DELETE"
                       className={`w-full px-3 py-2 border rounded-md ${
-                        darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300'
+                        darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                       }`}
                       autoFocus
                     />
