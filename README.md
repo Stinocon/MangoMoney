@@ -5,21 +5,19 @@
  * https://creativecommons.org/licenses/by-nc-sa/4.0/
 -->
 
-<img width="1229" height="376" alt="logo" src="https://github.com/user-attachments/assets/f0f18c09-2bd6-42e0-aa81-dfaf04d9867d" />
+<img width="1229" height="376" alt="logo" src="https://github.com/user-attachments/assets/2e6cae76-f5bf-4ed9-81a2-7cea45fa919c" />
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://stinocon.github.io/MangoMoney/) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) [![Privacy](https://img.shields.io/badge/privacy-100%25%20offline-brightgreen)](docs/legal/privacy-policy.md) [![Vibe Coding](https://img.shields.io/badge/vibe%20coding-100%25-ff69b4?style=flat&logo=sparkles)](https://github.com/Stinocon/MangoMoney)
 
 ---
 
-## 🌍 Who can use MangoMoney? | Chi può usare MangoMoney?
+## Chi può usare MangoMoney?
 
-**🇮🇹 For Italian investors (main target)** | **🇮🇹 Per investitori italiani (target principale)**
-Designed specifically for Italian tax system: automatic capital gains calculation (26% standard, 12.5% whitelist bonds), stamp duty, EUR currency.
-Pensato specificatamente per il sistema fiscale italiano: calcolo automatico plusvalenze (26% standard, 12.5% obbligazioni whitelist), bollo, valuta EUR.
+### 🇮🇹 **Per investitori italiani (target principale)**
+Progettato specificamente per il sistema fiscale italiano: calcolo automatico delle plusvalenze (26% standard, 12.5% obbligazioni whitelist), bollo titoli e valuta EUR. Setup rapido con configurazioni preimpostate per l'Italia.
 
-**🌐 For international investors (full support)** | **🌐 Per investitori internazionali (supporto completo)**  
-Complete English interface, multiple currencies (USD, GBP, CHF, JPY, EUR), universal calculations (CAGR, SWR, Risk Score), customizable tax rates.
-Interfaccia inglese completa, valute multiple (USD, GBP, CHF, JPY, EUR), calcoli universali (CAGR, SWR, Risk Score), aliquote tasse personalizzabili.
+### 🇬🇧 **For international investors (full support)**  
+Complete English interface, multiple currencies (USD, GBP, CHF, JPY, EUR), universal calculations (CAGR, SWR, Risk Score), customizable tax rates for any country. All features available with international market standards.
 
 ---
 
@@ -30,152 +28,96 @@ Interfaccia inglese completa, valute multiple (USD, GBP, CHF, JPY, EUR), calcoli
 
 ## Cos'è MangoMoney?
 
-Un tracker di patrimonio pensato per chi vuole tenere sotto controllo i propri soldi senza complicazioni. Nato perché gestire tutto su Excel non è il massimo esteticamente, e i servizi online... beh, preferisco tenere i miei dati per me.
+Un tracker di patrimonio pensato per chi vuole tenere sotto controllo i propri soldi senza troppe complicazioni. Nato perché gestire tutto su Excel non è il massimo esteticamente, e i servizi online... Beh, preferisco tenere i miei dati per me.
 
 Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma mi diverte! 😄
 
+---
+
+> ## 🛠️ **Disclaimer Sviluppo**
+> 
+> Giusto per essere trasparenti: io non sono uno sviluppatore di professione e non ho particolare interesse a diventarlo. Questo progetto è nato dal bisogno personale di avere uno strumento decente per tracciare il patrimonio, e ho fatto largo, larghissimo uso dell'intelligenza artificiale per svilupparlo. Alcuni potrebbero chiamarlo "vibe coding" - io lo chiamo pragmatismo.
+>
+> Il risultato è un'app funzionante (credo) che fa quello che deve fare, ma probabilmente troverete codice scritto in modo poco ortodosso, soluzioni creative (eufemismo per "accrocchi") e magari qualche bug qua e là. Il bello dell'open source è che se trovate problemi potete segnalarmeli e, ancora meglio, fixarli voi stessi. Win-win per tutti! 🚀
+
+---
+
 ### Come funziona
 
-Inserisci tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento. L'app calcola automaticamente il tuo patrimonio netto e ti dà statistiche interessanti come:
+Inserisci tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento.
 
-- Quanto potresti "prelevare" ogni mese senza intaccare il capitale (SWR)
-- Quanto durerebbe il tuo fondo di emergenza  
-- Il rischio del tuo portfolio (con calcoli veri, non a caso)
-- Le tasse che dovrai pagare sui tuoi guadagni (per Italia)
-- Performance reali dei tuoi investimenti (CAGR)
+L'app calcola automaticamente:
+- **Net Worth totale** con breakdown per tipologia
+- **Performance** con CAGR e confronti temporali  
+- **Risk Score** basato su volatilità del portafoglio
+- **Efficiency Score** (Sharpe Ratio) per misurare rendimento/rischio
+- **Safe Withdrawal Rate** per pianificare la pensione
+- **Tasse** su plusvalenze (configurabile per paese)
+
+Tutte le funzionalità sono pensate per essere semplici ma complete. L'app ti dirà se i conti tornano.
+
+Per le impostazioni, c'è una configurazione rapida per l'Italia che imposta automaticamente le aliquote fiscali più comuni.
+
+---
+
+## ☕ **Ti piace MangoMoney?**
+
+<div align="center">
+
+### 💝 **[Supporta il progetto con una donazione](https://www.paypal.com/paypalme/stefanoconter)**
+
+🎯 **Aiuta a mantenerlo gratuito e open source**  
+🚀 **Contribuisci alle nuove funzionalità**  
+
+*Ogni caffè conta! Grazie a chi ha già contribuito* 🙏
+
+</div>
+
+---
 
 ## ✨ Caratteristiche principali
 
-### 🔒 **Privacy Assoluta**
-- **100% offline** - I tuoi dati non escono mai dal tuo dispositivo (se scarichi l'app localmente)
-- **Niente tracking** - Zero analytics, zero cookie, zero spying  
-- **Crittografia AES-256** - Dati sensibili protetti localmente
+### **📊 Gestione Portfolio Avanzata**
+- **Multi-asset**: Azioni, ETF, obbligazioni, crypto, immobili, liquidità, asset alternativi
+- **Posizioni globali e individuali** con collegamento automatico
+- **Transazioni complete** con calcoli cost basis (FIFO, LIFO, Average Cost)
+- **Import/Export** CSV, Excel, JSON, PDF con template predefiniti
 
-### 💰 **Gestione Completa Portfolio**
+### **🧮 Calcoli Finanziari Avanzati** 
+- **CAGR** (Compound Annual Growth Rate) per performance temporali
+- **SWR** (Safe Withdrawal Rate) basato su Trinity Study
+- **Risk Score** basato su Modern Portfolio Theory e volatilità
+- **Efficiency Score** (Sharpe Ratio) per analisi rendimento/rischio
+- **Simulazioni** vendite con impatto fiscale
 
-#### **Liquidità & Contanti**
-- **Conti bancari**: Correnti, depositi, libretti postali
-- **Contanti**: Wallet, cassaforte, contanti in casa
-- **Fondo di emergenza**: Configurazione automatica con calcolo mesi di autonomia
-- **Spese mensili**: Tracciamento per calcoli di sicurezza finanziaria
+### **🇮🇹 Fisco Italiano Integrato**
+- **Plusvalenze automatiche**: 26% standard, 12.5% obbligazioni whitelist
+- **Regime amministrato vs dichiarativo**
+- **Bollo titoli** su depositi superiori a €5K
+- **Breakdown fiscale** per anno e tipologia asset
+- **Simulazioni vendite** con calcolo tasse in tempo reale
 
-#### **Investimenti Avanzati** 
-- **Posizioni globali**: Vista aggregata per broker/banca (es. "Totale su Fineco: €50.000")
-- **Asset individuali**: Singoli titoli con ticker, ISIN, quantità, prezzi (es. "VWCE: 100 pezzi @ €105")
-- **Storico transazioni**: Registro completo acquisti/vendite con commissioni
-- **Collegamento intelligente**: Verifica automatica posizioni vs transazioni
-- **Tipologie complete**: Azioni, ETF, Obbligazioni, Obbligazioni whitelist
-- **Performance tracking**: CAGR, rendimenti lordi/netti
-
-#### **Immobili**
-- **Proprietà multiple**: Casa principale, seconde case, investimenti
-- **Valutazioni aggiornabili**: Prezzi di mercato, stime, perizie
-- **Indirizzi e dettagli**: Gestione completa informazioni
-
-#### **Debiti & Passività**
-- **Mutui**: Casa, investimenti, ristrutturazioni  
-- **Prestiti personali**: Rate auto, prestiti famiglia
-- **Carte di credito**: Saldi e limiti
-
-### 📊 **Calcoli Finanziari Intelligenti**
-
-#### **CAGR (Compound Annual Growth Rate)**
-Rendimento annualizzato reale dei tuoi investimenti:
-```javascript
-// Calcolo con gestione edge cases e precisione finanziaria
-const cagr = safeCAGR(initialValue, finalValue, years);
-// Gestisce casi limite: valori negativi, zero, periodi brevi
-```
-```
-Investiti €10.000 → Dopo 5 anni hai €15.000
-CAGR = 8.45% annuo
-```
-
-#### **SWR (Safe Withdrawal Rate)** 
-Quanto puoi prelevare senza finire mai i soldi (regola del 4%):
-```javascript
-// Basato su Trinity Study con inflazione e tasse
-const swr = calculateSWR(portfolioData, swrRate, inflationRate, monthlyExpenses);
-// Calcola prelievo sicuro mensile considerando inflazione e tasse
-```
-```
-Portfolio €500.000 × 4% = €20.000/anno
-€1.667/mese prelevabili per 30+ anni
-```
-
-#### **Risk Score Intelligente** 
-Analisi rischio basata su **Modern Portfolio Theory**:
-```javascript
-// Basato su Modern Portfolio Theory
-const riskScore = calculatePortfolioRiskScore(assets);
-// Analizza volatilità, correlazioni e allocazione
-```
-- Usa volatilità storiche **reali** (liquidità 0.5%, azioni 18%, immobili 15%)
-- Considera **correlazioni** tra asset diversi  
-- Punteggio 0-10: Conservativo (0-3), Moderato (4-6), Aggressivo (7-10)
-
-#### **Emergency Fund Metrics**
-Analisi del fondo di emergenza:
-```javascript
-// Calcolo autonomia finanziaria e adeguatezza fondo
-const metrics = calculateEmergencyFundMetrics(assets, monthlyExpenses);
-// Valuta se il fondo copre i mesi ottimali/adeguati
-```
-- **3-6 mesi**: Adeguato per la maggior parte delle persone
-- **6+ mesi**: Ottimale per massima sicurezza finanziaria
-
-#### **Sistema Fiscale Italiano Integrato** 🇮🇹
-- **Calcolo automatico plusvalenze** su vendite in profitto
-- **Aliquote differenziate**: 26% standard, 12.5% obbligazioni whitelist
-- **Monitoraggio capital gains** per anno fiscale
-- **Bollo evidenziato** in rosso (0.20% su depositi titoli)
-- **Rendimenti netti** al netto tasse
-
-### 🎨 **Interfaccia & Usabilità**
-
-#### **Design Moderno**
-- **Dark/Light mode** - Per i cultori dello schermo nero
-- **Responsive design** - Perfetto su desktop, tablet, smartphone
-- **Accessibilità WCAG 2.1 AA** - Supporto screen reader completo
-
-#### **Grafici & Visualizzazioni**
-- **Grafici a torta interattivi** - Distribuzione patrimonio
-- **Grafici a barre** - Confronti tra categorie  
-- **Charts performance** - Trend nel tempo
-- **Colori coordinati** - Consistenti in tutta l'app
-
-#### **Export & Backup**
-- **Export PDF professionale** - Report per commercialista
-- **Export CSV** - Analisi su Excel/Google Sheets
-- **Backup JSON completo** - Tutti i dati con metadata
-- **Backup automatico** - Salvataggio ogni 5 minuti
-- **Template CSV** - Import facile dei tuoi dati esistenti
-
-### 🛡️ **Sicurezza Avanzata**
-
-#### **Protezione Dati**
-- **Input sanitization** completa (prevenzione XSS)
-- **CSV injection protection** 
-- **Content Security Policy** headers
+### **🔒 Privacy e Sicurezza**
+- **100% offline**: Dati solo nel browser (localStorage)
+- **Zero tracking**: Nessun analytics o raccolta dati
+- **Backup automatici** ogni 5 minuti
+- **Crittografia locale** per dati sensibili
+- **CSV injection protection** e Content Security Policy
 - **Audit trail** per operazioni critiche
 - **Checksum verification** integrità dati
 
-#### **Validazioni Smart**
-- **Controllo collegamenti** posizioni ↔ transazioni (tolleranza 5%)
-- **Validazione import** con sanitizzazione
-- **Controllo integrità** backup e restore
-- **Error logging** avanzato per debugging
-
-### 🌐 **Internazionalizzazione**
-
-#### **Lingue Supportate**
+### **🌐 Internazionalizzazione**
 - **🇮🇹 Italiano** (default) - Sistema fiscale italiano completo
 - **🇬🇧 English** - Traduzioni complete, calcoli universali
-
-#### **Valute Multiple**
 - **EUR** (default per Italia)
 - **USD, GBP, CHF, JPY** per mercati internazionali
 - **Configurazione tasse** personalizzabile per ogni paese
+
+### **🔒 Cosa non c'è **
+- **Dati storici**: Non c'è dietro un DB, quindi non è possibile mantenere storico o altro
+- **API**: Non faccio uso di API esterne per il valore degli asset, scomodo ma per ora è così
+
+E sicuramente un sacco di altra roba che non mi viene in mente.
 
 ## 💻 Per sviluppatori
 
@@ -259,20 +201,6 @@ Per utenti italiani:
 
 **[📚 AwesomeFinanceITA](https://github.com/Stinocon/AwesomeFinanceITA)** - Raccolta di risorse finanziarie per investitori italiani
 
-## ☕ Supporta il Progetto
-
-Se MangoMoney ti è utile e vuoi supportare lo sviluppo, puoi offrirmi un caffè! ☕
-
-**[💝 Dona su PayPal](https://www.paypal.com/paypalme/stefanoconter)**
-
-Ogni contributo, anche piccolo, aiuta a:
-- ✅ Mantenere il progetto **gratuito** e **open source**
-- ✅ Aggiungere **nuove funzionalità** 
-- ✅ Migliorare **sicurezza** e **performance**
-- ✅ Supportare **hosting** e **domini**
-
-*Grazie a tutti quelli che hanno già contribuito! 🙏*
-
 ---
 
 ## ⚖️ Disclaimer & Licenza
@@ -297,4 +225,4 @@ Rilasciato sotto **Creative Commons BY-NC-SA 4.0**.
 
 ---
 
-*Ultimo aggiornamento: 23 Agosto 2025 - Versione 3.2.0*
+*Ultimo aggiornamento: 25 Agosto 2025 - Versione 3.2.0*
