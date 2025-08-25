@@ -251,7 +251,7 @@ Per utenti italiani:
 - **Simulazione vendite** con calcolo tasse
 - **Regime amministrato vs dichiarativo**
 
-## 🆘 Supporto & Documentazione
+## 📚 Documentazione
 
 ### **Documentazione**
 - 📖 **[Manuale completo](docs/user-manual/README.md)** - Guida step-by-step

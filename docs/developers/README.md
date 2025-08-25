@@ -484,14 +484,6 @@ npm run deploy:production
 
 ---
 
-## 📞 Support
-
-### Getting Help
-- **GitHub Issues:** Per bug reports e feature requests
-- **GitHub Discussions:** Per domande e discussioni
-- **Email:** dev@mangomoney.app per supporto diretto
-- **Documentation:** Questa guida e API reference
-
 ### Resources
 - **React Documentation:** https://react.dev/
 - **TypeScript Handbook:** https://www.typescriptlang.org/docs/
