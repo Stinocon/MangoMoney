@@ -5,7 +5,7 @@
  * https://creativecommons.org/licenses/by-nc-sa/4.0/
 -->
 
-<img width="1229" height="376" alt="logo" src="https://github.com/user-attachments/assets/2e6cae76-f5bf-4ed9-81a2-7cea45fa919c" />
+<img width="1229" height="322" alt="logo" src="https://github.com/user-attachments/assets/4cba8264-cf64-447b-aed1-96d7c38d1027" />
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://stinocon.github.io/MangoMoney/) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) [![Privacy](https://img.shields.io/badge/privacy-100%25%20offline-brightgreen)](docs/legal/privacy-policy.md)
 
@@ -33,9 +33,6 @@ Interfaccia inglese completa, valute multiple (USD, GBP, CHF, JPY, EUR), calcoli
 Un tracker di patrimonio pensato per chi vuole tenere sotto controllo i propri soldi senza complicazioni. Nato perché gestire tutto su Excel non è il massimo esteticamente, e i servizi online... beh, preferisco tenere i miei dati per me.
 
 Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma mi diverte! 😄
-
-**Nota per i puristi del codice artigianale: io non sono uno sviluppatore, non so scrivere codice ed è una skill che francamente non mi interessa. Ho fatto largo, larghissimo uso di IA per questo progetto. Se vi va bene è così, se non vi va bene è così comunque. 
-Potrebbero quindi esserci inesattezze, accrocchi di codice, errori o altro... Il progetto è qui open apposta. Se ci sono problemi fatemelo sapere che posso provare a fixarlo o ancora meglio potete fixarlo voi :)**
 
 ### Come funziona
 
