@@ -485,205 +485,308 @@ interface SmartInsightsProps {
     performance: number;
     riskScore: number;
     emergencyFundMonths: number;
-    diversificationScore: number;
+    diversificationScore?: number;
+    unrealizedGains?: number;
+    cashAccounts?: number;
+    debtToAssetRatio?: number;
   };
   previousData?: {
     totalValue: number;
     performance: number;
   };
+  insightsConfig?: {
+    emergency?: boolean;
+    tax?: boolean;
+    performance?: boolean;
+    risk?: boolean;
+    allocation?: boolean;
+  };
+  darkMode?: boolean;
 }
 
 export const SmartInsights: React.FC<SmartInsightsProps> = ({
   portfolioData,
-  previousData
+  previousData,
+  insightsConfig,
+  darkMode
 }) => {
-  const insights = generateInsights(portfolioData, previousData);
+  const insights = generateInsights(portfolioData, previousData, insightsConfig);
 
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'positive': return '✅';
-      case 'warning': return '⚠️';
-      case 'critical': return '🚨';
-      default: return 'ℹ️';
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'positive': return 'border-green-200 bg-green-50';
-      case 'warning': return 'border-yellow-200 bg-yellow-50';
-      case 'critical': return 'border-red-200 bg-red-50';
-      default: return 'border-blue-200 bg-blue-50';
-    }
-  };
-
-  if (insights.length === 0) {
+  const Icon = ({ severity }: { severity: string }) => {
+    const common = 'w-4 h-4';
+    const color = severity === 'critical' ? (darkMode ? 'text-red-300' : 'text-red-600')
+      : severity === 'warning' ? (darkMode ? 'text-yellow-300' : 'text-yellow-600')
+      : severity === 'positive' ? (darkMode ? 'text-emerald-300' : 'text-emerald-600')
+      : (darkMode ? 'text-blue-300' : 'text-blue-600');
     return (
-      <Card>
-        <div className="text-center py-8 text-gray-500">
-          <span className="text-2xl">📊</span>
-          <p className="mt-2">Il tuo portfolio è equilibrato!</p>
-          <p className="text-sm">Continua a monitorare regolarmente.</p>
-        </div>
-      </Card>
+      <svg className={`${common} ${color}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {severity === 'critical' && (<>
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </>)}
+        {severity === 'warning' && (<>
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </>)}
+        {severity === 'positive' && (<>
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </>)}
+        {severity !== 'critical' && severity !== 'warning' && severity !== 'positive' && (<>
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          <path d="M12 12a4 4 0 1 0-4-4"></path>
+        </>)}
+      </svg>
     );
-  }
+  };
+
+  const getContainerClasses = (severity: string) => {
+    const base = 'p-3 border rounded-md';
+    if (darkMode) {
+      if (severity === 'critical') return `${base} border-red-800 bg-red-900/20`;
+      if (severity === 'warning') return `${base} border-yellow-800 bg-yellow-900/20`;
+      if (severity === 'positive') return `${base} border-emerald-800 bg-emerald-900/20`;
+      return `${base} border-blue-800 bg-blue-900/20`;
+    } else {
+      if (severity === 'critical') return `${base} border-red-200 bg-red-50`;
+      if (severity === 'warning') return `${base} border-yellow-200 bg-yellow-50`;
+      if (severity === 'positive') return `${base} border-emerald-200 bg-emerald-50`;
+      return `${base} border-blue-200 bg-blue-50`;
+    }
+  };
 
   return (
     <Card>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <span aria-hidden="true">💡</span>
-          Insight Automatici
+      <div className="mb-3">
+        <h3 className={`text-base font-semibold flex items-center gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={darkMode ? 'text-amber-300' : 'text-amber-600'}>
+            <path d="M9 18h6M10 22h4M2 12a10 10 0 1 1 20 0c0 3-2 5-5 6H7c-3-1-5-3-5-6Z" />
+          </svg>
+          Insight automatici
         </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          Analisi intelligente del tuo portfolio
-        </p>
+        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Suggerimenti compatti basati sui tuoi dati</p>
       </div>
 
-      <div className="space-y-4">
-        {insights.map((insight, index) => (
+      {insights.length === 0 ? (
+        <div className={`text-center py-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className="text-sm">Nessun insight al momento.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {insights.map((insight, index) => (
           <div
             key={index}
-            className={`p-4 border rounded-lg ${getSeverityColor(insight.severity)}`}
+            className={getContainerClasses(insight.severity)}
             role="alert"
             aria-live="polite"
           >
-            <div className="flex items-start gap-3">
-              <span className="text-xl" aria-hidden="true">
-                {getSeverityIcon(insight.severity)}
-              </span>
-              
+            <div className="flex items-start gap-2">
+              <Icon severity={insight.severity} />
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">
-                  {insight.title}
-                </h4>
-                
-                <p className="text-sm text-gray-700 mt-1">
-                  {insight.description}
-                </p>
-                
+                <div className={`flex items-center justify-between gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                  <h4 className="text-sm font-semibold truncate">{insight.title}</h4>
+                  {insight.value !== undefined && (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${darkMode ? 'bg-white/10 text-gray-200' : 'bg-white/70 text-gray-800'}`}>
+                      {insight.type === 'performance' && `${insight.value > 0 ? '+' : ''}${insight.value.toFixed(1)}%`}
+                      {insight.type === 'risk' && `${insight.value.toFixed(1)}/10`}
+                      {insight.type === 'emergency' && `${insight.value.toFixed(1)}m`}
+                      {insight.type === 'allocation' && `${insight.value.toFixed(1)}%`}
+                    </span>
+                  )}
+                </div>
+                <p className={`text-xs mt-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{insight.description}</p>
                 {insight.actionable && (
-                  <div className="mt-2 p-2 bg-white bg-opacity-50 rounded text-sm">
-                    <strong>Suggerimento:</strong> {insight.actionable}
-                  </div>
-                )}
-                
-                {insight.value !== undefined && (
-                  <div className="mt-2 text-lg font-semibold">
-                    {insight.type === 'performance' && `${insight.value > 0 ? '+' : ''}${insight.value.toFixed(1)}%`}
-                    {insight.type === 'risk' && `${insight.value.toFixed(1)}/10`}
-                    {insight.type === 'emergency' && `${insight.value.toFixed(1)} mesi`}
-                    {insight.type === 'allocation' && `${insight.value.toFixed(1)}%`}
+                  <div className={`mt-2 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <span className={`mr-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Azione:</span>{insight.actionable}
                   </div>
                 )}
               </div>
             </div>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 };
 
-// ===== INSIGHTS GENERATION LOGIC =====
+// ===== ADVANCED INSIGHTS GENERATION LOGIC =====
+
+interface SmartInsight {
+  type: 'critical' | 'warning' | 'info' | 'success';
+  category: 'emergency' | 'risk' | 'performance' | 'tax' | 'allocation' | 'efficiency';
+  message: string;
+  action?: string;
+  priority: number;
+  value?: number;
+  trend?: 'up' | 'down' | 'stable';
+}
+
 export const generateInsights = (
   current: SmartInsightsProps['portfolioData'],
-  previous?: SmartInsightsProps['previousData']
+  previous?: SmartInsightsProps['previousData'],
+  config?: {
+    emergency?: boolean;
+    tax?: boolean;
+    performance?: boolean;
+    risk?: boolean;
+    allocation?: boolean;
+  }
 ): Insight[] => {
-  const insights: Insight[] = [];
-
-  // Performance insights
-  if (previous && current.performance !== previous.performance) {
-    const change = current.performance - previous.performance;
+  const insights: SmartInsight[] = [];
+  
+  // Emergency Fund Analysis (context-aware)
+  if (config?.emergency !== false && current.emergencyFundMonths > 0) {
+    const emergencyRatio = current.emergencyFundMonths / 6; // Target: 6 months
     
-    if (change > 5) {
+    if (emergencyRatio < 0.5) {
       insights.push({
-        type: 'performance',
-        severity: 'positive',
-        title: 'Performance Eccellente',
-        description: `Il tuo portfolio ha guadagnato ${change.toFixed(1)}% rispetto al periodo precedente`,
-        actionable: 'Considera di ribilanciare per mantenere la diversificazione',
-        value: change,
-        trend: 'up'
+        type: 'critical',
+        category: 'emergency',
+        message: `Fondo emergenza critico: ${(emergencyRatio * 100).toFixed(0)}% dell'obiettivo minimo`,
+        action: 'Aumenta liquidità immediatamente',
+        priority: 10,
+        value: current.emergencyFundMonths
       });
-    } else if (change < -10) {
+    } else if (emergencyRatio > 2.5) {
       insights.push({
-        type: 'performance',
-        severity: 'warning',
-        title: 'Performance in Calo',
-        description: `Il portfolio ha perso ${Math.abs(change).toFixed(1)}% rispetto al periodo precedente`,
-        actionable: 'Rivedi la strategia di investimento e considera la diversificazione',
-        value: change,
-        trend: 'down'
+        type: 'info',
+        category: 'emergency',
+        message: `Fondo emergenza sovradimensionato: ${(emergencyRatio * 6).toFixed(1)} mesi di spese`,
+        action: 'Considera investimenti più redditizi',
+        priority: 3,
+        value: current.emergencyFundMonths
       });
     }
   }
-
-  // Risk insights
-  if (current.riskScore > 8) {
+  
+  // Risk Analysis - Based on real portfolio composition
+  if (config?.risk !== false) {
+    const riskScore = current.riskScore;
+    
+    // High risk portfolio warning (based on actual allocations)
+    if (riskScore > 7.5) {
+      insights.push({
+        type: 'warning',
+        category: 'risk',
+        message: 'Portfolio ad alto rischio - elevata concentrazione in asset volatili',
+        action: 'Considera di bilanciare con asset più stabili',
+        priority: 7,
+        value: riskScore
+      });
+    } else if (riskScore < 2.5) {
+      insights.push({
+        type: 'info',
+        category: 'risk',
+        message: 'Portfolio molto conservativo - potenziale per crescita limitata',
+        action: 'Valuta di includere asset con rendimenti più elevati',
+        priority: 4,
+        value: riskScore
+      });
+    } else if (riskScore >= 4 && riskScore <= 6) {
+      insights.push({
+        type: 'success',
+        category: 'risk',
+        message: 'Portfolio ben bilanciato - rischio moderato e diversificato',
+        action: 'Mantieni l\'equilibrio attuale',
+        priority: 2,
+        value: riskScore
+      });
+    }
+  }
+  
+  // Tax Optimization (per utenti italiani)
+  if (config?.tax !== false) {
+    const currentMonth = new Date().getMonth() + 1; // 1-12
+    if (currentMonth === 12 && (current.unrealizedGains ?? 0) > 0) {
+      insights.push({
+        type: 'info',
+        category: 'tax',
+        message: `Plusvalenze non realizzate: ${(current.unrealizedGains ?? 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`,
+        action: 'Valuta harvesting fiscale prima di fine anno',
+        priority: 5,
+        value: current.unrealizedGains ?? 0
+      });
+    }
+    
+    // Bollo titoli reminder (per conti deposito)
+    if ((current.cashAccounts ?? 0) > 5000) {
+      insights.push({
+        type: 'info',
+        category: 'tax',
+        message: 'Conti deposito > €5K: ricorda bollo titoli 0.2%',
+        action: 'Verifica adempimenti fiscali',
+        priority: 4
+      });
+    }
+  }
+  
+  // Performance trends
+  if (config?.performance !== false && previous && current.performance !== previous.performance) {
+    const change = current.performance - previous.performance;
+    const trend = change > 0 ? 'up' : change < 0 ? 'down' : 'stable';
+    
+    if (Math.abs(change) > 5) {
+      insights.push({
+        type: change > 0 ? 'success' : 'warning',
+        category: 'performance',
+        message: `Performance ${change > 0 ? 'migliorata' : 'peggiorata'} del ${Math.abs(change).toFixed(1)}%`,
+        action: change > 0 ? 'Monitora per mantenere trend positivo' : 'Analizza cause del calo',
+        priority: 6,
+        value: change,
+        trend
+      });
+    }
+  }
+  
+  // Diversification analysis
+  if (config?.allocation !== false) {
+    if ((current.diversificationScore ?? 0) < 50) {
+      insights.push({
+        type: 'warning',
+        category: 'allocation',
+        message: 'Diversificazione limitata: concentrazione eccessiva',
+        action: 'Diversifica in più settori e asset class',
+        priority: 8,
+        value: current.diversificationScore ?? 0
+      });
+    } else if ((current.diversificationScore ?? 0) > 80) {
+      insights.push({
+        type: 'success',
+        category: 'allocation',
+        message: 'Eccellente diversificazione del portafoglio',
+        action: 'Mantieni la strategia di diversificazione',
+        priority: 1,
+        value: current.diversificationScore ?? 0
+      });
+    }
+  }
+  
+  // Debt-to-asset ratio warning
+  if (config?.risk !== false && (current.debtToAssetRatio ?? 0) > 0.5) {
     insights.push({
-      type: 'risk',
-      severity: 'critical',
-      title: 'Portfolio Ad Alto Rischio',
-      description: 'Il livello di rischio del tuo portfolio è molto elevato',
-      actionable: 'Considera di aggiungere asset più conservativi come obbligazioni o depositi',
-      value: current.riskScore
-    });
-  } else if (current.riskScore > 6) {
-    insights.push({
-      type: 'risk',
-      severity: 'warning',
-      title: 'Rischio Moderato-Alto',
-      description: 'Il portfolio presenta un rischio superiore alla media',
-      actionable: 'Valuta di diversificare con asset meno volatili',
-      value: current.riskScore
+      type: 'critical',
+      category: 'risk',
+      message: 'Rapporto debiti/patrimonio elevato (>50%)',
+      action: 'Riduci debiti o aumenta patrimonio',
+      priority: 9,
+      value: (current.debtToAssetRatio ?? 0) * 100
     });
   }
-
-  // Emergency fund insights
-  if (current.emergencyFundMonths < 3) {
-    insights.push({
-      type: 'emergency',
-      severity: 'critical',
-      title: 'Fondo di Emergenza Insufficiente',
-      description: `Il fondo copre solo ${current.emergencyFundMonths.toFixed(1)} mesi di spese`,
-      actionable: 'Aumenta la liquidità disponibile per raggiungere almeno 6 mesi di spese',
-      value: current.emergencyFundMonths
-    });
-  } else if (current.emergencyFundMonths < 6) {
-    insights.push({
-      type: 'emergency',
-      severity: 'warning',
-      title: 'Fondo di Emergenza da Potenziare',
-      description: `Il fondo copre ${current.emergencyFundMonths.toFixed(1)} mesi di spese`,
-      actionable: 'Considera di aumentare la riserva fino a 6 mesi di spese',
-      value: current.emergencyFundMonths
-    });
-  }
-
-  // Diversification insights
-  if (current.diversificationScore < 50) {
-    insights.push({
-      type: 'allocation',
-      severity: 'warning',
-      title: 'Diversificazione Limitata',
-      description: 'Il portfolio è concentrato in poche categorie di asset',
-      actionable: 'Diversifica investendo in settori e tipologie di asset differenti',
-      value: current.diversificationScore
-    });
-  }
-
-  // Positive insights
-  if (current.emergencyFundMonths >= 6 && current.riskScore <= 6 && current.diversificationScore >= 70) {
-    insights.push({
-      type: 'allocation',
-      severity: 'positive',
-      title: 'Portfolio Equilibrato',
-      description: 'Il tuo portfolio presenta un buon equilibrio tra rischio, liquidità e diversificazione',
-      actionable: 'Continua a monitorare e ribilanciare periodicamente'
-    });
-  }
-
-  return insights;
+  
+  // Sort by priority (highest first)
+  insights.sort((a, b) => b.priority - a.priority);
+  
+  // Convert to legacy Insight format for backward compatibility
+  return insights.map(insight => ({
+    type: (insight.category === 'efficiency' ? 'performance' : insight.category) as 'performance' | 'risk' | 'emergency' | 'allocation' | 'tax',
+    severity: (insight.type === 'success' ? 'positive' : insight.type) as 'positive' | 'warning' | 'critical' | 'info',
+    title: insight.message.split(':')[0],
+    description: insight.message,
+    actionable: insight.action || '',
+    value: insight.value || 0,
+    trend: (insight.trend === 'stable' ? 'neutral' : insight.trend) as 'up' | 'down' | 'neutral' | undefined
+  }));
 };

@@ -38,7 +38,7 @@ export const it = {
   investmentPositions: 'Investimenti',
   realEstate: 'Immobili',
   pensionFunds: 'Fondi pensione',
-  otherAccounts: 'Altri conti',
+
   alternativeAssets: 'Beni alternativi',
   
   // Investment specific
@@ -90,7 +90,7 @@ export const it = {
   status: 'Stato',
   
   // Statistics
-  riskScore: 'Livello di rischio portafoglio',
+  riskScore: 'Livello di rischio semplificato',
   efficiencyScore: 'Efficienza (Sharpe Ratio)',
   emergencyFund: 'Fondo emergenza',
   diversification: 'Diversificazione',
@@ -167,6 +167,7 @@ export const it = {
   
   // Charts
   assetDistribution: 'Distribuzione asset',
+  assetDistributionNote: 'Distribuzione degli asset (esclusi i debiti). Il patrimonio netto è calcolato come asset - passività.',
   categoryComparison: 'Confronto categorie',
   realEstateDistribution: 'Distribuzione immobili',
   
@@ -302,7 +303,7 @@ export const it = {
   welcomeInvestments: 'Benvenuto nella sezione Investimenti',
   welcomeRealEstate: 'Benvenuto nella sezione Immobili',
   welcomePensionFunds: 'Benvenuto nella sezione Fondi Pensione',
-  welcomeOtherAccounts: 'Benvenuto nella sezione Altri Conti',
+
   welcomeAlternativeAssets: 'Benvenuto nella sezione Beni Alternativi',
   
   // Individual positions specific
@@ -378,9 +379,20 @@ export const it = {
   emergencyFundAnalysis: 'Analisi fondo di emergenza',
   commissionCostStatistics: 'Statistiche commissioni e costi',
   assetLinking: 'Collegamenti asset',
-  automaticValidationTolerance: 'Validazione automatica con tolleranza 5%',
+  automaticValidationTolerance: 'Validazione automatica con tolleranza dinamica',
   
   // Autolink functionality
+  dynamicToleranceExplanation: 'Tolleranza variabile: ±10% per importi < €1K, ±5% per importi < €10K, ±3% per importi < €100K, ±2% per importi maggiori',
+  
+  // Smart Insights Configuration
+  smartInsightsTitle: 'Insights Intelligenti',
+  smartInsightsDescription: 'Suggerimenti personalizzati basati sul tuo portafoglio',
+  insightsConfiguration: 'Configurazione Insights',
+  enableEmergencyInsights: 'Abilita insights fondo emergenza',
+  enableTaxInsights: 'Abilita insights fiscali',
+  enablePerformanceInsights: 'Abilita insights performance',
+  enableRiskInsights: 'Abilita insights rischio',
+  enableAllocationInsights: 'Abilita insights allocazione',
   autolinkTransactions: 'Autolink Transazioni',
   autolinkDescription: 'Collega automaticamente le transazioni alle posizioni individuali basandosi sull\'ISIN',
   autolinkCompleted: 'Autolink completato',
@@ -420,15 +432,17 @@ export const it = {
   // Statistics section
   advancedStatistics: 'Statistiche avanzate',
   transactionStatistics: 'Statistiche Transazioni',
-  riskScoreTitle: 'Score di rischio',
+  riskScoreTitle: 'Score di rischio semplificato',
   
   // Risk score descriptions
+  riskScoreDescription: 'Calcolo semplificato basato su categorie di asset. Adatto per la maggior parte degli utenti.',
+  riskScoreMethod: 'Metodo: Media ponderata per categoria (non Modern Portfolio Theory completa)',
   liquidityRiskDescription: 'Liquidità: 1.0 (rischio minimo - alta liquidità)',
   pensionFundsRiskDescription: 'Fondi pensione: 2.0 (rischio medio - regolamentati, lungo termine)',
   realEstateRiskDescription: 'Immobili: 2.0 (rischio medio - stabili ma illiquidi)',
   globalPositionsRiskDescription: 'Posizioni globali: 3.0 (rischio medio-alto - conti broker)',
   alternativeAssetsRiskDescription: 'Beni alternativi: 5.0 (rischio molto alto - asset speculativi)',
-  otherAccountsRiskDescription: 'Altri conti: 1.5 (rischio basso - prodotti finanziari vari)',
+
   investmentsTransactionsRiskDescription: 'Investimenti/Transazioni: 4.0 (rischio alto - volatilità di mercato)',
   riskScoreBasedOnVolatility: 'Basato sulla volatilità del portafoglio calcolata con Modern Portafoglio Theory.',
   efficiencyBasedOnSharpe: 'Basato sul rapporto rischio-rendimento aggiustato.',
@@ -652,6 +666,7 @@ export const it = {
   books: 'Libri',
   comics: 'Fumetti',
   art: 'Arte',
+  lego: 'LEGO',
   selected: 'Selezionato',
   fees: 'Commissioni',
   primaryResidence: 'Residenza Principale',

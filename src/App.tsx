@@ -5,14 +5,14 @@
  * https://creativecommons.org/licenses/by-nc-sa/4.0/
  */
 
-import React, { Component, ReactNode, useCallback, useEffect, useMemo, useState, useRef, lazy, Suspense } from 'react';
+import React, { Component, ReactNode, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 // PDF generation utilities - used in exportToPDF function (line 5208)
 import jsPDF from 'jspdf';
 // Screenshot capture utility - used in exportToPDF function (line 5198)
 import html2canvas from 'html2canvas';
 // UI Icons - used throughout the application for buttons and indicators
-import { PlusCircle, Trash2, Moon, Sun, Calculator, Target, TrendingUp } from 'lucide-react';
+import { PlusCircle, Trash2, Moon, Sun } from 'lucide-react';
 // Chart components - used in MemoizedBarChart component (lines 6280-6309)
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 // Virtualized table component - used for large data sets (line 10567)
@@ -75,6 +75,8 @@ import {
   SmartInsights,
   generateInsights
 } from './components/AccessibleCharts';
+import SwrSimplified from './components/SwrSimplified';
+import SimpleStatistics from './components/SimpleStatistics';
 // Internationalization utilities - used for multi-language support (lines 1436, 7275, 7370)
 import { translations, languages, type TranslationKey, type Language } from './translations';
 
@@ -871,7 +873,7 @@ interface BaseAsset {
 // ✅ TYPE SAFETY IMPROVEMENTS - Keep AssetItem for backward compatibility
 interface AssetItem extends BaseAsset {
   accountType?: 'current' | 'deposit' | 'remunerated' | 'cash'; // For cash accounts
-  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other' | 'Azione' | 'ETF' | 'Obbligazione' | 'Obbligazione whitelist'; // For alternative assets and investments
+  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other' | 'Azione' | 'ETF' | 'Obbligazione' | 'Obbligazione whitelist'; // For alternative assets and investments
   bollo?: number; // For cash accounts - stamp duty amount in euros
   interestRate?: number; // Tasso interesse lordo annuo in % per conti deposito
 }
@@ -935,7 +937,6 @@ interface Assets {
   transactions: Transaction[];
   realEstate: RealEstate[];
   pensionFunds: AssetItem[];
-  otherAccounts: AssetItem[];
   alternativeAssets: AssetItem[];
 }
 
@@ -958,7 +959,7 @@ interface NewItem {
   sector: string;
   date?: string;
   accountType?: 'current' | 'deposit' | 'remunerated' | 'cash';
-  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other' | 'Azione' | 'ETF' | 'Obbligazione whitelist' | 'Obbligazione';
+  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other' | 'Azione' | 'ETF' | 'Obbligazione whitelist' | 'Obbligazione';
   interestRate?: string; // Tasso interesse lordo annuo in % per conti deposito e remunerati
 }
 
@@ -1045,6 +1046,7 @@ interface ExportData {
     
     // Pagination settings
     currentTransactionPage: number;
+    currentTransactionYearPage: number;
     currentAlternativeAssetPage: number;
     
     // Form and editing state
@@ -1118,7 +1120,7 @@ interface EditingItem {
   commissions?: number;
   linkedToAsset?: number;
   accountType?: 'current' | 'deposit' | 'cash';
-  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other';
+  assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other';
   type?: 'primary' | 'secondary';
   address?: string;
   value?: number;
@@ -1159,7 +1161,7 @@ const validateAssets = (data: unknown): Assets | null => {
   if (!data || typeof data !== 'object') return null;
   
   const assets = data as Partial<Assets>;
-  const requiredSections = ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'otherAccounts', 'alternativeAssets'];
+      const requiredSections = ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'alternativeAssets'];
   
   for (const section of requiredSections) {
     if (!Array.isArray(assets[section as keyof Assets])) {
@@ -1495,12 +1497,14 @@ const NetWorthManager = () => {
   });
   const [emergencyFundAccount, setEmergencyFundAccount] = useState<EmergencyFundAccount>(() => {
     const saved = localStorage.getItem('mangomoney-emergencyFundAccount');
-    return saved ? safeParseJSON(saved, { section: 'otherAccounts', id: 2, name: 'Conto Emergenza' }) : { section: 'otherAccounts', id: 2, name: 'Conto Emergenza' };
+    return saved ? safeParseJSON(saved, { section: 'cash', id: 2, name: 'Conto Emergenza' }) : { section: 'cash', id: 2, name: 'Conto Emergenza' };
   });
   const [monthlyExpenses, setMonthlyExpenses] = useState(() => {
     const saved = localStorage.getItem('mangomoney-monthlyExpenses');
     return saved ? safeParseJSON(saved, 3500) : 3500;
   });
+  
+
   
   // Language configuration
   const [selectedLanguage, setSelectedLanguage] = useState(() => {
@@ -1531,6 +1535,29 @@ const NetWorthManager = () => {
     const saved = localStorage.getItem('mangomoney-safe-mode');
     return saved ? safeParseJSON(saved, false) : false;
   });
+
+  // Smart Insights configuration
+  const [insightsConfig, setInsightsConfig] = useState(() => {
+    const saved = localStorage.getItem('mangomoney-insights-config');
+    return saved ? safeParseJSON(saved, {
+      emergency: true,
+      tax: true,
+      performance: true,
+      risk: true,
+      allocation: true
+    }) : {
+      emergency: true,
+      tax: true,
+      performance: true,
+      risk: true,
+      allocation: true
+    };
+  });
+
+  // Save insights config to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('mangomoney-insights-config', JSON.stringify(insightsConfig));
+  }, [insightsConfig]);
 
   // Notification system
   const [notification, setNotification] = useState<{
@@ -1670,8 +1697,8 @@ const NetWorthManager = () => {
       investments: 'Investimenti in titoli, ETF e fondi comuni di investimento',
       realEstate: 'Proprietà immobiliari (residenza principale e secondarie)',
       pensionFunds: 'Fondi pensione e previdenza complementare',
-      otherAccounts: 'Altri conti bancari e strumenti finanziari',
-      alternativeAssets: 'Asset alternativi come collezionabili, arte, criptovalute'
+
+      alternativeAssets: 'Asset alternativi come collezionabili, arte, oro, argento, vini pregiati'
     };
     return descriptions[section] || 'Sezione per la gestione di asset finanziari';
   }, []);
@@ -1763,6 +1790,10 @@ const NetWorthManager = () => {
   
   const [currentTransactionPage, setCurrentTransactionPage] = useState(1);
   const transactionsPerPage = 10;
+  
+  // Transaction statistics pagination - showing last 2 years by default
+  const [currentTransactionYearPage, setCurrentTransactionYearPage] = useState(1);
+  const yearsPerPage = 2;
 
   // Transaction sorting state
   const [sortField, setSortField] = useState<'date' | 'assetType' | 'amount' | 'quantity'>('date');
@@ -1884,33 +1915,29 @@ const NetWorthManager = () => {
       transactions: [],
       realEstate: [],
       pensionFunds: [],
-      otherAccounts: [],
+
       alternativeAssets: []
     };
   }
 
-  // Function to calculate stamp duty (bollo) amount for cash accounts
-  const calculateBolloAmount = useCallback((accountType: 'current' | 'deposit' | 'remunerated' | 'cash' | undefined, amount: number): number => {
-    if (accountType === 'deposit') {
-      return (amount * depositAccountStampDutyRate) / 100; // Percentage of amount
-    } else if ((accountType === 'current' || accountType === 'remunerated') && amount > currentAccountStampDutyThreshold) {
-      return currentAccountStampDuty; // Fixed amount for current and remunerated accounts
-    }
-    return 0; // No stamp duty for cash or accounts with low balance
-  }, [depositAccountStampDutyRate, currentAccountStampDuty, currentAccountStampDutyThreshold]);
+  // Simplified: only signal whether stamp duty (bollo) is due; no amount calculation
+  const isStampDutyDue = useCallback((accountType: 'current' | 'deposit' | 'remunerated' | 'cash' | undefined, amount: number): boolean => {
+    if (!accountType) return false;
+    const absAmount = Math.abs(amount);
+    if (accountType === 'deposit') return absAmount > 0;
+    if (accountType === 'remunerated' || accountType === 'current') return absAmount > currentAccountStampDutyThreshold;
+    return false;
+  }, [currentAccountStampDutyThreshold]);
 
-  // Function to update existing cash accounts with bollo calculation
-  const updateCashAccountsWithBollo = useCallback((cashAccounts: AssetItem[]): AssetItem[] => {
-    return cashAccounts.map(account => ({
-      ...account,
-      bollo: calculateBolloAmount(account.accountType, Math.abs(account.amount))
-    }));
-  }, [calculateBolloAmount]);
+  // Remove persisted bollo amounts (we don't compute numbers anymore)
+  const stripBolloAmounts = useCallback((cashAccounts: AssetItem[]): AssetItem[] => {
+    return cashAccounts.map(account => ({ ...account, bollo: undefined }));
+  }, []);
 
-  // Update bollo calculation for existing cash accounts on mount
+  // Strip previous bollo amounts on mount
   useEffect(() => {
     if (assets.cash.length > 0) {
-      const updatedCash = updateCashAccountsWithBollo(assets.cash);
+      const updatedCash = stripBolloAmounts(assets.cash);
       if (JSON.stringify(updatedCash) !== JSON.stringify(assets.cash)) {
         setAssets(prev => ({
           ...prev,
@@ -1918,7 +1945,7 @@ const NetWorthManager = () => {
         }));
       }
     }
-  }, [updateCashAccountsWithBollo, assets.cash, currentAccountStampDutyThreshold, depositAccountStampDutyRate, currentAccountStampDuty]);
+  }, [stripBolloAmounts, assets.cash]);
 
   // Granular loading states
   const [loadingStates, setLoadingStates] = useState({
@@ -2302,7 +2329,6 @@ const NetWorthManager = () => {
     const cash = assets.cash.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
     const investmentPositions = assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => safeAdd(sum, item.amount), 0);
     const pensionFunds = assets.pensionFunds.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
-    const otherAccounts = assets.otherAccounts.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
     const alternativeAssets = assets.alternativeAssets.reduce((sum: number, item: AssetItem) => safeAdd(sum, item.amount), 0);
     
       // ✅ CALCOLI REAL ESTATE FIXED - Use clear, single-purpose functions
@@ -2326,12 +2352,6 @@ const NetWorthManager = () => {
     return safeAdd(sum, Math.abs(amount));
   }, 0);
   
-  // ✅ TOTAL CALCULATION FIXED - Subtract debts from assets
-  const totalAssets = safeAdd(
-    safeAdd(safeAdd(cash, investmentPositions), safeAdd(realEstate, pensionFunds)), 
-    safeAdd(otherAccounts, alternativeAssets)
-  );
-  const total = safeSubtract(totalAssets, totalDebts);
   
   return {
     cash,
@@ -2339,16 +2359,21 @@ const NetWorthManager = () => {
     investments: investmentPositions,
     realEstate,                    // ✅ SEMPLIFICATO: usa solo il valore per net worth
     pensionFunds,
-    otherAccounts,
-    alternativeAssets,
-    total                                         // ✅ CONSISTENTE: usa realEstate
+    alternativeAssets
   };
   }, [assets]);
+
+  // Calcola patrimonio netto (asset - debiti)
+  const netWorth = useMemo(() => {
+    const totalAssets = totals.cash + totals.investments + totals.realEstate + 
+                       totals.pensionFunds + totals.alternativeAssets;
+    return totalAssets - Math.abs(totals.debts);
+  }, [totals]);
 
   // Core financial calculations - Memoized for performance
   // Questi calcoli dipendono solo da assets e settings, non da UI state
   const coreFinancialCalculations = useMemo(() => {
-    const { cash, investments, total } = totals;
+    const { cash, investments } = totals;
     const totalDebts = Math.abs(totals.debts);
     
     // Emergency Fund Analysis - Funzione centralizzata
@@ -2363,24 +2388,23 @@ const NetWorthManager = () => {
     // Modern Portfolio Theory Risk Score Calculation
     const portfolioAllocations = {
       cash: totals.cash,
-      otherAccounts: totals.otherAccounts, 
       pensionFunds: totals.pensionFunds,
-      realEstate: totals.realEstate,  // ✅ Consistente con total
+      realEstate: totals.realEstate,
       investmentPositions: totals.investments,
       alternativeAssets: totals.alternativeAssets
-    };
+    } as const;
 
     // 🎯 SEMPLIFICAZIONE 3: Standardizzare terminologie - totalAssets per coerenza
     const totalAssets = totals.cash + totals.investments + totals.realEstate + 
-                        totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+                        totals.pensionFunds + totals.alternativeAssets;
     
     // Debug in development per verificare il fix
     if (process.env.NODE_ENV === 'development') {
       console.log('🔧 SEMPLIFICAZIONE 3 - MPT calculations:', {
-        patrimonioNetto: totals.total,
+          patrimonioNetto: netWorth,
         totalAssets: totalAssets,
-        differenza: totals.total - totalAssets,
-        shouldUseTotalAssets: totals.total < 0
+          differenza: netWorth - totalAssets,
+          shouldUseTotalAssets: netWorth < 0
       });
     }
 
@@ -2410,20 +2434,18 @@ const NetWorthManager = () => {
       validateDebtToAssetRatio(debtToAssetRatio, 'debt-to-asset ratio calculation');
     }
     
-    // 🎯 SEMPLIFICAZIONE 3: Leverage ratio con totalAssets standardizzato
-    const leverageRatio = totalAssets > 0 ? safeDivide(totalAssets, Math.abs(total)) : 1;
-    const leverageMultiplier = 1 + leverageRatio;
-    const adjustedRiskScore = Math.min(10, baseRiskScore * leverageMultiplier);
+    // ✅ SISTEMATO: Risk Score basato solo sulla composizione del portafoglio
+    // Non serve leverage multiplier - il rischio dipende dalla composizione, non dai debiti
+    const adjustedRiskScore = baseRiskScore;
     
     // Validazione in development mode
     if (process.env.NODE_ENV === 'development') {
-      validateLeverageMultiplier(leverageMultiplier, leverageRatio);
-      validateRiskScore(adjustedRiskScore, 'adjusted risk score calculation');
+      validateRiskScore(adjustedRiskScore, 'risk score calculation');
     }
     
     // Asset allocation percentages - Normalized to always sum to 100%
     const assetValues = [cash, investments, totals.realEstate, totals.pensionFunds, totals.alternativeAssets];
-    const normalizedPercentages = calculateNormalizedPercentages(assetValues, total);
+    const normalizedPercentages = calculateNormalizedPercentages(assetValues, netWorth);
 
     const allocationPercentages = {
       cash: normalizedPercentages[0],
@@ -2442,8 +2464,8 @@ const NetWorthManager = () => {
           // 🎯 VALIDAZIONE COMPLETA - Verifica tutti i fix in development
       if (process.env.NODE_ENV === 'development') {
         const realAssets = totals.cash + totals.investments + totals.realEstate + 
-                           totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
-        const oldGrossAssets = totals.total + Math.abs(totals.debts || 0);
+                           totals.pensionFunds + totals.alternativeAssets;
+        const oldGrossAssets = netWorth + Math.abs(totals.debts || 0);
         
         console.log('🎯 VALIDAZIONE COMPLETA - Tutti i fix:', {
           // SEMPLIFICAZIONE 3: MPT calculations
@@ -2463,10 +2485,10 @@ const NetWorthManager = () => {
           debtToAssetOld: Math.abs(totals.debts || 0) / oldGrossAssets,
           debtToAssetNew: Math.abs(totals.debts || 0) / realAssets,
           
-          // ERRORE 6: Leverage ratio
-          leverageUsesAbsTotal: leverageRatio === realAssets / Math.abs(totals.total),
-          leverageOld: oldGrossAssets / totals.total,
-          leverageNew: realAssets / Math.abs(totals.total)
+          // ERRORE 6: Leverage ratio - RIMOSSO (non più utilizzato)
+          // leverageUsesAbsTotal: leverageRatio === realAssets / Math.abs(netWorth),
+          // leverageOld: oldGrossAssets / netWorth,
+          // leverageNew: realAssets / Math.abs(netWorth)
         });
         
         // 🎯 VALIDAZIONE COERENZA CARDS vs GRAFICO
@@ -2475,7 +2497,7 @@ const NetWorthManager = () => {
           (totals.investments / realAssets) * 100,
           (totals.realEstate / realAssets) * 100,
           (totals.pensionFunds / realAssets) * 100,
-          (totals.otherAccounts / realAssets) * 100,
+
           (totals.alternativeAssets / realAssets) * 100
         ];
         const totalAssetPercentage = assetPercentages.reduce((sum, pct) => sum + pct, 0);
@@ -2496,8 +2518,6 @@ const NetWorthManager = () => {
       efficiencyScore,
       taxAnalysis,
       debtToAssetRatio,
-      leverageRatio,
-      leverageMultiplier,
       adjustedRiskScore,
       allocationPercentages,
       totalAssets,
@@ -2517,7 +2537,7 @@ const NetWorthManager = () => {
 
   // Advanced statistics calculations - UI dependent calculations
   const statistics = useMemo(() => {
-    const { cash, investments, total } = totals;
+    const { cash, investments } = totals;
     
     // ✅ ACCESSO DIRETTO AI VALORI PRE-CALCOLATI senza creare dipendenza circolare
     const emergencyFundMetrics = coreFinancialCalculations.emergencyFundMetrics;
@@ -2543,7 +2563,7 @@ const NetWorthManager = () => {
     // Count total positions across all sections
     const totalPositions = assets.cash.length + assets.debts.length + 
                           assets.investmentPositions.length + assets.realEstate.length + 
-                          assets.pensionFunds.length + assets.otherAccounts.length + 
+                          assets.pensionFunds.length + 
                           assets.alternativeAssets.length;
     
     // Count unique investment positions
@@ -2562,20 +2582,19 @@ const NetWorthManager = () => {
                            assets.investmentPositions.filter((item: InvestmentPosition) => item.amount > 0).length +
                            assets.realEstate.filter((item: RealEstate) => item.value > 0).length +
                            assets.pensionFunds.filter((item: AssetItem) => item.amount > 0).length +
-                           assets.otherAccounts.filter((item: AssetItem) => item.amount > 0).length +
                            assets.alternativeAssets.filter((item: AssetItem) => item.amount > 0).length;
 
     // Financial Health Metrics
     const debtToAssetPercentage = (debtToAssetRatio * 100).toFixed(1);
           const debtHealth = debtToAssetRatio < 0.3 ? t('excellent') : debtToAssetRatio < 0.5 ? t('good') : t('attention');
 
-    const liquidityRatio = total > 0 ? (cash / total) : 0;
+    const liquidityRatio = netWorth > 0 ? (cash / netWorth) : 0;
     const liquidityPercentage = (liquidityRatio * 100).toFixed(1);
     const liquidityHealth = liquidityRatio > 0.1 ? t('adequate') : liquidityRatio > 0.05 ? t('limited') : t('insufficient');
 
     // Investment Efficiency
     const totalGlobalPositions = assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => safeAdd(sum, item.amount), 0);
-    const investmentEfficiency = total > 0 ? (investments / total) : 0;
+    const investmentEfficiency = netWorth > 0 ? (investments / netWorth) : 0;
     const investmentPercentage = (investmentEfficiency * 100).toFixed(1);
 
     const statisticsResult = {
@@ -2644,12 +2663,7 @@ const NetWorthManager = () => {
         value: totals.pensionFunds, 
         color: '#ef4444' 
       },
-      { 
-        id: 'otherAccounts',
-        label: t('otherAccounts'), 
-        value: totals.otherAccounts, 
-        color: '#06b6d4' 
-      },
+
       { 
         id: 'alternativeAssets',
         label: t('alternativeAssets'), 
@@ -2681,7 +2695,7 @@ const NetWorthManager = () => {
       investments: CHART_COLORS[1],
       realEstate: CHART_COLORS[3],
       pensionFunds: CHART_COLORS[2],
-      otherAccounts: CHART_COLORS[5],
+
       alternativeAssets: CHART_COLORS[8]
     };
     return colors[key as keyof typeof colors] || '#6b7280';
@@ -2693,7 +2707,7 @@ const NetWorthManager = () => {
     investments: t('investments'),
     realEstate: t('realEstate'),
     pensionFunds: t('pensionFunds'),
-    otherAccounts: t('otherAccounts'),
+
     alternativeAssets: t('alternativeAssets')
   }), [t]);
 
@@ -2946,20 +2960,29 @@ const NetWorthManager = () => {
   }
   }, [assets, t, showError]);
 
-  // Funzione per il collegamento automatico delle transazioni basato su ISIN
+  // Funzione per il collegamento automatico delle transazioni basato su ISIN - OTTIMIZZATA
   const performAutoLink = useCallback(() => {
-    let linkedCount = 0;
+    // Performance monitoring in development mode
+    const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
     
+    // Pre-calcola mappa ISIN -> Asset (una volta sola) - O(n)
+    const isinToAssetMap = new Map(
+      assets.investments
+        .filter(asset => asset.isin)
+        .map(asset => [asset.isin!.trim().toUpperCase(), asset])
+    );
+    
+    let linkedCount = 0;
     const updatedTransactions = assets.transactions.map((transaction: Transaction) => {
       // Se la transazione è già collegata, salta
       if (transaction.linkedToAsset) {
         return transaction;
       }
       
-      // Cerca un asset con lo stesso ISIN
-      const matchingAsset = assets.investments.find((asset: AssetItem) => 
-        asset.isin && transaction.isin && asset.isin.trim().toUpperCase() === transaction.isin.trim().toUpperCase()
-      );
+      // Lookup O(1) invece di find O(n)
+      const matchingAsset = transaction.isin ? 
+        isinToAssetMap.get(transaction.isin.trim().toUpperCase()) : 
+        null;
       
       if (matchingAsset) {
         linkedCount++;
@@ -2971,6 +2994,17 @@ const NetWorthManager = () => {
       
       return transaction;
     });
+    
+    // Performance logging in development mode
+    if (process.env.NODE_ENV === 'development') {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      console.log(`🚀 Autolink Performance: ${duration.toFixed(2)}ms for ${assets.transactions.length} transactions, ${assets.investments.length} investments`);
+      
+      if (duration > 100) {
+        console.warn(`⚠️ Autolink is slow (>100ms) - consider optimization for large datasets`);
+      }
+    }
     
     setAssets({
       ...assets,
@@ -3203,12 +3237,8 @@ const NetWorthManager = () => {
       
       if (section === 'cash') {
         sanitizedData.accountType = assetData.accountType;
-        // Calculate bollo based on account type and amount
-        sanitizedData.bollo = calculateBolloAmount(assetData.accountType, Math.abs(sanitizeNumber(assetData.amount || 0, 'amount')));
-        // Handle interest rate for deposit accounts
-        if (assetData.accountType === 'deposit' && assetData.interestRate !== undefined) {
-          sanitizedData.interestRate = sanitizeNumber(assetData.interestRate, 'percentage');
-        }
+        // No bollo amount calculation anymore; only signal due in UI
+        // Drop interest rate handling
       }
       
       if (section === 'alternativeAssets') {
@@ -3343,8 +3373,14 @@ const NetWorthManager = () => {
     });
   };
 
-  // Constants
-  const LINKING_TOLERANCE_PERCENTAGE = 0.05; // 5% tolerance for linking validation
+  // Dynamic tolerance calculation based on amount size
+  const calculateDynamicTolerance = (amount: number): number => {
+    if (amount < 1000) return 0.10;      // ±10% per piccoli importi (arrotondamenti)
+    if (amount < 10000) return 0.05;     // ±5% per importi medi  
+    if (amount < 100000) return 0.03;    // ±3% per portafogli medi
+    return 0.02;                         // ±2% per grandi portafogli
+  };
+
   // Minimum tolerance amount varies by currency to account for different monetary scales
   const MIN_LINKING_TOLERANCE_AMOUNT = selectedCurrency === 'JPY' ? 1000 : // ¥1000 for JPY
                                       selectedCurrency === 'USD' ? 10 : // $10 for USD
@@ -3354,16 +3390,15 @@ const NetWorthManager = () => {
 
   // Function to calculate linking validation
   const getLinkingValidation = () => {
-    const validation: { [key: number]: { linkedAssets: AssetItem[], totalLinkedValue: number, globalValue: number, deviation: number, isValid: boolean } } = {};
+    const validation: { [key: number]: { linkedAssets: AssetItem[], totalLinkedValue: number, globalValue: number, deviation: number, isValid: boolean, appliedTolerance: number, tolerancePercentage: number } } = {};
     
     assets.investmentPositions.forEach((globalPosition: InvestmentPosition) => {
       const linkedAssets = assets.investments.filter((asset: AssetItem) => asset.linkedToGlobalPosition === globalPosition.id);
       const totalLinkedValue = linkedAssets.reduce((sum: number, asset: AssetItem) => sum + asset.amount, 0);
       const deviation = Math.abs(totalLinkedValue - globalPosition.amount);
-      // Variable tolerance: 5% of amount, but minimum amount for small positions
-      // This prevents overly strict validation for small amounts where percentage differences
-      // can be misleading due to rounding, fees, or timing differences
-      const tolerance = Math.max(globalPosition.amount * LINKING_TOLERANCE_PERCENTAGE, MIN_LINKING_TOLERANCE_AMOUNT);
+      // Dynamic tolerance based on amount size
+      const dynamicTolerancePercentage = calculateDynamicTolerance(globalPosition.amount);
+      const tolerance = Math.max(globalPosition.amount * dynamicTolerancePercentage, MIN_LINKING_TOLERANCE_AMOUNT);
       const isValid = deviation <= tolerance;
       
       validation[globalPosition.id] = {
@@ -3371,7 +3406,9 @@ const NetWorthManager = () => {
         totalLinkedValue,
         globalValue: globalPosition.amount,
         deviation,
-        isValid
+        isValid,
+        appliedTolerance: tolerance,
+        tolerancePercentage: dynamicTolerancePercentage
       };
     });
     
@@ -4082,8 +4119,7 @@ const NetWorthManager = () => {
       // 🎯 SEMPLIFICAZIONE 1: Calcola asset prelevabili (withdrawable assets)
   // Esclusi sempre: realEstate (illiquid), pensionFunds (locked until retirement)
   const withdrawableAssets = safeAdd(
-    safeAdd(totals.cash || 0, totals.investments || 0),
-    totals.otherAccounts || 0
+    totals.cash || 0, totals.investments || 0
   );
     
     // Helper function for translation with parameter substitution
@@ -4171,123 +4207,38 @@ const NetWorthManager = () => {
   };
 
   // Funzione per aggregare tutti i conti deposito
-  const calculateAllDepositTaxes = (
-    accounts: AssetItem[], 
-    settings: { 
-      capitalGainsTaxRate: number;
-      depositAccountStampDutyRate: number;
-    }
-  ): DepositTaxesSummary => {
-    const depositAccounts = accounts.filter(acc => acc.accountType === 'deposit' || acc.accountType === 'remunerated');
-    
-    return depositAccounts.reduce((totals, account) => {
-      const calc = calculateDepositTaxes(account, settings);
-      return {
-        totalGrossInterest: totals.totalGrossInterest + calc.grossInterest,
-        totalInterestTax: totals.totalInterestTax + calc.interestTax,
-        totalBollo: totals.totalBollo + calc.bollo,
-        totalTaxes: totals.totalTaxes + calc.totalTaxes,
-        totalNetYield: totals.totalNetYield + calc.netYield,
-        accountCount: totals.accountCount + 1
-      };
-    }, {
-      totalGrossInterest: 0,
-      totalInterestTax: 0,
-      totalBollo: 0, 
-      totalTaxes: 0,
-      totalNetYield: 0,
-      accountCount: 0
-    });
-  };
+  // Semplificato: niente aggregazioni su interessi/bollo
+  const calculateAllDepositTaxes = (_accounts: AssetItem[]) => null;
 
   // UI breakdown fiscale per singolo conto deposito (versione completa per modal)
-  const renderDepositBreakdown = (account: AssetItem, settings: { 
-    capitalGainsTaxRate: number;
-    depositAccountStampDutyRate: number;
-  }) => {
+  const renderDepositBreakdown = (account: AssetItem) => {
     if (account.accountType !== 'deposit' && account.accountType !== 'remunerated') return null;
-    
-    const calc = calculateDepositTaxes(account, settings);
-    
-    if (!account.interestRate || Number(account.interestRate) <= 0) {
+    const due = isStampDutyDue(account.accountType, account.amount);
       return (
-        <div className={`text-sm mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          Tasso di interesse non specificato
-        </div>
-      );
-    }
-
-    return (
-      <div className={`mt-3 p-3 rounded-lg text-sm ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-        <div className={`font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Breakdown fiscale annuo:</div>
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <span>Tasso lordo:</span>
-            <span className="font-medium">{Number(account.interestRate).toFixed(2)}%</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Interessi lordi:</span>
-            <span className="text-green-600">+{formatCurrencyWithPrivacy(calc.grossInterest)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Tassa rendimenti ({settings.capitalGainsTaxRate}%):</span>
-            <span className="text-red-600">-{formatCurrencyWithPrivacy(calc.interestTax)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Bollo ({settings.depositAccountStampDutyRate}%):</span>
-            <span className="text-red-600">-{formatCurrencyWithPrivacy(calc.bollo)}</span>
-          </div>
-          <div className={`flex justify-between border-t pt-1 font-medium ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
-            <span>Rendimento netto:</span>
-            <span className={calc.netYield >= 0 ? 'text-green-600' : 'text-red-600'}>
-              {calc.netYield >= 0 ? '+' : ''}{formatCurrencyWithPrivacy(calc.netYield)} ({calc.effectiveRate.toFixed(2)}%)
-            </span>
-          </div>
-        </div>
+      <div className={`mt-2 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <span className={due ? 'text-red-600 font-medium' : (darkMode ? 'text-gray-400' : 'text-gray-500')}>{due ? 'SI' : 'NO'}</span>
       </div>
     );
   };
 
   // UI breakdown fiscale compatto per tabella - STANDARDIZZATO
-  const renderCompactFiscalBreakdown = (account: AssetItem, settings: { 
-    capitalGainsTaxRate: number;
-    depositAccountStampDutyRate: number;
-  }) => {
+  const renderCompactFiscalBreakdown = (account: AssetItem) => {
     // Per conti deposito
     if (account.accountType === 'deposit' || account.accountType === 'remunerated') {
-      const calc = calculateDepositTaxes(account, settings);
-      
-      if (!account.interestRate || Number(account.interestRate) <= 0) {
-        return (
-          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            Nessun tasso
-          </div>
-        );
-      }
-
+      const due = isStampDutyDue(account.accountType, account.amount);
       return (
         <div className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-          <div className="font-medium">{Number(account.interestRate).toFixed(2)}% lordo</div>
-          <div className={`${calc.netYield >= 0 ? 'text-green-600' : 'text-red-600'} font-medium`}>
-            {calc.netYield >= 0 ? '+' : ''}{formatCurrencyWithPrivacy(calc.netYield)} netto
-          </div>
-          {calc.bollo > 0 && (
-            <div className="text-xs text-red-600 font-medium">
-              Bollo: {formatCurrencyWithPrivacy(calc.bollo)}
-            </div>
-          )}
+          <span className={due ? 'text-red-600 font-medium' : (darkMode ? 'text-gray-400' : 'text-gray-500')}>{due ? 'SI' : 'NO'}</span>
         </div>
       );
     }
     
     // Per conti correnti - mostra solo se c'è bollo da pagare
     if (account.accountType === 'current') {
-      if (account.bollo && account.bollo > 0) {
+      if (isStampDutyDue('current', account.amount)) {
         return (
           <div className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            <div className="text-red-600 font-medium">
-              Bollo: {formatCurrencyWithPrivacy(account.bollo)}
-            </div>
+            <div className="text-red-600 font-medium">SI</div>
           </div>
         );
       }
@@ -4411,43 +4362,10 @@ const NetWorthManager = () => {
       depositAccountStampDutyRate: number;
     } 
   }) => {
-    const depositTaxes = calculateAllDepositTaxes(accounts, settings);
-    
-    if (depositTaxes.accountCount === 0) return null;
+    const depositTaxes = calculateAllDepositTaxes(accounts);
+    if (!depositTaxes) return null;
 
-    return (
-      <div className={`mt-4 p-4 rounded-lg ${darkMode ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-200'} border`}>
-        <h4 className={`font-medium mb-3 ${darkMode ? 'text-blue-200' : 'text-gray-800'}`}>
-          Imposte Conti Deposito ({depositTaxes.accountCount} conti)
-        </h4>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex justify-between">
-            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>Interessi lordi annui:</span>
-            <span className={`font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-              {formatCurrencyWithPrivacy(depositTaxes.totalGrossInterest)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>Tasse rendimenti:</span>
-            <span className={`font-medium ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
-              -{formatCurrencyWithPrivacy(depositTaxes.totalInterestTax)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>Bolli totali:</span>
-            <span className={`font-medium ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
-              -{formatCurrencyWithPrivacy(depositTaxes.totalBollo)}
-            </span>
-          </div>
-          <div className={`flex justify-between border-t pt-2 font-semibold ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
-            <span className={darkMode ? 'text-gray-200' : 'text-gray-900'}>Rendimento netto:</span>
-            <span className={`font-bold ${depositTaxes.totalNetYield >= 0 ? (darkMode ? 'text-green-400' : 'text-green-600') : (darkMode ? 'text-red-400' : 'text-red-600')}`}>
-              {depositTaxes.totalNetYield >= 0 ? '+' : ''}{formatCurrencyWithPrivacy(depositTaxes.totalNetYield)}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   };
 
   // Validazione per conti deposito
@@ -4848,6 +4766,7 @@ const NetWorthManager = () => {
         
         // Pagination settings
         currentTransactionPage,
+        currentTransactionYearPage,
         currentAlternativeAssetPage,
         
         // Form and editing state
@@ -4874,7 +4793,7 @@ const NetWorthManager = () => {
         dataIntegrity: {
           assetsValid: true,
           settingsValid: true,
-          requiredSections: ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'otherAccounts', 'alternativeAssets']
+          requiredSections: ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'alternativeAssets']
         }
       }
     };
@@ -4896,7 +4815,7 @@ const NetWorthManager = () => {
       showError('Errore durante l\'esportazione del backup.');
     }
     );
-  }, [withLoading, assets, totals, capitalGainsTaxRate, whitelistBondsTaxRate, currentAccountStampDuty, currentAccountStampDutyThreshold, depositAccountStampDutyRate, emergencyFundOptimalMonths, emergencyFundAdequateMonths, selectedCurrency, selectedLanguage, swrRate, inflationRate, costBasisMethod, darkMode, forceMobileLayout, privacyMode, emergencyFundAccount, monthlyExpenses, safeMode, transactionFilters, sortField, sortDirection, alternativeAssetFilter, currentTransactionPage, currentAlternativeAssetPage, localFieldValues, lastSaved, showSuccess, showError]);
+  }, [withLoading, assets, totals, capitalGainsTaxRate, whitelistBondsTaxRate, currentAccountStampDuty, currentAccountStampDutyThreshold, depositAccountStampDutyRate, emergencyFundOptimalMonths, emergencyFundAdequateMonths, selectedCurrency, selectedLanguage, swrRate, inflationRate, costBasisMethod, darkMode, forceMobileLayout, privacyMode, emergencyFundAccount, monthlyExpenses, safeMode, transactionFilters, sortField, sortDirection, alternativeAssetFilter, currentTransactionPage, currentTransactionYearPage, currentAlternativeAssetPage, localFieldValues, lastSaved, showSuccess, showError]);
 
   const exportToCSV = () => {
     setIsLoading(true);
@@ -5696,7 +5615,7 @@ const NetWorthManager = () => {
         <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #059669; padding-bottom: 20px;">
           <h1 style="color: #059669; margin: 0 0 10px 0; font-size: 24px;">MangoMoney - Report Completo Patrimonio</h1>
           <p style="margin: 5px 0; color: #666;"><strong>Data:</strong> ${currentDate} alle ${currentTime}</p>
-          <p style="font-size: 20px; color: #059669; font-weight: bold; margin: 10px 0;">Patrimonio Netto: ${formatCurrencyWithPrivacy(totals.total)}</p>
+          <p style="font-size: 20px; color: #059669; font-weight: bold; margin: 10px 0;">Patrimonio Netto: ${formatCurrencyWithPrivacy(netWorth)}</p>
         </div>
         
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -5707,7 +5626,7 @@ const NetWorthManager = () => {
               <div style="font-size: 10px; color: #6c757d; text-transform: uppercase;">Elementi Totali</div>
             </div>
             <div style="text-align: center; padding: 10px; background: white; border-radius: 5px; border: 1px solid #e9ecef;">
-              <div style="font-size: 18px; font-weight: bold; color: #059669;">${formatCurrencyWithPrivacy(totals.total)}</div>
+              <div style="font-size: 18px; font-weight: bold; color: #059669;">${formatCurrencyWithPrivacy(netWorth)}</div>
               <div style="font-size: 10px; color: #6c757d; text-transform: uppercase;">Patrimonio Netto</div>
             </div>
             <div style="text-align: center; padding: 10px; background: white; border-radius: 5px; border: 1px solid #e9ecef;">
@@ -5922,7 +5841,7 @@ const NetWorthManager = () => {
         }
 
         // Validate required asset sections
-        const requiredSections = ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'otherAccounts', 'alternativeAssets'];
+        const requiredSections = ['cash', 'debts', 'investments', 'investmentPositions', 'transactions', 'realEstate', 'pensionFunds', 'alternativeAssets'];
         for (const section of requiredSections) {
           if (!Array.isArray(importedData.assets[section])) {
             throw new Error(`Sezione "${section}" mancante o non valida`);
@@ -6048,6 +5967,9 @@ const NetWorthManager = () => {
           if (importedData.settings.currentTransactionPage !== undefined) {
             setCurrentTransactionPage(importedData.settings.currentTransactionPage);
           }
+          if (importedData.settings.currentTransactionYearPage !== undefined) {
+            setCurrentTransactionYearPage(importedData.settings.currentTransactionYearPage);
+          }
           if (importedData.settings.currentAlternativeAssetPage !== undefined) {
             setCurrentAlternativeAssetPage(importedData.settings.currentAlternativeAssetPage);
           }
@@ -6120,9 +6042,7 @@ const NetWorthManager = () => {
     } else if (section === 'pensionFunds') {
       csvContent = 'Nome,Descrizione,Importo,Tipo Fondo,Data Inizio,Contributo Mensile,Note\nFondo Pensione A,Previdenza Complementare,12000,complementare,2010-01-01,200,Versamenti regolari';
       filename = 'mangomoney-fondipensione-template.csv';
-    } else if (section === 'otherAccounts') {
-      csvContent = 'Nome,Descrizione,Importo,Tipo Conto,Note\nConto Deposito,Deposito vincolato,25000,deposit,Scadenza 2025';
-      filename = 'mangomoney-altriconti-template.csv';
+
     } else if (section === 'alternativeAssets') {
       csvContent = 'Nome,Descrizione,Importo,Tipo Asset,Note\nOro,Investimento in oro fisico,10000,tcg,Acquistato nel 2023';
       filename = 'mangomoney-benialternativi-template.csv';
@@ -6136,7 +6056,7 @@ const NetWorthManager = () => {
         + 'transactions,Acquisto ETF,Acquisto SPY,15000,SPY,US78462F1030,Acquisto,33,2024-01-15\n'
         + 'realEstate,Casa Milano,Residenza,350000,Via Roma 123,primary,,Acquistata 2020\n'
         + 'pensionFunds,Fondo Pensione A,Previdenza Complementare,12000,complementare,2010-01-01,200,Versamenti regolari\n'
-        + 'otherAccounts,Conto Deposito,Deposito vincolato,25000,deposit,,,Scadenza 2025\n'
+
         + 'alternativeAssets,Oro,Investimento in oro fisico,10000,tcg,,,Acquistato nel 2023';
       filename = 'mangomoney-universal-template.csv';
     }
@@ -6270,7 +6190,7 @@ const NetWorthManager = () => {
         alternativeAssets: [],
         debts: [],
         pensionFunds: [],
-        otherAccounts: []
+  
       };
 
     const errors: string[] = [];
@@ -6304,7 +6224,7 @@ const NetWorthManager = () => {
             const sectionIndex = header.indexOf('Sezione');
             section = values[sectionIndex]?.trim().toLowerCase() || 'transactions';
             
-            if (!['transactions', 'investments', 'realestate', 'cash', 'alternativeassets', 'debts', 'pensionfunds', 'otheraccounts'].includes(section)) {
+            if (!['transactions', 'investments', 'realestate', 'cash', 'alternativeassets', 'debts', 'pensionfunds'].includes(section)) {
               errors.push(`Riga ${i + 1}: sezione non valida "${section}"`);
               continue;
             }
@@ -6313,7 +6233,7 @@ const NetWorthManager = () => {
             if (section === 'realestate') section = 'realEstate';
             if (section === 'alternativeassets') section = 'alternativeAssets';
             if (section === 'pensionfunds') section = 'pensionFunds';
-            if (section === 'otheraccounts') section = 'otherAccounts';
+            
 
             // Estrai dati in base alla sezione
             const nameIndex = header.indexOf('Nome');
@@ -6505,7 +6425,8 @@ const NetWorthManager = () => {
               amount: itemData.amount,
               description: itemData.description,
               accountType: accountType,
-              bollo: calculateBolloAmount(accountType, itemData.amount),
+              // niente calcolo importo bollo: solo segnale UI successivo
+              bollo: undefined,
               ...((accountType === 'deposit' || accountType === 'remunerated') && interestRate && interestRate > 0 && {
                 interestRate
               }),
@@ -6520,14 +6441,16 @@ const NetWorthManager = () => {
               name: sanitizeString(itemData.name),
               amount: itemData.amount,
               description: itemData.description,
-              assetType: itemData.field1 as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other' || 'other',
+              assetType: itemData.field1 as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other' || 'other',
               notes: itemData.notes
             };
 
             newItems.alternativeAssets.push(newAlternativeAsset);
 
+
+
           } else {
-            // Per altre sezioni (debts, pensionFunds, otherAccounts)
+            // Per altre sezioni (debts, pensionFunds)
             const newAsset: AssetItem = {
               id: maxId + 1 + successCount,
               name: sanitizeString(itemData.name),
@@ -6594,7 +6517,7 @@ const NetWorthManager = () => {
   );
 
     event.target.value = '';
-  }, [withLoading, assets, setAssets, showSuccess, showError, sanitizeTicker, sanitizeISIN, calculateBolloAmount, setTransactionFilters, setCurrentTransactionPage]);
+  }, [withLoading, assets, setAssets, showSuccess, showError, sanitizeTicker, sanitizeISIN, setTransactionFilters, setCurrentTransactionPage]);
 
   // Reset function (manual save removed - auto-save handles everything)
 
@@ -7180,13 +7103,10 @@ const NetWorthManager = () => {
             }),
             ...(section === 'cash' && {
               accountType: formData.accountType,
-              bollo: calculateBolloAmount(formData.accountType, Math.abs(sanitizeNumber(formData.amount, 'amount'))),
-                              ...((formData.accountType === 'deposit' || formData.accountType === 'remunerated') && formData.interestRate && {
-                interestRate: parseFloat(formData.interestRate)
-              })
+              bollo: undefined
             }),
-            ...(section === 'alternativeAssets' && formData.assetType && ['tcg', 'stamps', 'alcohol', 'collectibles', 'vinyl', 'books', 'comics', 'art', 'other'].includes(formData.assetType) && {
-              assetType: formData.assetType as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other'
+            ...(section === 'alternativeAssets' && formData.assetType && ['tcg', 'stamps', 'alcohol', 'collectibles', 'vinyl', 'books', 'comics', 'art', 'lego', 'other'].includes(formData.assetType) && {
+              assetType: formData.assetType as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other'
             })
           };
 
@@ -7685,7 +7605,7 @@ const NetWorthManager = () => {
               </label>
               <select
                 value={formData.assetType || 'other'}
-                onChange={(e) => setFormData({ ...formData, assetType: e.target.value as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other' })}
+                onChange={(e) => setFormData({ ...formData, assetType: e.target.value as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other' })}
                 className={`w-full px-3 py-2 border rounded-md text-sm ${
                   darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                 }`}
@@ -7698,6 +7618,7 @@ const NetWorthManager = () => {
                 <option value="books">{t('books')}</option>
                 <option value="comics">{t('comics')}</option>
                 <option value="art">{t('art')}</option>
+                <option value="lego">{t('lego')}</option>
                 <option value="other">{t('other')}</option>
               </select>
             </div>
@@ -7737,7 +7658,7 @@ const NetWorthManager = () => {
         {section === 'debts' && '💳'}
         {section === 'investments' && '📈'}
         {section === 'pensionFunds' && '🏦'}
-        {section === 'otherAccounts' && '🏛️'}
+
         {section === 'alternativeAssets' && '🎨'}
         {section === 'realEstate' && '🏠'}
       </div>
@@ -7865,8 +7786,9 @@ const NetWorthManager = () => {
       
       <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-sm border-b`}>
         <div className="max-w-7xl mx-auto px-3 py-3">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
-            <div>
+          <div className="flex justify-between items-start md:items-center gap-3">
+            {/* Left side - Logo */}
+            <div className="flex flex-col">
               <div className="flex items-center">
                 <img 
                   src={require('./images/logo.png')} 
@@ -7874,18 +7796,19 @@ const NetWorthManager = () => {
                   className="h-10 md:h-14 w-auto object-contain"
                 />
               </div>
-              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
-                {t('totalAssets')}: <span className={`text-lg md:text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrencyWithPrivacy(totals.total)}</span>
-              </p>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('lastSaved')}: {lastSaved.toLocaleTimeString()}
-              </p>
               {safeMode && (
                 <div className={`text-xs ${darkMode ? 'text-yellow-400' : 'text-yellow-600'} font-medium flex items-center gap-1 mt-1`}>
                   <span>🛡️</span>
                   <span>Modalità Sicura Attiva</span>
                 </div>
               )}
+            </div>
+            
+            {/* Right side - Last saved info */}
+            <div className="flex flex-col items-end">
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} whitespace-nowrap text-right`}>
+                {t('lastSaved')}: {lastSaved.toLocaleTimeString()}
+              </p>
             </div>
             
             {/* Mobile: Compact button row */}
@@ -8150,7 +8073,7 @@ const NetWorthManager = () => {
             {/* Welcome message when no data */}
             {loadingStates.calculating ? (
               <OverviewSkeleton darkMode={darkMode} />
-            ) : totals.total === 0 ? (
+            ) : netWorth === 0 ? (
               <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-8 text-center`}>
                 <div className={`text-6xl mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>
                   🥭
@@ -8168,9 +8091,9 @@ const NetWorthManager = () => {
             ) : (
               <>
                 <div className="space-y-4 mb-6">
-                  <div className={`grid gap-3 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-4'}`}>
-                    {Object.entries(totals).slice(0, 4).map(([key, value], index) => (
-                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 animate-scaleIn relative`} style={{ animationDelay: `${index * 100}ms` }}>
+                  <div className={`grid gap-3 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                    {Object.entries(totals).slice(0, 3).map(([key, value], index) => (
+                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 relative`}>
                         <h4 className={`text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1 flex items-center gap-1`}>
                           {sections[key as keyof typeof sections] || key}
                           <InfoTooltip 
@@ -8199,7 +8122,7 @@ const NetWorthManager = () => {
                             } else {
                               // 🎯 SEMPLIFICAZIONE 3: Asset percentuale su totalAssets standardizzato
                               const totalAssets = totals.cash + totals.investments + totals.realEstate + 
-                                                  totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+                                                  totals.pensionFunds + totals.alternativeAssets;
                               
                               // Edge case: se non ci sono asset, ritorna 0.0%
                               if (totalAssets <= 0) {
@@ -8230,8 +8153,8 @@ const NetWorthManager = () => {
                     </div>
                     
                   <div className={`grid gap-3 ${isCompactLayout ? 'grid-cols-1' : 'grid-cols-3'}`}>
-                    {Object.entries(totals).slice(4, 7).map(([key, value], index) => (
-                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 animate-scaleIn relative`} style={{ animationDelay: `${(index + 4) * 100}ms` }}>
+                    {Object.entries(totals).slice(3, 6).map(([key, value], index) => (
+                      <div key={key} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-1 relative`}>
                         <h4 className={`text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1 flex items-center gap-1`}>
                           {sections[key as keyof typeof sections] || key}
                           <InfoTooltip 
@@ -8248,7 +8171,7 @@ const NetWorthManager = () => {
                           {(() => {
                             // 🎯 SEMPLIFICAZIONE 3: Asset percentuale su totalAssets standardizzato
                             const totalAssets = totals.cash + totals.investments + totals.realEstate + 
-                                                totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+                                                totals.pensionFunds + totals.alternativeAssets;
                             
                             // Edge case: se non ci sono asset, ritorna 0.0%
                             if (totalAssets <= 0) {
@@ -8281,7 +8204,10 @@ const NetWorthManager = () => {
                 <div className="space-y-6">
                   {/* Pie Chart - Horizontal Layout */}
                   <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-6 hover:shadow-xl transition-shadow`}>
-                    <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('assetDistribution')}</h3>
+                    <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('assetDistribution')}</h3>
+                    <p className={`text-xs mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {t('assetDistributionNote')}
+                    </p>
                     {loadingStates.calculating ? (
                       <ChartSkeleton darkMode={darkMode} />
                     ) : filteredPieData.length === 0 ? (
@@ -8420,437 +8346,66 @@ const NetWorthManager = () => {
         {activeSection === 'statistics' && (
           <div className="space-y-6 animate-slideIn">
             
-            {/* Main Statistics Grid */}
+                         {/* 📊 STATISTICHE SEMPLIFICATE */}
             {loadingStates.calculating ? (
               <StatsSkeleton darkMode={darkMode} />
             ) : (
               <>
-                {/* Primary Metrics - Top Row */}
-                <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-                  {/* Risk Score - Large Card */}
-                  <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-102 hover:-translate-y-1 animate-scaleIn`} style={{ animationDelay: '0ms' }}>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 rounded-xl ${darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} mr-4`}>
-                        <Calculator className={`h-8 w-8 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        parseFloat(statistics.riskScore) < 3 ? 'bg-green-100 text-green-800' :
-                        parseFloat(statistics.riskScore) < 5 ? 'bg-blue-100 text-blue-800' :
-                        parseFloat(statistics.riskScore) < 7 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {parseFloat(statistics.riskScore) < 3 ? t('veryConservative') : 
-                         parseFloat(statistics.riskScore) < 5 ? t('conservative') :
-                         parseFloat(statistics.riskScore) < 7 ? t('moderate') : t('aggressive')}
-                      </div>
-                    </div>
-                    <div>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1`}>{t('riskScoreTitle')}</p>
-                      <p className={`text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-2`}>{statistics.riskScore}/10</p>
-                      <div className={`w-full bg-gray-200 rounded-full h-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-500 ${
-                            parseFloat(statistics.riskScore) < 3 ? 'bg-green-500' :
-                            parseFloat(statistics.riskScore) < 5 ? 'bg-blue-500' :
-                            parseFloat(statistics.riskScore) < 7 ? 'bg-yellow-500' : 'bg-red-500'
-                          }`}
-                          style={{ width: `${(parseFloat(statistics.riskScore) / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
+                 <SimpleStatistics 
+                   totals={totals}
+                   monthlyExpenses={monthlyExpenses}
+                   emergencyFundValue={coreFinancialCalculations.emergencyFundMetrics.value}
+                   darkMode={darkMode}
+                   formatCurrencyWithPrivacy={formatCurrencyWithPrivacy}
+                 />
 
-                                      {/* Efficiency Score - Large Card */}
-                  <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-102 hover:-translate-y-1 animate-scaleIn`} style={{ animationDelay: '50ms' }}>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 rounded-xl ${darkMode ? 'bg-emerald-900/30' : 'bg-emerald-100'} mr-4`}>
-                        <TrendingUp className={`h-8 w-8 ${darkMode ? 'text-emerald-300' : 'text-emerald-600'}`} />
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${statistics.efficiencyBgColor} ${statistics.efficiencyColor}`}>
-                        {statistics.efficiencyRating}
-                      </div>
-                    </div>
-                    <div>
-                                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1`}>{t('efficiencyScore')}</p>
-                      <p className={`text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-2`}>{statistics.sharpeRatio}</p>
-                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {t('efficiencyBasedOnSharpe')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Emergency Fund - Large Card */}
-                  <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} rounded-xl shadow-lg border p-6 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-102 hover:-translate-y-1 animate-scaleIn`} style={{ animationDelay: '100ms' }}>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 rounded-xl ${darkMode ? 'bg-green-900/30' : 'bg-green-100'} mr-4`}>
-                        <Target className={`h-8 w-8 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
-                      </div>
-                                             <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                         (() => {
-                           const months = parseFloat(statistics.emergencyMonths);
-                           return months >= 6 ? 'bg-green-100 text-green-800' :
-                                  months >= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800';
-                         })()
-                       }`}>
-                        {statistics.emergencyFundStatus}
-                      </div>
-                    </div>
-                    <div>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1`}>{t('emergencyFundTitle')}</p>
-                      <p className={`text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-2`}>{statistics.emergencyMonths}</p>
-                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        mesi di copertura
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Secondary Metrics - Bottom Row */}
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                  {/* Debt to Asset */}
-                  <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-md border p-4 hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 animate-scaleIn`} style={{ animationDelay: '200ms' }}>
-                    <div className="flex items-center mb-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${darkMode ? 'bg-red-900/30' : 'bg-red-100'} mr-3`}>
-                        <span className={`text-sm font-bold ${darkMode ? 'text-red-300' : 'text-red-600'}`}>D</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('debtToWealthRatio')}</p>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-1`}>{statistics.debtToAssetPercentage}%</p>
-                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {statistics.debtHealth}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Liquidity */}
-                  <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-md border p-4 hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 animate-scaleIn`} style={{ animationDelay: '250ms' }}>
-                    <div className="flex items-center mb-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} mr-3`}>
-                        <span className={`text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>L</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('liquidity')}</p>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-1`}>{statistics.liquidityPercentage}%</p>
-                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {statistics.liquidityHealth}
-                      </p>
-                    </div>
-                  </div>
-
-                   {/* Investments */}
-                   <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-md border p-4 hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 animate-scaleIn`} style={{ animationDelay: '300ms' }}>
-                     <div className="flex items-center mb-3">
-                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${darkMode ? 'bg-green-900/30' : 'bg-green-100'} mr-3`}>
-                         <span className={`text-sm font-bold ${darkMode ? 'text-green-300' : 'text-green-600'}`}>I</span>
-                       </div>
-                       <div className="flex-1">
-                         <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('investments')}</p>
-                       </div>
-                     </div>
-                     <div className="text-center">
-                       <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-1`}>{statistics.investmentPercentage}%</p>
-                       <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                         {t('ofWealth')}
-                       </p>
-                     </div>
-                   </div>
-
-                   {/* Total Positions */}
-                   <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-md border p-4 hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 animate-scaleIn`} style={{ animationDelay: '350ms' }}>
-                     <div className="flex items-center mb-3">
-                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${darkMode ? 'bg-purple-900/30' : 'bg-purple-100'} mr-3`}>
-                         <span className={`text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-600'}`}>T</span>
-                       </div>
-                       <div className="flex-1">
-                         <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Posizioni Totali</p>
-                       </div>
-                     </div>
-                     <div className="text-center">
-                       <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-1`}>{statistics.totalPositions}</p>
-                       <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                         posizioni totali
-                       </p>
-                     </div>
-                   </div>
+                 {/* Smart Insights Section */}
+                 <div className="mt-8">
+                   <SmartInsights
+                     portfolioData={{
+                       totalValue: netWorth,
+                       performance: 0,
+                       riskScore: parseFloat(statistics.riskScore),
+                       emergencyFundMonths: parseFloat(statistics.emergencyMonths),
+                       // Diversification score calcolato da allocationPercentages (HHI → 1-HHI)
+                       diversificationScore: (() => {
+                         const ap = statistics.allocationPercentages as { [k: string]: string };
+                         if (!ap) return 0;
+                         const keys = ['cash','investments','realEstate','pensionFunds','alternativeAssets'];
+                         const parts = keys.map(k => {
+                           const pct = parseFloat(ap[k] as string);
+                           const n = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
+                           return n / 100;
+                         });
+                         const hhi = parts.reduce((sum, p) => sum + p * p, 0);
+                         const score = (1 - hhi) * 100;
+                         return Number(score.toFixed(1));
+                       })(),
+                       // unrealizedGains: statistics.unrealizedGains || 0,
+                       cashAccounts: totals.cash,
+                       // debtToAssetRatio: statistics.debtToAssetRatio || 0
+                     }}
+                     previousData={undefined}
+                     insightsConfig={insightsConfig}
+                     darkMode={darkMode}
+                   />
                  </div>
                </>
              )}
 
-            {/* Safe Withdrawal Rate Simulation */}
-            <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-6 hover:shadow-xl transition-shadow`}>
-              <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('swrSimulation')}</h3>
+            {/* Safe Withdrawal Rate Simulation - Semplificato */}
+            <SwrSimplified 
+              cashTotal={totals.cash}
+              investmentsTotal={totals.investments} 
+              monthlyExpenses={monthlyExpenses}
+              inflationRate={inflationRate}
+              darkMode={darkMode}
+              formatCurrencyWithPrivacy={formatCurrencyWithPrivacy}
+              handleNumericInputChange={handleNumericInputChange}
+              setMonthlyExpenses={setMonthlyExpenses}
+            />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {t('swrRate')} ({swrRate}%)
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="1"
-                    value={swrRate}
-                    onChange={(e) => setSwrRate(parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    style={{
-                      background: darkMode ? '#374151' : '#e5e7eb',
-                      outline: 'none',
-                      WebkitAppearance: 'none',
-                      MozAppearance: 'none'
-                    }}
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>0%</span>
-                    <span>5%</span>
-                    <span>10%</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {t('swrMonthlyExpenses')}
-                  </label>
-                  <input
-                    type="number"
-                    value={monthlyExpenses || ''}
-                    onChange={(e) => handleNumericInputChange(setMonthlyExpenses, e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
-                    placeholder="0"
-                    step="50"
-                  />
-                </div>
-              </div>
-
-              {(() => {
-                // ✅ PERFORMANCE FIX #10: Use memoized SWR data
-    // const swrData = calculateSWR(); // No longer needed - use swrData from useMemo above
-                return (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                          {formatCurrencyWithPrivacy(swrData.withdrawableAssets)}
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {t('withdrawableAssets')}
-                        </div>
-                      </div>
-                      
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-2xl font-bold ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                          {formatCurrencyWithPrivacy(swrData.annualWithdrawal)}
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          Prelievo Annuale ({swrData.recommendedRate.toFixed(1)}% SWR)
-                          {swrData.recommendedRate !== (swrRate || 4.0) && (
-                            <span className={`text-xs ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                              {' '}(aggiustato)
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                          {formatCurrencyWithPrivacy(swrData.monthlyWithdrawal)}
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {t('swrMonthlyWithdrawal')}
-                        </div>
-                      </div>
-                      
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                          {swrData.yearsOfSupport.toFixed(1)}
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {t('swrYearsOfSupport')}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Advanced SWR Information */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-lg font-bold ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                          {swrData.riskLevel.toUpperCase()}
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          Livello di rischio
-                        </div>
-                      </div>
-                      
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-lg font-bold ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                          {swrData.portfolioVolatility ? swrData.portfolioVolatility.toFixed(1) : '15.0'}%
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          Volatilità Portafoglio
-                        </div>
-                      </div>
-                      
-                      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
-                        <div className={`text-lg font-bold ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
-                          {formatCurrencyWithPrivacy(swrData.adjustedForInflation)}
-                        </div>
-                        <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          Potere d'acquisto futuro
-                        </div>
-                      </div>
-                    </div>
-                  
-                  {/* SWR Warnings */}
-                  {swrData.warnings && swrData.warnings.length > 0 && (
-                    <div className={`${darkMode ? 'bg-yellow-900/20' : 'bg-yellow-50'} rounded-lg p-4 mb-4 border ${darkMode ? 'border-yellow-800' : 'border-yellow-200'}`}>
-                      <div className="text-center">
-                        <div className={`text-sm font-semibold ${darkMode ? 'text-yellow-300' : 'text-yellow-700'} mb-2`}>
-                          ⚠️ Avvisi SWR
-                        </div>
-                        <div className={`text-xs ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                          {swrData.warnings.map((warning, index) => (
-                            <div key={index} className="mb-1">• {warning}</div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* CAGR Warning */}
-                  {portfolioPerformance.cagrWarning && (
-                    <div className={`${darkMode ? 'bg-orange-900/20' : 'bg-orange-50'} rounded-lg p-4 mb-4 border ${darkMode ? 'border-orange-800' : 'border-orange-200'}`}>
-                      <div className="text-center">
-                        <div className={`text-sm font-semibold ${darkMode ? 'text-orange-300' : 'text-orange-700'} mb-2`}>
-                          📊 Avviso CAGR
-                        </div>
-                        <div className={`text-xs ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                          • {portfolioPerformance.cagrWarning}
-                        </div>
-                        <div className={`text-xs ${darkMode ? 'text-orange-400' : 'text-orange-600'} mt-1`}>
-                          Metodologia: {portfolioPerformance.methodology}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {monthlyExpenses > 0 && (
-                    <div className={`${darkMode ? 'bg-blue-900/20' : 'bg-blue-50'} rounded-lg p-4 mb-4 border ${darkMode ? 'border-blue-800' : 'border-blue-200'}`}>
-                      <div className="text-center">
-                        <div className={`text-sm ${darkMode ? 'text-blue-300' : 'text-blue-700'} mb-2`}>
-                          <strong>Confronto:</strong> Con spese mensili di {formatCurrencyWithPrivacy(monthlyExpenses)}, il prelievo del {privacyMode ? '••••••••' : swrData.recommendedRate.toFixed(1)}% SWR degli asset liquidi ({formatCurrencyWithPrivacy(swrData.monthlyWithdrawal)}/mese) 
-                          {swrData.monthlyWithdrawal >= monthlyExpenses ? ' copre' : ' non copre'} le tue spese
-                        </div>
-                        <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                          {swrData.monthlyWithdrawal >= monthlyExpenses
-                            ? `✅ Copertura: ${((swrData.monthlyWithdrawal / monthlyExpenses) * 100).toFixed(1)}% delle spese`
-                            : `Copertura: ${((swrData.monthlyWithdrawal / monthlyExpenses) * 100).toFixed(1)}% delle spese`
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Enhanced SWR Information */}
-                  <div className={`${darkMode ? 'bg-green-900/20' : 'bg-green-50'} rounded-lg p-4 mb-4 border ${darkMode ? 'border-green-800' : 'border-green-200'}`}>
-                    <div className="text-center">
-                      <div className={`text-sm ${darkMode ? 'text-green-300' : 'text-green-700'} mb-2`}>
-                        <strong>Calcolo SWR Avanzato:</strong>
-                      </div>
-                      <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} space-y-1`}>
-                        <div>• SWR nominale: {swrRate}%</div>
-                        <div>• Inflazione: {inflationRate}%</div>
-                        <div>• SWR reale: {swrData.realSWRRate.toFixed(1)}% (con buffer di sicurezza)</div>
-                        <div>• Spese annuali aggiustate per inflazione: {formatCurrencyWithPrivacy(safeMultiply(safeMultiply(monthlyExpenses, 12), (1 + inflationRate / 100)))}</div>
-                      </div>
-                    </div>
-                      </div>
-
-                  {/* Advanced SWR Analysis */}
-                  <div className={`${darkMode ? 'bg-purple-900/20' : 'bg-purple-50'} rounded-lg p-4 mb-4 border ${darkMode ? 'border-purple-800' : 'border-purple-200'}`}>
-                    <div className="text-center">
-                      <div className={`text-sm ${darkMode ? 'text-purple-300' : 'text-purple-700'} mb-3`}>
-                        <strong>📊 Analisi SWR Avanzata:</strong>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                        <div className={`${darkMode ? 'bg-purple-800/30' : 'bg-purple-100'} rounded p-2`}>
-                          <div className={`text-xs ${darkMode ? 'text-purple-400' : 'text-purple-600'} font-medium`}>
-                            SWR Base
-                          </div>
-                          <div className={`text-lg font-bold ${darkMode ? 'text-purple-200' : 'text-purple-800'}`}>
-                            {advancedSwrData.basicSWR}%
-                          </div>
-                        </div>
-                        
-                        <div className={`${darkMode ? 'bg-purple-800/30' : 'bg-purple-100'} rounded p-2`}>
-                          <div className={`text-xs ${darkMode ? 'text-purple-400' : 'text-purple-600'} font-medium`}>
-                            {t('swrInflationAdjusted')}
-                          </div>
-                          <div className={`text-lg font-bold ${darkMode ? 'text-purple-200' : 'text-purple-800'}`}>
-                            {advancedSwrData.inflationAdjustedSWR}%
-                          </div>
-                        </div>
-                        
-                        <div className={`${darkMode ? 'bg-purple-800/30' : 'bg-purple-100'} rounded p-2`}>
-                          <div className={`text-xs ${darkMode ? 'text-purple-400' : 'text-purple-600'} font-medium`}>
-                            {t('swrRiskAdjusted')}
-                          </div>
-                          <div className={`text-lg font-bold ${darkMode ? 'text-purple-200' : 'text-purple-800'}`}>
-                            {advancedSwrData.riskAdjustedSWR}%
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className={`text-sm ${darkMode ? 'text-purple-300' : 'text-purple-700'} mb-2`}>
-                        <strong>Prelievo Mensile Consigliato:</strong> {formatCurrencyWithPrivacy(advancedSwrData.monthlyWithdrawal)}
-                      </div>
-                      
-                      <div className={`text-xs ${darkMode ? 'text-purple-400' : 'text-purple-600'} mb-2`}>
-                        <strong>Livello di Confidenza:</strong> 
-                        <span className={`ml-1 px-2 py-1 rounded text-xs font-medium ${
-                          advancedSwrData.confidence === 'high' 
-                            ? darkMode ? 'bg-green-800 text-green-200' : 'bg-green-200 text-green-800'
-                            : advancedSwrData.confidence === 'medium'
-                            ? darkMode ? 'bg-yellow-800 text-yellow-200' : 'bg-yellow-200 text-yellow-800'
-                            : darkMode ? 'bg-red-800 text-red-200' : 'bg-red-200 text-red-800'
-                        }`}>
-                          {advancedSwrData.confidence === 'high' ? 'Alto' : 
-                           advancedSwrData.confidence === 'medium' ? 'Medio' : 'Basso'}
-                        </span>
-                      </div>
-                      
-                      {/* Advanced SWR Warnings */}
-                      {advancedSwrData.warnings && advancedSwrData.warnings.length > 0 && (
-                        <div className={`${darkMode ? 'bg-yellow-900/20' : 'bg-yellow-50'} rounded p-2 border ${darkMode ? 'border-yellow-800' : 'border-yellow-200'}`}>
-                          <div className={`text-xs ${darkMode ? 'text-yellow-300' : 'text-yellow-700'} font-medium mb-1`}>
-                            ⚠️ Avvisi SWR Avanzato:
-                          </div>
-                          <div className={`text-xs ${darkMode ? 'text-yellow-400' : 'text-yellow-600'} space-y-1`}>
-                            {advancedSwrData.warnings.map((warning, index) => (
-                              <div key={index}>• {warning}</div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
-
-              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-3`}>
-                {t('swrExplanation')}
-              </div>
               
-              <div className={`text-xs ${darkMode ? 'text-yellow-300' : 'text-yellow-600'} font-medium`}>
-                {t('swrDisclaimer')}
-              </div>
-            </div>
 
             {/* Capital Gains Section */}
             {capitalGainsData.summary.totalSales > 0 && (
@@ -9605,7 +9160,7 @@ const NetWorthManager = () => {
               <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-4 hover:shadow-xl transition-shadow`}>
                 <div className="text-center">
                   <div className={`text-2xl font-bold ${darkMode ? 'text-purple-300' : 'text-purple-600'}`}>
-                    {totals.total > 0 ? (((assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0)) / totals.total) * 100).toFixed(1) : '0'}%
+                    {netWorth > 0 ? (((assets.investmentPositions.reduce((sum: number, item: InvestmentPosition) => sum + item.amount, 0)) / netWorth) * 100).toFixed(1) : '0'}%
                   </div>
                   <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                             {t('percentOfWealth')}
@@ -9628,11 +9183,16 @@ const NetWorthManager = () => {
                 
                 {(() => {
                   const transactionStats = getTransactionStats();
-                  const years = Object.keys(transactionStats).sort((a, b) => parseInt(b) - parseInt(a));
+                  const allYears = Object.keys(transactionStats).sort((a, b) => parseInt(b) - parseInt(a));
+                  
+                  // Paginazione: mostra solo 2 anni per pagina
+                  const totalYearPages = Math.ceil(allYears.length / yearsPerPage);
+                  const startIndex = (currentTransactionYearPage - 1) * yearsPerPage;
+                  const paginatedYears = allYears.slice(startIndex, startIndex + yearsPerPage);
                   
                   return (
                     <div className="space-y-4">
-                      {years.map((year) => {
+                      {paginatedYears.map((year) => {
                         const stats = transactionStats[year];
                         return (
                           <div key={year} className={`p-4 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'} hover:shadow-md transition-shadow`}>
@@ -9709,6 +9269,20 @@ const NetWorthManager = () => {
                           </div>
                         );
                       })}
+                      
+                      {/* Paginazione per anni */}
+                      {totalYearPages > 1 && (
+                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                          <EnhancedPagination
+                            currentPage={currentTransactionYearPage}
+                            totalPages={totalYearPages}
+                            onPageChange={setCurrentTransactionYearPage}
+                            totalItems={allYears.length}
+                            itemsPerPage={yearsPerPage}
+                            darkMode={darkMode}
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
@@ -10990,6 +10564,87 @@ const NetWorthManager = () => {
                   </div>
                 </div>
 
+                {/* Smart Insights Configuration */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-2">
+                      <path d="M9 12l2 2 4-4"></path>
+                      <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>
+                      <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"></path>
+                      <path d="M12 3c0 1-1 2-2 2s-2-1-2-2 1-2 2-2 2 1 2 2z"></path>
+                      <path d="M12 21c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z"></path>
+                    </svg>
+                    {t('smartInsightsTitle')}
+                  </h3>
+                  <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
+                    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {t('smartInsightsDescription')}
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insightsConfig.emergency}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, emergency: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {t('enableEmergencyInsights')}
+                        </span>
+                      </label>
+                      
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insightsConfig.tax}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, tax: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {t('enableTaxInsights')}
+                        </span>
+                      </label>
+                      
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insightsConfig.performance}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, performance: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {t('enablePerformanceInsights')}
+                        </span>
+                      </label>
+                      
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insightsConfig.risk}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, risk: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {t('enableRiskInsights')}
+                        </span>
+                      </label>
+                      
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insightsConfig.allocation}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, allocation: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {t('enableAllocationInsights')}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Backup Management */}
                 <div>
                   <h3 className="text-xl font-semibold mb-4">
@@ -11232,10 +10887,8 @@ const NetWorthManager = () => {
                           <svg className="inline-block w-3 h-3 mr-1 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14"/><path d="M3 21h18M7 10h10"/></svg>
                           Fondi Pensione
                         </button>
-                        <button onClick={() => downloadCSVTemplate('otherAccounts')} className={`px-2 py-1.5 text-xs rounded-md ${darkMode ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-500 text-white hover:bg-indigo-600'}`}>
-                          <svg className="inline-block w-3 h-3 mr-1 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                          Altri Conti
-                        </button>
+        
+
                         <button onClick={() => downloadCSVTemplate('alternativeAssets')} className={`px-2 py-1.5 text-xs rounded-md ${darkMode ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-500 text-white hover:bg-red-600'}`}>
                           <svg className="inline-block w-3 h-3 mr-1 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 6L9 17l-5-5"/></svg>
                           Beni Alternativi
@@ -11362,6 +11015,7 @@ const NetWorthManager = () => {
                         <option value="books">{t('books')}</option>
                         <option value="comics">{t('comics')}</option>
                         <option value="art">{t('art')}</option>
+                        <option value="lego">{t('lego')}</option>
                         <option value="other">{t('other')}</option>
                       </select>
                     </div>
@@ -11380,14 +11034,11 @@ const NetWorthManager = () => {
                           {activeSection === 'realEstate' && (
                             <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('address')}</th>
                           )}
-                          {activeSection === 'realEstate' && (
-                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('status')}</th>
-                          )}
                           {activeSection === 'cash' && (
                             <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('accountType')}</th>
                           )}
                           {activeSection === 'cash' && (
-                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Fisco</th>
+                            <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bollo</th>
                           )}
                           {activeSection === 'alternativeAssets' && (
                             <th className={`border px-2 py-1 text-center text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('assetType')}</th>
@@ -11442,10 +11093,7 @@ const NetWorthManager = () => {
                             )}
                             {activeSection === 'cash' && assetItem && (
                               <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                                {renderCompactFiscalBreakdown(assetItem, { 
-                                  capitalGainsTaxRate,
-                                  depositAccountStampDutyRate 
-                                })}
+                                {renderCompactFiscalBreakdown(assetItem)}
                               </td>
                             )}
                             {activeSection === 'alternativeAssets' && assetItem && (
@@ -11459,6 +11107,7 @@ const NetWorthManager = () => {
                                    assetItem.assetType === 'books' ? t('books') :
                                    assetItem.assetType === 'comics' ? t('comics') :
                                    assetItem.assetType === 'art' ? t('art') :
+                                   assetItem.assetType === 'lego' ? t('lego') :
                                    assetItem.assetType === 'other' ? t('other') : t('notAvailable')}
                                 </span>
                               </td>
@@ -11567,7 +11216,7 @@ const NetWorthManager = () => {
                         Nessun asset trovato
                       </p>
                       <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                {t('noAssetsOfType').replace('{type}', alternativeAssetFilter === 'tcg' ? t('tcg') :
+                                                {t('noAssetsOfType').replace('{type}',                           alternativeAssetFilter === 'tcg' ? t('tcg') :
                           alternativeAssetFilter === 'stamps' ? t('stamps') :
                           alternativeAssetFilter === 'alcohol' ? t('alcohol') :
                           alternativeAssetFilter === 'collectibles' ? t('collectibles') :
@@ -11575,6 +11224,7 @@ const NetWorthManager = () => {
                           alternativeAssetFilter === 'books' ? t('books') :
                           alternativeAssetFilter === 'comics' ? t('comics') :
                           alternativeAssetFilter === 'art' ? t('art') :
+                          alternativeAssetFilter === 'lego' ? t('lego') :
                           alternativeAssetFilter === 'other' ? t('other') : t('selected'))}
                       </p>
                       <button
@@ -12128,7 +11778,7 @@ const NetWorthManager = () => {
                   </label>
                   <select
                     value={(editingItem.data as AssetItem).assetType || 'other'}
-                    onChange={(e) => handleEditFieldChange('assetType', e.target.value as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other')}
+                    onChange={(e) => handleEditFieldChange('assetType', e.target.value as 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'lego' | 'other')}
                     className={`w-full md:w-1/2 px-3 py-2 border rounded-md ${
                       darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'
                     }`}
@@ -12141,6 +11791,7 @@ const NetWorthManager = () => {
                     <option value="books">{t('books')}</option>
                     <option value="comics">{t('comics')}</option>
                     <option value="art">{t('art')}</option>
+                    <option value="lego">{t('lego')}</option>
                     <option value="other">{t('other')}</option>
                   </select>
                 </div>

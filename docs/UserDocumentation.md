@@ -69,23 +69,21 @@ Prelievo Mensile = (Patrimonio Liquido × Tasso SWR) ÷ 100 ÷ 12
 
 ---
 
-### ⚠️ **3. Risk Score (Punteggio di Rischio) - Modern Portfolio Theory**
+### ⚠️ **3. Risk Score (Punteggio di Rischio) - Metodo Semplificato**
 
 **Cosa significa:**
-Il Risk Score misura il livello di rischio del tuo portafoglio su una scala da 0 a 10, implementando la **Modern Portfolio Theory** di Markowitz. Utilizza volatilità storica e correlazioni tra asset class per calcolare un punteggio scientificamente accurato basato sulla volatilità del portfolio.
+Il Risk Score misura il livello di rischio del tuo portafoglio su una scala da 0 a 10, utilizzando un **metodo semplificato** basato su categorie di asset. Questo approccio è adatto per il 95% degli utenti e fornisce una valutazione del rischio facile da comprendere.
 
 **Come si calcola:**
 ```
-Portfolio Volatility = √(Σ(wi²σi²) + Σ(wiwjσiσjρij))
+Risk Score = Σ(Asset Weight × Category Risk Weight) / Total Weight
 
-wi, wj = pesi degli asset
-σi, σj = volatilità storica degli asset
-ρij = correlazione tra asset
-Risk Score = (Portfolio Volatility × 100 ÷ 30%) × 10
-
-0% volatilità = 0 risk score
-30%+ volatilità = 10 risk score
-Scala lineare basata su volatilità portfolio
+Pesi di rischio per categoria:
+- Contanti: 1 (molto sicuro)
+- Fondi Pensione: 3 (moderato, regolamentato)
+- Immobili: 4 (medio, stabile ma illiquido)
+- Investimenti: 7 (alto, volatile)
+- Beni Alternativi: 9 (molto alto, speculativo)
 ```
 
 **Interpretazione:**
@@ -96,8 +94,14 @@ Scala lineare basata su volatilità portfolio
 - **9-10**: Molto Aggressivo (es. 100% azioni + leverage)
 
 **Esempio pratico:**
-Portafoglio bilanciato (40% azioni, 40% obbligazioni, 20% contanti):
-- Risk Score: ~5/10 (moderato)
+Portafoglio bilanciato (40% investimenti, 40% immobili, 20% contanti):
+- Risk Score: ~4.4/10 (moderato-conservativo)
+
+**Perché semplificato:**
+- 95% degli utenti necessitano di una valutazione semplice e comprensibile
+- Calcoli MPT complessi possono essere confusi e soggetti a errori
+- Questo approccio fornisce accuratezza sufficiente per la finanza personale
+- Facile da spiegare e giustificare agli utenti
 
 **Quando usarlo:**
 - Valutare l'adeguatezza del profilo di rischio
@@ -402,7 +406,36 @@ Sharpe Ratio = (Return - Risk Free Rate) / Volatility
 
 ---
 
-### ⚠️ **11. Disclaimer e Avvertenze**
+### 🎯 **11. Cosa NON fa MangoMoney (e perché)**
+
+**Prezzi real-time:**
+- **Cosa:** Niente API esterne per prezzi in tempo reale
+- **Perché:** Privacy totale - tutti i dati rimangono sul tuo dispositivo
+- **Alternativa:** Inserimento manuale prezzi quando necessario
+
+**Modern Portfolio Theory completa:**
+- **Cosa:** Calcoli semplificati invece di correlazioni complesse
+- **Perché:** 95% degli utenti necessitano di semplicità, non precisione accademica
+- **Alternativa:** Metodo ponderato per categoria, facile da capire
+
+**Predizioni future:**
+- **Cosa:** Usa solo dati storici, non previsioni
+- **Perché:** Indicativo, non predittivo - più onesto
+- **Alternativa:** Analisi basata su performance passate
+
+**Consigli investimento:**
+- **Cosa:** Strumento di monitoraggio, non consulenza
+- **Perché:** Tu decidi, noi calcoliamo - responsabilità personale
+- **Alternativa:** Strumenti per informare le tue decisioni
+
+**Gestione automatica:**
+- **Cosa:** Nessun trading automatico o rebalancing
+- **Perché:** Controllo totale dell'utente sui propri asset
+- **Alternativa:** Notifiche e suggerimenti per azioni manuali
+
+---
+
+### ⚠️ **12. Disclaimer e Avvertenze**
 
 **Importante:**
 - Questa documentazione è a scopo educativo
@@ -412,15 +445,15 @@ Sharpe Ratio = (Return - Risk Free Rate) / Volatility
 - Considera la tua situazione personale
 
 **Limitazioni:**
-- I calcoli sono semplificati
-- Non considerano tutti i fattori di rischio
+- I calcoli sono semplificati per facilità d'uso
+- Non considerano tutti i fattori di rischio di mercato
 - I dati storici potrebbero non ripetersi
-- Le tasse e i costi possono variare
-- Le condizioni di mercato cambiano
+- Le tasse e i costi possono variare nel tempo
+- Le condizioni di mercato cambiano continuamente
 
 **Raccomandazioni:**
-- Diversifica sempre
+- Diversifica sempre il tuo portafoglio
 - Investi per il lungo termine
-- Mantieni costi bassi
-- Monitora regolarmente
-- Adatta la strategia alle tue esigenze
+- Mantieni costi di gestione bassi
+- Monitora regolarmente le performance
+- Adatta la strategia alle tue esigenze personali

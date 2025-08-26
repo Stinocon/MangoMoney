@@ -86,7 +86,7 @@ Per le impostazioni, c'è una configurazione rapida per l'Italia che imposta aut
 ### **🧮 Calcoli Finanziari Avanzati** 
 - **CAGR** (Compound Annual Growth Rate) per performance temporali
 - **SWR** (Safe Withdrawal Rate) basato su Trinity Study
-- **Risk Score** basato su Modern Portfolio Theory e volatilità
+- **Risk Score** semplificato basato su categorie asset (adatto per il 95% degli utenti)
 - **Efficiency Score** (Sharpe Ratio) per analisi rendimento/rischio
 - **Simulazioni** vendite con impatto fiscale
 

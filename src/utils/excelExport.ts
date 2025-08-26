@@ -10,6 +10,7 @@ interface ExcelExportOptions {
 interface ExportData {
   assets: any;
   totals: any;
+  netWorth: number;
   statistics: any;
   emergencyFundAccount: { section: string; id: number; name: string };
   formatCurrency: (amount: number) => string;
@@ -66,11 +67,11 @@ export class ExcelExporter {
       [''],
       ['RIEPILOGO GENERALE'],
       [''],
-      ['Patrimonio Netto', this.data.formatCurrency(this.data.totals.total)],
+      ['Patrimonio Netto', this.data.formatCurrency(this.data.netWorth)],
       // 🎯 FIX ERRORE 4: Patrimonio Lordo = somma asset reali (non patrimonio netto + debiti)
       ['Patrimonio Lordo', this.data.formatCurrency(this.data.totals.cash + this.data.totals.investments + 
                                                     this.data.totals.realEstate + this.data.totals.pensionFunds + 
-                                                    this.data.totals.otherAccounts + this.data.totals.alternativeAssets)],
+                                                    this.data.totals.alternativeAssets)],
       ['Debiti Totali', this.data.formatCurrency(Math.abs(this.data.totals.debts))],
       [''],
       ['ALLOCAZIONE PATRIMONIO'],
@@ -79,7 +80,7 @@ export class ExcelExporter {
       ['Investimenti', this.data.formatCurrency(this.data.totals.investments)],
       ['Immobili', this.data.formatCurrency(this.data.totals.realEstate)],
       ['Fondi Pensione', this.data.formatCurrency(this.data.totals.pensionFunds)],
-      ['Altri Asset', this.data.formatCurrency(this.data.totals.otherAccounts + this.data.totals.alternativeAssets)],
+      ['Beni Alternativi', this.data.formatCurrency(this.data.totals.alternativeAssets)],
       [''],
       ['STATISTICHE'],
       [''],
@@ -103,7 +104,7 @@ export class ExcelExporter {
       investmentPositions: 'Posizioni di Investimento',
       realEstate: 'Immobili',
       pensionFunds: 'Fondi Pensione',
-      otherAccounts: 'Altri Conti',
+
       alternativeAssets: 'Beni Alternativi',
       debts: 'Debiti'
     };
@@ -229,15 +230,15 @@ export class ExcelExporter {
       [''],
     ];
 
-    const total = this.data.totals.total + Math.abs(this.data.totals.debts);
+    const total = this.data.netWorth + Math.abs(this.data.totals.debts);
     if (total > 0) {
       const allocations = [
         ['Liquidità', this.data.totals.cash, (this.data.totals.cash / total) * 100],
         ['Investimenti', this.data.totals.investments, (this.data.totals.investments / total) * 100],
         ['Immobili', this.data.totals.realEstate, (this.data.totals.realEstate / total) * 100],
         ['Fondi Pensione', this.data.totals.pensionFunds, (this.data.totals.pensionFunds / total) * 100],
-        ['Altri Asset', this.data.totals.otherAccounts + this.data.totals.alternativeAssets, 
-         ((this.data.totals.otherAccounts + this.data.totals.alternativeAssets) / total) * 100]
+                  ['Beni Alternativi', this.data.totals.alternativeAssets,
+           (this.data.totals.alternativeAssets / total) * 100]
       ];
 
       analysisData.push(['Categoria', 'Importo', 'Percentuale']);

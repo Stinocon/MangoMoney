@@ -13,6 +13,7 @@ import {
   safePercentage,
   validateFinancialDecimal
 } from '../financialCalculations';
+import { generateInsights } from '../../components/AccessibleCharts';
 
 // Historical test cases for validation
 const HISTORICAL_TEST_CASES = [
@@ -206,6 +207,111 @@ describe('Financial Calculations - Critical Unit Tests', () => {
     test('empty portfolio handling', () => {
       const result = calculatePortfolioRiskScore({}, 0);
       expect(result).toBe(5); // Default risk score for empty portfolio
+    });
+  });
+
+  describe('Advanced Smart Insights', () => {
+    test('emergency fund critical insight', () => {
+      const portfolioData = {
+        emergencyFundMonths: 1.5,
+        riskScore: 5,
+        performance: 6,
+        diversificationScore: 70,
+        unrealizedGains: 0,
+        cashAccounts: 3000,
+        debtToAssetRatio: 0.3
+      };
+      
+      const insights = generateInsights(portfolioData, undefined, { emergency: true });
+      const emergencyInsight = insights.find(i => i.type === 'emergency');
+      
+      expect(emergencyInsight).toBeDefined();
+      expect(emergencyInsight?.severity).toBe('critical');
+      expect(emergencyInsight?.description).toContain('25%');
+    });
+
+    test('tax optimization insight in december', () => {
+      const originalDate = Date;
+      global.Date = class extends Date {
+        constructor() {
+          super('2023-12-15');
+        }
+        getMonth() { return 11; } // December
+      } as any;
+      
+      const portfolioData = {
+        emergencyFundMonths: 6,
+        riskScore: 5,
+        performance: 6,
+        diversificationScore: 70,
+        unrealizedGains: 5000,
+        cashAccounts: 3000,
+        debtToAssetRatio: 0.3
+      };
+      
+      const insights = generateInsights(portfolioData, undefined, { tax: true });
+      const taxInsight = insights.find(i => i.type === 'tax');
+      
+      expect(taxInsight).toBeDefined();
+      expect(taxInsight?.description).toContain('Plusvalenze non realizzate');
+      
+      global.Date = originalDate;
+    });
+
+    test('bollo titoli reminder for large cash accounts', () => {
+      const portfolioData = {
+        emergencyFundMonths: 6,
+        riskScore: 5,
+        performance: 6,
+        diversificationScore: 70,
+        unrealizedGains: 0,
+        cashAccounts: 10000,
+        debtToAssetRatio: 0.3
+      };
+      
+      const insights = generateInsights(portfolioData, undefined, { tax: true });
+      const bolloInsight = insights.find(i => i.description.includes('bollo titoli'));
+      
+      expect(bolloInsight).toBeDefined();
+      expect(bolloInsight?.description).toContain('€5K');
+    });
+
+    test('high debt-to-asset ratio warning', () => {
+      const portfolioData = {
+        emergencyFundMonths: 6,
+        riskScore: 5,
+        performance: 6,
+        diversificationScore: 70,
+        unrealizedGains: 0,
+        cashAccounts: 3000,
+        debtToAssetRatio: 0.7
+      };
+      
+      const insights = generateInsights(portfolioData, undefined, { risk: true });
+      const debtInsight = insights.find(i => i.type === 'risk' && i.description.includes('debiti'));
+      
+      expect(debtInsight).toBeDefined();
+      expect(debtInsight?.severity).toBe('critical');
+    });
+
+    test('insights sorted by priority', () => {
+      const portfolioData = {
+        emergencyFundMonths: 1, // Priority 10
+        riskScore: 8, // Priority 7
+        performance: 3,
+        diversificationScore: 30, // Priority 8
+        unrealizedGains: 0,
+        cashAccounts: 3000,
+        debtToAssetRatio: 0.3
+      };
+      
+      const insights = generateInsights(portfolioData, undefined, { emergency: true, risk: true, allocation: true });
+      
+      // Should have multiple insights
+      expect(insights.length).toBeGreaterThan(1);
+      
+      // First insight should be emergency fund (highest priority)
+      expect(insights[0].type).toBe('emergency');
     });
   });
 

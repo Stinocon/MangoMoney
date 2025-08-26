@@ -201,7 +201,7 @@ export const testCorrelationMatrixSafety = (): boolean => {
   // Simula le strutture dati
   const ASSET_CLASS_MAPPING = {
     cash: 'cash',
-    otherAccounts: 'cash',
+
     pensionFunds: 'bonds',
     realEstate: 'realEstate',
     investmentPositions: 'stocks',

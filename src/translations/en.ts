@@ -38,7 +38,7 @@ export const en = {
   investmentPositions: 'Investments',
   realEstate: 'Real Estate',
   pensionFunds: 'Pension Funds',
-  otherAccounts: 'Other Accounts',
+
   alternativeAssets: 'Alternative Assets',
   
   // Investment specific
@@ -90,7 +90,7 @@ export const en = {
   status: 'Status',
   
   // Statistics
-  riskScore: 'Portfolio Risk Level',
+  riskScore: 'Simplified Risk Level',
   efficiencyScore: 'Efficiency (Sharpe Ratio)',
   emergencyFund: 'Emergency Fund',
   diversification: 'Diversification',
@@ -167,6 +167,7 @@ export const en = {
   
   // Charts
   assetDistribution: 'Asset Allocation',
+  assetDistributionNote: 'Asset distribution (excluding debts). Net worth is calculated as assets - liabilities.',
   categoryComparison: 'Category Comparison',
   realEstateDistribution: 'Real Estate Distribution',
   
@@ -309,7 +310,7 @@ export const en = {
   welcomeInvestments: 'Welcome to the Investments section',
   welcomeRealEstate: 'Welcome to the Real Estate section',
   welcomePensionFunds: 'Welcome to the Pension Funds section',
-  welcomeOtherAccounts: 'Welcome to the Other Accounts section',
+
   welcomeAlternativeAssets: 'Welcome to the Alternative Assets section',
   
   // Individual positions specific
@@ -385,9 +386,20 @@ export const en = {
   emergencyFundAnalysis: 'Emergency fund analysis',
   commissionCostStatistics: 'Commission and cost statistics',
   assetLinking: 'Asset Linking',
-  automaticValidationTolerance: 'Automatic validation with 5% tolerance',
+  automaticValidationTolerance: 'Automatic validation with dynamic tolerance',
   
   // Autolink functionality
+  dynamicToleranceExplanation: 'Variable tolerance: ±10% for amounts < $1K, ±5% for amounts < $10K, ±3% for amounts < $100K, ±2% for larger amounts',
+  
+  // Smart Insights Configuration
+  smartInsightsTitle: 'Smart Insights',
+  smartInsightsDescription: 'Personalized suggestions based on your portfolio',
+  insightsConfiguration: 'Insights Configuration',
+  enableEmergencyInsights: 'Enable emergency fund insights',
+  enableTaxInsights: 'Enable tax insights',
+  enablePerformanceInsights: 'Enable performance insights',
+  enableRiskInsights: 'Enable risk insights',
+  enableAllocationInsights: 'Enable allocation insights',
   autolinkTransactions: 'Autolink Transactions',
   autolinkDescription: 'Automatically link transactions to individual positions based on ISIN',
   autolinkCompleted: 'Autolink completed',
@@ -427,15 +439,17 @@ export const en = {
   // Statistics section
   advancedStatistics: 'Advanced Statistics',
   transactionStatistics: 'Transaction Statistics',
-  riskScoreTitle: 'Risk Score',
+  riskScoreTitle: 'Simplified Risk Score',
   
   // Risk score descriptions
+  riskScoreDescription: 'Simplified calculation based on asset categories. Suitable for most users.',
+  riskScoreMethod: 'Method: Weighted average by category (not full Modern Portfolio Theory)',
   liquidityRiskDescription: 'Liquidity: 1.0 (minimal risk - high liquidity)',
   pensionFundsRiskDescription: 'Pension Funds: 2.0 (medium risk - regulated, long-term)',
   realEstateRiskDescription: 'Real Estate: 2.0 (medium risk - stable but illiquid)',
   globalPositionsRiskDescription: 'Global Positions: 3.0 (medium-high risk - broker accounts)',
   alternativeAssetsRiskDescription: 'Alternative Assets: 5.0 (very high risk - speculative assets)',
-  otherAccountsRiskDescription: 'Other Accounts: 1.5 (low risk - various financial products)',
+
   investmentsTransactionsRiskDescription: 'Investments/Transactions: 4.0 (high risk - market volatility)',
   riskScoreBasedOnVolatility: 'Based on portfolio volatility calculated with Modern Portfolio Theory.',
   efficiencyBasedOnSharpe: 'Based on risk-adjusted return ratio.',
@@ -661,6 +675,7 @@ export const en = {
   books: 'Books',
   comics: 'Comics',
   art: 'Art',
+  lego: 'LEGO',
   selected: 'Selected',
   fees: 'Fees',
   primaryResidence: 'Primary Residence',

@@ -86,7 +86,7 @@ export class ExportValidator {
   }
 
   private validateAssets(): void {
-    const sections = ['cash', 'investments', 'realEstate', 'pensionFunds', 'otherAccounts', 'alternativeAssets', 'debts', 'transactions'];
+    const sections = ['cash', 'investments', 'realEstate', 'pensionFunds', 'alternativeAssets', 'debts', 'transactions'];
     
     sections.forEach(section => {
       const items = this.data.assets[section];
@@ -207,7 +207,7 @@ export class ExportValidator {
   }
 
   private validateAlternativeAssetItem(item: any, rowPrefix: string): void {
-    const validTypes = ['tcg', 'stamps', 'alcohol', 'collectibles', 'vinyl', 'books', 'comics', 'art', 'other'];
+    const validTypes = ['tcg', 'stamps', 'alcohol', 'collectibles', 'vinyl', 'books', 'comics', 'art', 'lego', 'other'];
     if (item.assetType && !validTypes.includes(item.assetType)) {
       this.warnings.push(`${rowPrefix}: Tipo asset alternativo non valido`);
     }
@@ -236,8 +236,10 @@ export class ExportValidator {
     });
 
     // Validate net worth calculation
-    const calculatedNetWorth = calculatedTotals.total;
-    const providedNetWorth = providedTotals.total;
+    const calculatedNetWorth = calculatedTotals.cash + calculatedTotals.investments + calculatedTotals.realEstate + 
+                               calculatedTotals.pensionFunds + calculatedTotals.alternativeAssets - Math.abs(calculatedTotals.debts);
+    const providedNetWorth = providedTotals.cash + providedTotals.investments + providedTotals.realEstate + 
+                             providedTotals.pensionFunds + providedTotals.alternativeAssets - Math.abs(providedTotals.debts);
     
     if (typeof providedNetWorth !== 'number') {
       this.errors.push('Patrimonio netto totale: valore mancante o non numerico');
@@ -327,7 +329,7 @@ export class ExportValidator {
       investments: 0,
       realEstate: 0,
       pensionFunds: 0,
-      otherAccounts: 0,
+  
       alternativeAssets: 0,
       debts: 0,
       total: 0
@@ -348,9 +350,9 @@ export class ExportValidator {
       }
     });
 
-    // Calculate net worth
-    totals.total = totals.cash + totals.investments + totals.realEstate + 
-                  totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets - Math.abs(totals.debts);
+    // Calculate net worth (not stored in totals anymore)
+    const netWorth = totals.cash + totals.investments + totals.realEstate + 
+                    totals.pensionFunds + totals.alternativeAssets - Math.abs(totals.debts);
 
     return totals;
   }

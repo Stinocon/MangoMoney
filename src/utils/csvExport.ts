@@ -10,6 +10,7 @@ interface CSVExportOptions {
 interface ExportData {
   assets: any;
   totals: any;
+  netWorth: number;
   statistics: any;
   emergencyFundAccount: { section: string; id: number; name: string };
   formatCurrency: (amount: number) => string;
@@ -257,7 +258,7 @@ export class CSVExporter {
       investmentPositions: 'Posizioni di Investimento',
       realEstate: 'Immobili',
       pensionFunds: 'Fondi Pensione',
-      otherAccounts: 'Altri Conti',
+
       alternativeAssets: 'Beni Alternativi',
       debts: 'Debiti',
       transactions: 'Transazioni'

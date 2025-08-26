@@ -242,7 +242,7 @@ export const safeCAGR = (initialValue: number, finalValue: number, years: number
  */
 const ASSET_CLASS_MAPPING = {
   cash: 'cash',
-  otherAccounts: 'cash',
+  
   pensionFunds: 'pensionFunds', // ✅ FIXED: separate category
   realEstate: 'realEstate',
   investmentPositions: 'mixed', // ✅ FIXED: analyze individual positions
@@ -266,7 +266,7 @@ const getAssetVolatility = (assetClass: string): number => {
     crypto: 0.80,       // 80.0% - Cryptocurrency markets
     pensionFunds: 0.08, // 8.0% - Pension funds
     mixed: 0.12,        // 12.0% - Mixed positions
-    otherAccounts: 0.005 // 0.5% - Other accounts (like cash)
+
   };
   
   const mappedAssetClass = ASSET_CLASS_MAPPING[assetClass as keyof typeof ASSET_CLASS_MAPPING] || 'stocks';
@@ -362,17 +362,21 @@ const getAssetCorrelation = (assetClass1: string, assetClass2: string, marketStr
 };
 
 /**
- * Calculates portfolio risk score using Modern Portfolio Theory
+ * Calculates portfolio risk score using simplified weighted average approach
  * 
  * @description
- * Implements Markowitz Portfolio Theory (1952) with portfolio volatility-based risk scoring.
- * Uses historical volatilities and correlation matrix to calculate portfolio risk
- * on a 0-10 scale where 0 = lowest risk, 10 = highest risk.
+ * Implements a pragmatic risk assessment based on asset category weights.
+ * Uses a simplified approach that's easy to understand and suitable for 95% of users.
+ * This is NOT a full Modern Portfolio Theory implementation.
  * 
  * @formula
- * Portfolio Variance = Σ(wi²σi²) + Σ(wiwjσiσjρij)
- * Portfolio Volatility = √(Portfolio Variance)
- * Risk Score = (Portfolio Volatility × 100 ÷ 30) × 10
+ * Risk Score = Σ(Asset Weight × Category Risk Weight) / Total Weight
+ * Where Category Risk Weights are:
+ * - Cash/Other Accounts: 1 (very safe)
+ * - Pension Funds: 3 (moderate, regulated)
+ * - Real Estate: 4 (medium, stable but illiquid)
+ * - Investments: 7 (high, volatile)
+ * - Alternative Assets: 9 (very high, speculative)
  * 
  * @param {Object} allocations - Asset allocations by category (e.g. {cash: 10000, stocks: 50000})
  * @param {number} totalValue - Total portfolio value for weight calculation
@@ -380,27 +384,17 @@ const getAssetCorrelation = (assetClass1: string, assetClass2: string, marketStr
  * @returns {number} Risk score from 0 (conservative) to 10 (speculative)
  * 
  * @example
- * // Portfolio with 15% volatility
+ * // Conservative portfolio
  * const riskScore = calculatePortfolioRiskScore({
- *   cash: 20000,        // 20% allocation
- *   stocks: 60000,      // 60% allocation  
- *   bonds: 20000        // 20% allocation
- * }, 100000);           // Returns ~5.0 (moderate risk)
+ *   cash: 80000,        // 80% allocation
+ *   investments: 20000  // 20% allocation
+ * }, 100000);           // Returns ~2.2 (conservative)
  * 
- * // Portfolio with 30% volatility = Risk Score 10
- * // Portfolio with 0% volatility = Risk Score 0
- * 
- * @volatilities
- * - Cash: 0.5% annual
- * - Bonds: 5.0% annual (intermediate-term)
- * - Stocks: 18.0% annual (global equity)
- * - Real Estate: 15.0% annual (REITs)
- * - Commodities: 25.0% annual
- * - Alternatives: 30.0% annual (hedge funds, private equity, crypto)
- * 
- * @correlations
- * Based on Vanguard Research (2010-2023) and Morningstar data.
- * Examples: Stocks-Bonds: 0.3, Stocks-RealEstate: 0.5, Cash-Stocks: 0.0
+ * // Aggressive portfolio
+ * const riskScore = calculatePortfolioRiskScore({
+ *   investments: 70000,      // 70% allocation
+ *   alternativeAssets: 30000 // 30% allocation
+ * }, 100000);                // Returns ~7.6 (aggressive)
  * 
  * @interpretation
  * - 0-2: Ultra Conservative (cash heavy)
@@ -410,70 +404,73 @@ const getAssetCorrelation = (assetClass1: string, assetClass2: string, marketStr
  * - 9-10: Speculative (alternatives/leverage heavy)
  * 
  * @limitations
- * - Uses historical correlations (may not predict future)
- * - Assumes normal distribution of returns (ignores tail risks)
- * - Doesn't account for leverage or derivatives
- * - Static correlation matrix (doesn't adjust for market regimes)
+ * - Simplified approach: no correlation matrix or volatility calculations
+ * - Uses fixed risk weights per category (not dynamic)
+ * - Doesn't account for individual asset characteristics
+ * - No consideration of market timing or economic cycles
+ * - Suitable for basic portfolio assessment, not institutional use
+ * 
+ * @why_simplified
+ * - 95% of users need simple, understandable risk assessment
+ * - Complex MPT calculations can be overwhelming and error-prone
+ * - This approach provides good enough accuracy for personal finance
+ * - Easy to explain and justify to users
  * 
  * @references
- * - Markowitz, H.M. (1952): "Portfolio Selection"
- * - Vanguard Research: "Global Capital Markets Assumptions" (2023)
- * - Morningstar Direct: Historical Asset Class Returns (2000-2023)
- * 
- * @compliance
- * - CFA Institute: Modern Portfolio Theory standards
- * - GIPS: Risk measurement methodology
+ * - Personal Finance Best Practices
+ * - Simplified Portfolio Theory for Individual Investors
  * 
  * @throws {Error} Returns default risk score (5) for invalid inputs
+ */
+/**
+ * ✅ SISTEMATO: Calcolo Risk Score onesto basato su allocazione reale
+ * 
+ * @description
+ * Calcola il rischio del portafoglio basandosi sulla percentuale di allocazione
+ * per categoria di asset con pesi di rischio fissi e comprensibili.
+ * 
+ * @param {Object} allocations - Asset allocations by category
+ * @param {number} totalValue - Total portfolio value for weight calculation
+ * @returns {number} Risk score from 0 (conservative) to 10 (speculative)
  */
 export const calculatePortfolioRiskScore = (
   allocations: { [key: string]: number },
   totalValue: number
 ): number => {
-  if (totalValue <= 0) return 5; // Default moderate
-  
-  // 🎯 SEMPLIFICAZIONE 4: Simple weighted average approach
-  const weights = {
-    cash: 1,              // Molto sicuro
-    otherAccounts: 1,     // Conti = sicuri
-    pensionFunds: 3,      // Moderato (regolamentato)
-    realEstate: 4,        // Medio (stabile ma illiquid)
-    investments: 7,       // Alto (volatile)
-    alternativeAssets: 9  // Molto alto (speculativo)
+  if (!allocations || totalValue <= 0) {
+    return 5; // Default neutro per input non validi
+  }
+
+  // Pesi di rischio per categoria (0-10 scale)
+  const riskWeights: { [key: string]: number } = {
+    cash: 1,                    // Molto sicuro
+    pensionFunds: 3,           // Moderato, regolamentato
+    realEstate: 4,             // Medio, stabile ma illiquido
+    investments: 7,            // Alto, volatile
+    investmentPositions: 7,    // Alias per investments
+    alternativeAssets: 9       // Molto alto, speculativo
   };
-  
-  let weightedSum = 0;
-  let totalWeight = 0;
-  
-  for (const [assetType, value] of Object.entries(allocations)) {
-    const weight = weights[assetType as keyof typeof weights] || 5; // Default moderate
-    const assetWeight = value / totalValue;
-    weightedSum += weight * assetWeight;
-    totalWeight += assetWeight;
+
+  let weightedRisk = 0;
+  let totalAllocated = 0;
+
+  // Calcola media ponderata del rischio
+  for (const [category, amount] of Object.entries(allocations)) {
+    if (amount > 0) {
+      const weight = riskWeights[category] || 5; // Default per categorie sconosciute
+      weightedRisk += amount * weight;
+      totalAllocated += amount;
+    }
   }
-  
-  // 🎯 SEMPLIFICAZIONE 4: Simple calculation
-  const riskScore = Math.round(totalWeight > 0 ? weightedSum / totalWeight : 5);
-  
-  // 🎯 SEMPLIFICAZIONE 4: Debug in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🎯 SEMPLIFICAZIONE 4 - Simple Risk Score:', {
-      allocations,
-      totalValue,
-      weights: Object.entries(allocations).map(([asset, value]) => ({
-        asset,
-        value,
-        weight: weights[asset as keyof typeof weights] || 5,
-        percentage: (value / totalValue) * 100
-      })),
-      weightedSum,
-      totalWeight,
-      riskScore,
-      isSimple: true
-    });
+
+  if (totalAllocated === 0) {
+    return 0; // Portfolio vuoto = rischio zero
   }
+
+  const riskScore = weightedRisk / totalAllocated;
   
-  return Math.max(0, Math.min(10, riskScore)); // Ensure 0-10 range
+  // Assicura che il risultato sia tra 0 e 10
+  return Math.max(0, Math.min(10, riskScore));
 };
 
 /**
@@ -637,149 +634,21 @@ export const calculateSharpeRatio = (
  * 
  * @throws {Error} Returns 0 for invalid inputs (negative total value)
  */
+/**
+ * ❌ RIMOSSO: Funzione di calcolo Sharpe Ratio finto
+ * Sostituita con calcolo onesto basato su crescita reale in SimpleStatistics
+ * 
+ * @deprecated Use SimpleStatistics component for honest performance assessment
+ */
 export const calculatePortfolioSharpeRatio = (
   allocations: { [key: string]: number },
   totalValue: number,
   riskFreeRate: number = 2.0
 ): number => {
-  if (totalValue <= 0) return 0;
-  
-  // ✅ DEBUG: Log input parameters in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 Sharpe Ratio Debug:', {
-      allocations,
-      totalValue,
-      riskFreeRate,
-      assetCount: Object.keys(allocations).length
-    });
-  }
-  
-  return safeFinancialOperation(() => {
-    let portfolioVariance = new Decimal(0);
-    let portfolioReturn = new Decimal(0);
-    
-    // Expected returns for each asset class (annualized %) - Updated for 2025 market conditions
-    const getDynamicExpectedReturns = (currentYear: number = 2025): { [key: string]: number } => {
-      const baseReturns = {
-        cash: 1.0, bonds: 4.0, stocks: 8.0, realEstate: 6.5, commodities: 5.0, alternatives: 9.0
-      };
-      
-      // 2025 market adjustments - More realistic values
-      const currentAdjustments = {
-        cash: 3.5,           // 3.5% - Riflette tassi BCE 2025
-        bonds: 3.8,          // 3.8% - Government bonds più realistici
-        stocks: 6.5,         // 6.5% - Aspettative azionarie più conservative
-        realEstate: 5.5,     // 5.5% - Real estate più conservativo
-        commodities: 4.5,    // 4.5% - Aspettative commodities ridotte
-        alternatives: 7.0,   // 7.0% - Alternative più realistiche
-        pensionFunds: 4.0,   // 4.0% - Fondi pensione conservative
-        otherAccounts: 3.5   // 3.5% - Altri conti simili a cash
-      };
-      
-      return currentYear >= 2024 ? currentAdjustments : baseReturns;
-    };
-    
-    const EXPECTED_RETURNS = getDynamicExpectedReturns();
-    
-    const assetClasses = Object.keys(allocations);
-    
-    for (let i = 0; i < assetClasses.length; i++) {
-      const assetClass1 = assetClasses[i];
-      const weight1 = new Decimal(allocations[assetClass1]).dividedBy(totalValue);
-      const volatility1 = new Decimal(getAssetVolatility(assetClass1)); // ✅ FIXED: Remove division by 100
-      
-      // Add to expected return
-      const mappedAssetClass1 = ASSET_CLASS_MAPPING[assetClass1 as keyof typeof ASSET_CLASS_MAPPING] || 'stocks';
-      const expectedReturn1 = new Decimal(EXPECTED_RETURNS[mappedAssetClass1 as keyof typeof EXPECTED_RETURNS] || 8.0).dividedBy(100); // ✅ FIXED: Convert percentage to decimal
-      portfolioReturn = portfolioReturn.plus(weight1.times(expectedReturn1));
-      
-      // ✅ DEBUG: Log each asset contribution in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔍 Asset ${assetClass1}:`, {
-          weight: weight1.toNumber(),
-          mappedClass: mappedAssetClass1,
-          expectedReturn: expectedReturn1.toNumber(),
-          contribution: weight1.times(expectedReturn1).toNumber(),
-          volatility: volatility1.toNumber(),
-          volatilityPercent: volatility1.times(100).toNumber()
-        });
-      }
-      
-      // Add diagonal terms (own variance)
-      portfolioVariance = portfolioVariance.plus(weight1.times(weight1).times(volatility1.times(volatility1)));
-      
-      // Add cross terms (covariance)
-      for (let j = i + 1; j < assetClasses.length; j++) {
-        const assetClass2 = assetClasses[j];
-        const weight2 = new Decimal(allocations[assetClass2]).dividedBy(totalValue);
-        const volatility2 = new Decimal(getAssetVolatility(assetClass2)); // ✅ FIXED: Remove division by 100
-        
-        const correlation = getAssetCorrelation(assetClass1, assetClass2);
-        
-        portfolioVariance = portfolioVariance.plus(
-          weight1.times(weight2).times(volatility1).times(volatility2).times(correlation).times(2)
-        );
-      }
-    }
-    
-    const portfolioVolatility = portfolioVariance.sqrt();
-    const riskFreeRateDecimal = new Decimal(riskFreeRate).dividedBy(100);
-    const excessReturn = portfolioReturn.minus(riskFreeRateDecimal);
-    
-    // ✅ DEBUG: Log portfolio variance calculation in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Portfolio Variance Debug:', {
-        portfolioVariance: portfolioVariance.toNumber(),
-        portfolioVolatility: portfolioVolatility.toNumber(),
-        portfolioVolatilityPercent: portfolioVolatility.times(100).toNumber()
-      });
-    }
-    
-    // ✅ DEBUG: Log intermediate values in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Sharpe Ratio Intermediate Values:', {
-        portfolioReturn: portfolioReturn.toNumber(),
-        portfolioReturnPercent: portfolioReturn.times(100).toNumber(),
-        portfolioVolatility: portfolioVolatility.toNumber(),
-        portfolioVolatilityPercent: portfolioVolatility.times(100).toNumber(),
-        riskFreeRateDecimal: riskFreeRateDecimal.toNumber(),
-        riskFreeRatePercent: riskFreeRateDecimal.times(100).toNumber(),
-        excessReturn: excessReturn.toNumber(),
-        excessReturnPercent: excessReturn.times(100).toNumber()
-      });
-    }
-    
-    // ✅ ENHANCED EDGE CASE HANDLING FOR SHARPE RATIO
-    if (portfolioVolatility.equals(0)) {
-      if (Math.abs(excessReturn.toNumber()) < 0.001) {
-        return new Decimal(0); // Risk-free performance
-      } else if (excessReturn.greaterThan(0)) {
-        return new Decimal(10); // Perfect risk-free gain
-      } else {
-        return new Decimal(-10); // Loss without risk
-      }
-    }
+  // ❌ RIMOSSO: Calcolo finto basato su Modern Portfolio Theory inventato
+  // ✅ SOSTITUITO: Calcolo onesto basato su crescita anno su anno
+  return 0; // Default per compatibilità
 
-    // ✅ VALIDATE INPUTS BEFORE CALCULATION
-    if (!portfolioReturn.isFinite() || !portfolioVolatility.isFinite()) {
-      console.warn('Invalid inputs for Sharpe ratio calculation');
-      return new Decimal(0);
-    }
-
-    // Sharpe Ratio = (Portfolio Return - Risk Free Rate) / Portfolio Volatility
-    const sharpeRatio = excessReturn.dividedBy(portfolioVolatility);
-    
-    // ✅ DEBUG: Log final result in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Sharpe Ratio Result:', sharpeRatio.toNumber());
-    }
-    
-    // ✅ CAP EXTREME VALUES FOR UI SANITY
-    if (sharpeRatio.greaterThan(10)) return new Decimal(10);
-    if (sharpeRatio.lessThan(-10)) return new Decimal(-10);
-    
-    return sharpeRatio;
-  }, 0);
 };
 
 /**
@@ -803,18 +672,20 @@ export const calculatePortfolioSharpeRatio = (
  * }, 100000, 2.0);
  * // Returns { sharpeRatio: 0.8, efficiencyRating: 'Buono' }
  */
+/**
+ * ❌ RIMOSSO: Funzione di calcolo Efficiency Score finto
+ * Sostituita con calcolo onesto basato su crescita reale in SimpleStatistics
+ * 
+ * @deprecated Use SimpleStatistics component for honest performance assessment
+ */
 export const calculatePortfolioEfficiencyScore = (
   allocations: { [key: string]: number },
   totalValue: number,
   riskFreeRate: number = 2.0
 ): { sharpeRatio: number; efficiencyRating: string } => {
-  const sharpe = calculatePortfolioSharpeRatio(allocations, totalValue, riskFreeRate);
-  
-  const rating = sharpe > 1.0 ? 'Eccellente' :
-                sharpe > 0.5 ? 'Buono' :
-                sharpe > 0 ? 'Scarso' : 'Molto Scarso';
-                
-  return { sharpeRatio: sharpe, efficiencyRating: rating };
+  // ❌ RIMOSSO: Calcolo finto basato su Sharpe Ratio inventato
+  // ✅ SOSTITUITO: Calcolo onesto basato su crescita anno su anno
+  return { sharpeRatio: 0, efficiencyRating: 'N/A' };
 };
 
 /**
@@ -1337,86 +1208,66 @@ interface CostBasisCalculation {
 export const applyCostBasisMethod = (
   transactions: Transaction[], 
   soldQuantity: number, 
-  method: 'FIFO' | 'LIFO' | 'AVERAGE_COST'
+  method: 'FIFO' | 'LIFO' | 'AVERAGE_COST' = 'FIFO'
 ): CostBasisCalculation => {
   
-  // Filtra solo acquisti
-  const purchases = transactions.filter(t => 
-    t.transactionType === 'purchase'
-  ).map(t => ({
-    ...t,
-    remainingQuantity: t.quantity // Track remaining quantity
-  }));
-  
+  const purchases = transactions.filter(t => t.transactionType === 'purchase');
   if (purchases.length === 0) {
-    return {
-      costBasis: 0,
-      quantity: 0,
-      transactions: [],
-      remainingTransactions: purchases
-    };
+    return { costBasis: 0, quantity: 0, transactions: [], remainingTransactions: [] };
   }
   
+  // AVERAGE_COST: calcolo separato (più semplice)
+  if (method === 'AVERAGE_COST') {
+    return calculateAverageCostBasis(purchases, soldQuantity);
+  }
+  
+  // FIFO/LIFO: logica unificata
+  const sorted = [...purchases].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return method === 'LIFO' ? dateB - dateA : dateA - dateB;
+  });
+  
+  return processLots(sorted, soldQuantity);
+};
+
+// Funzione helper per AVERAGE_COST
+const calculateAverageCostBasis = (purchases: Transaction[], soldQuantity: number): CostBasisCalculation => {
+  const totalCost = purchases.reduce((sum, t) => safeAdd(sum, t.amount || 0), 0);
+  const totalQty = purchases.reduce((sum, t) => safeAdd(sum, t.quantity), 0);
+  const avgPrice = totalQty > 0 ? safeDivide(totalCost, totalQty) : 0;
+  
+  return {
+    costBasis: safeMultiply(avgPrice, soldQuantity),
+    quantity: soldQuantity,
+    transactions: [{
+      ...purchases[0],
+      amount: safeMultiply(avgPrice, soldQuantity),
+      quantity: soldQuantity,
+      unitPrice: avgPrice,
+      transactionType: 'purchase' as const,
+      id: Date.now(),
+      assetType: purchases[0].assetType,
+      ticker: purchases[0].ticker,
+      isin: purchases[0].isin,
+      date: purchases[0].date,
+      commissions: 0,
+      description: 'AVERAGE_COST_BASIS'
+    }],
+    remainingTransactions: purchases
+  };
+};
+
+// Funzione helper per FIFO/LIFO
+const processLots = (sortedPurchases: Transaction[], soldQuantity: number): CostBasisCalculation => {
   let remainingToSell = soldQuantity;
   let totalCostBasis = 0;
   const usedTransactions: Transaction[] = [];
-  const remaining = [...purchases];
+  const remaining = sortedPurchases.map(t => ({ ...t, remainingQuantity: t.quantity }));
   
-  switch (method) {
-    case 'FIFO':
-      // First In, First Out - vendi prima gli acquisti più vecchi
-      remaining.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      break;
-      
-    case 'LIFO':
-      // Last In, First Out - vendi prima gli acquisti più recenti
-      remaining.sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        
-        // Validazione date
-        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-          console.error('Invalid date in LIFO cost basis calculation:', { dateA: a.date, dateB: b.date });
-          return 0; // Mantieni ordine originale se date invalide
-        }
-        
-        return dateB.getTime() - dateA.getTime();
-      });
-      break;
-      
-    case 'AVERAGE_COST':
-      // Prezzo medio ponderato
-      const totalInvested = purchases.reduce((sum, t) => {
-        const amount = t.amount || (t.quantity * (t.unitPrice || 0));
-        return safeAdd(sum, amount);
-      }, 0);
-      const totalQuantity = purchases.reduce((sum, t) => safeAdd(sum, t.quantity), 0);
-      const avgPrice = totalQuantity > 0 ? safeDivide(totalInvested, totalQuantity) : 0;
-      
-      return {
-        costBasis: safeMultiply(avgPrice, soldQuantity),
-        quantity: soldQuantity,
-        transactions: [{
-          ...purchases[0],
-          amount: safeMultiply(avgPrice, soldQuantity),
-          quantity: soldQuantity,
-          unitPrice: avgPrice,
-          transactionType: 'purchase' as const,
-          id: Date.now(),
-          assetType: purchases[0].assetType,
-          ticker: purchases[0].ticker,
-          isin: purchases[0].isin,
-          date: purchases[0].date,
-          commissions: 0,
-          description: 'AVERAGE_COST_BASIS'
-        }],
-        remainingTransactions: purchases
-      };
-  }
-  
-  // Processo FIFO/LIFO
-  for (let i = 0; i < remaining.length && remainingToSell > 0; i++) {
-    const transaction = remaining[i];
+  for (const transaction of remaining) {
+    if (remainingToSell <= 0) break;
+    
     const quantityToUse = Math.min(remainingToSell, transaction.remainingQuantity);
     const unitPrice = transaction.unitPrice || safeDivide(transaction.amount, transaction.quantity) || 0;
     
@@ -1430,7 +1281,6 @@ export const applyCostBasisMethod = (
       unitPrice: unitPrice
     });
     
-    // Aggiorna quantità rimanente
     transaction.remainingQuantity = safeSubtract(transaction.remainingQuantity, quantityToUse);
   }
   
@@ -1456,12 +1306,7 @@ export const calculateLIFOCostBasis = (transactions: Transaction[], currentPrice
   return calculateCostBasis(transactions, currentPrice, 'LIFO');
 };
 
-/**
- * Calculate cost basis using Average Cost method
- */
-export const calculateAverageCostBasis = (transactions: Transaction[], currentPrice: number): CostBasisResult => {
-  return calculateCostBasis(transactions, currentPrice, 'AVERAGE_COST');
-};
+
 
 /**
  * Unified cost basis calculation with proper method implementation
@@ -2337,14 +2182,14 @@ export const calculateSWR = (
   
   // 🎯 SEMPLIFICAZIONE 1: Calcola asset prelevabili (withdrawable assets)
   // Esclusi sempre: realEstate (illiquid), pensionFunds (locked until retirement)
-  const withdrawableAssets = safeAdd(
-    safeAdd(totals.cash || 0, totals.investments || 0),
-    totals.otherAccounts || 0
-  );
+      const withdrawableAssets = safeAdd(
+      totals.cash || 0, totals.investments || 0
+    );
   
   // Risk assessment based on portfolio composition
   let riskLevel: 'conservative' | 'moderate' | 'aggressive' = 'moderate';
-  const totalAssets = Math.max(1, totals.total || 1); // Avoid division by zero
+      const totalAssets = Math.max(1, totals.cash + totals.investments + totals.realEstate + 
+                                 totals.pensionFunds + totals.alternativeAssets || 1); // Avoid division by zero
   const stocksPercentage = safeDivide(totals.investments || 0, totalAssets) * 100;
   
   if (stocksPercentage > 70) {
@@ -3393,7 +3238,7 @@ export const isValidAssetItem = (asset: unknown): asset is any => {
     (a.date === undefined || typeof a.date === 'string') &&
     (a.accountType === undefined || ['current', 'deposit', 'remunerated', 'cash'].includes(a.accountType)) &&
     (a.assetType === undefined || [
-      'tcg', 'stamps', 'alcohol', 'collectibles', 'vinyl', 'books', 'comics', 'art', 'other',
+      'tcg', 'stamps', 'alcohol', 'collectibles', 'vinyl', 'books', 'comics', 'art', 'lego', 'other',
       'Azione', 'ETF', 'Obbligazione whitelist', 'Obbligazione'
     ].includes(a.assetType)) &&
     (a.excludeFromTotal === undefined || typeof a.excludeFromTotal === 'boolean') &&

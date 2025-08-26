@@ -11,6 +11,7 @@ interface PDFExportOptions {
 interface ExportData {
   assets: any;
   totals: any;
+  netWorth: number;
   statistics: any;
   emergencyFundAccount: { section: string; id: number; name: string };
   formatCurrency: (amount: number) => string;
@@ -95,7 +96,7 @@ export class PDFExporter {
     this.pdf.setFontSize(18);
     this.pdf.setTextColor(5, 150, 105);
     this.pdf.text('Patrimonio Netto:', this.margin + 10, this.currentY + 15);
-    this.pdf.text(this.data.formatCurrency(this.data.totals.total), this.margin + 80, this.currentY + 15);
+    this.pdf.text(this.data.formatCurrency(this.data.netWorth), this.margin + 80, this.currentY + 15);
     
     // Total assets and debts
     this.pdf.setFontSize(10);
@@ -103,7 +104,7 @@ export class PDFExporter {
     // 🎯 FIX ERRORE 4: Patrimonio Lordo = somma asset reali (non patrimonio netto + debiti)
     const totalAssets = this.data.totals.cash + this.data.totals.investments + 
                         this.data.totals.realEstate + this.data.totals.pensionFunds + 
-                        this.data.totals.otherAccounts + this.data.totals.alternativeAssets;
+                        this.data.totals.alternativeAssets;
     this.pdf.text(`Patrimonio Lordo: ${this.data.formatCurrency(totalAssets)}`, this.margin + 10, this.currentY + 25);
     this.pdf.text(`Debiti Totali: ${this.data.formatCurrency(Math.abs(this.data.totals.debts))}`, this.margin + 10, this.currentY + 32);
     
@@ -117,7 +118,7 @@ export class PDFExporter {
       investmentPositions: 'Posizioni di Investimento',
       realEstate: 'Immobili',
       pensionFunds: 'Fondi Pensione',
-      otherAccounts: 'Altri Conti',
+
       alternativeAssets: 'Beni Alternativi',
       debts: 'Debiti',
       transactions: 'Transazioni'
@@ -310,15 +311,15 @@ export class PDFExporter {
     this.pdf.text('Allocazione Patrimonio:', this.margin, this.currentY);
     this.currentY += 10;
 
-    const total = this.data.totals.total + Math.abs(this.data.totals.debts);
+    const total = this.data.netWorth + Math.abs(this.data.totals.debts);
     if (total > 0) {
       const allocations = [
         { name: 'Liquidità', value: this.data.totals.cash, percentage: (this.data.totals.cash / total) * 100 },
         { name: 'Investimenti', value: this.data.totals.investments, percentage: (this.data.totals.investments / total) * 100 },
         { name: 'Immobili', value: this.data.totals.realEstate, percentage: (this.data.totals.realEstate / total) * 100 },
         { name: 'Fondi Pensione', value: this.data.totals.pensionFunds, percentage: (this.data.totals.pensionFunds / total) * 100 },
-        { name: 'Altri Asset', value: this.data.totals.otherAccounts + this.data.totals.alternativeAssets, 
-          percentage: ((this.data.totals.otherAccounts + this.data.totals.alternativeAssets) / total) * 100 }
+                { name: 'Beni Alternativi', value: this.data.totals.alternativeAssets,
+          percentage: (this.data.totals.alternativeAssets / total) * 100 }
       ];
 
       this.pdf.setFontSize(9);
