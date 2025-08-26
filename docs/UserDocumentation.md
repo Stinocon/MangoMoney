@@ -1,33 +1,32 @@
 # 📚 **DOCUMENTAZIONE UTENTE - MangoMoney**
 
-## 🎯 **Guida Completa ai Calcoli Finanziari**
+## 🎯 **Guida ai Calcoli Finanziari Semplici e Onesti**
 
-### 📊 **1. CAGR (Tasso di Crescita Annuo Composto)**
+### 📊 **1. Patrimonio Netto**
 
 **Cosa significa:**
-Il CAGR ti dice quanto è cresciuto il tuo investimento in media ogni anno, considerando l'effetto dell'interesse composto. È il tasso di crescita costante che, se applicato ogni anno, ti porterebbe dal valore iniziale al valore finale.
+Il Patrimonio Netto è il tuo valore finanziario reale: tutto quello che possiedi meno tutti i tuoi debiti.
 
 **Come si calcola:**
 ```
-CAGR = ((Valore Finale / Valore Iniziale)^(1/anni)) - 1
+Patrimonio Netto = Totale Asset - Totale Debiti
 ```
 
 **Esempio pratico:**
-- Investimento iniziale: €10,000
-- Valore finale: €15,000  
-- Periodo: 5 anni
-- CAGR = ((15,000/10,000)^(1/5)) - 1 = 8.45%
+- Asset: €150,000 (casa €100K + investimenti €30K + liquidità €20K)
+- Debiti: €80,000 (mutuo €80K)
+- Patrimonio Netto = €150,000 - €80,000 = €70,000
 
 **Quando usarlo:**
-- Confrontare performance di investimenti diversi
-- Valutare crescita a lungo termine
+- Valutare la tua situazione finanziaria complessiva
+- Monitorare i progressi nel tempo
 - Pianificare obiettivi finanziari
-- Analizzare performance storiche
+- Valutare l'impatto di decisioni finanziarie
 
 **Limitazioni:**
-- Non considera volatilità (crescita non è costante)
-- Non include depositi/prelievi durante il periodo
-- Periodo minimo: 1 mese
+- Non considera la liquidità degli asset
+- Valutazioni immobiliari possono essere imprecise
+- Non include asset intangibili (competenze, relazioni)
 - Assume crescita costante (non realistico per investimenti volatili)
 
 **Fonti:**
@@ -128,48 +127,7 @@ Portafoglio bilanciato (40% investimenti, 40% immobili, 20% contanti):
 
 ---
 
-### 📊 **4. Efficiency Score (Sharpe Ratio)**
-
-**Cosa significa:**
-L'Efficiency Score misura quanto bene il tuo portafoglio converte il rischio in rendimento. È basato sul Sharpe Ratio, una metrica standard dell'industria finanziaria per valutare l'efficienza risk-adjusted.
-
-**Come si calcola:**
-```
-Sharpe Ratio = (Portfolio Return - Risk Free Rate) ÷ Portfolio Volatility
-Efficiency Rating = Eccellente (>1.0) | Buono (0.5-1.0) | Scarso (<0.5)
-```
-
-**Esempio pratico:**
-Portfolio Return: 8% annuo
-Risk Free Rate: 2% (BOT)
-Portfolio Volatility: 15%
-Sharpe Ratio = (8-2) ÷ 15 = 0.4 ("Scarso")
-
-**Interpretazione:**
-- **> 1.0**: Eccellente efficienza (alto rendimento per unità di rischio)
-- **0.5-1.0**: Buona efficienza (rendimento adeguato per il rischio)
-- **0-0.5**: Scarsa efficienza (poco rendimento per il rischio assunto)
-- **< 0**: Efficienza molto scarsa (rendimento sotto il risk-free)
-
-**Quando usarlo:**
-- Valutare se il rischio assunto "vale la pena"
-- Confrontare efficienza di portafogli diversi
-- Ottimizzare asset allocation per migliore risk-adjusted return
-- Monitorare performance nel tempo
-
-**Limitazioni:**
-- Basato su rendimenti storici (non predice il futuro)
-- Assume distribuzione normale dei rendimenti
-- Non considera skewness o eventi estremi
-- Dipende dalla qualità dei dati di input
-
-**Fonti:**
-- Sharpe, W.F. (1964): "Capital Asset Pricing Model"
-- CFA Institute: "Investment Performance Measurement"
-
----
-
-### 🏠 **5. Emergency Fund (Fondo di Emergenza)**
+### 🏠 **4. Emergency Fund (Fondo di Emergenza)**
 
 **Cosa significa:**
 Il fondo di emergenza è la quantità di denaro liquido che hai disponibile per coprire spese impreviste. È misurato in mesi di spese mensili che puoi coprire.

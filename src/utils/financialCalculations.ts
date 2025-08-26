@@ -634,59 +634,9 @@ export const calculateSharpeRatio = (
  * 
  * @throws {Error} Returns 0 for invalid inputs (negative total value)
  */
-/**
- * ❌ RIMOSSO: Funzione di calcolo Sharpe Ratio finto
- * Sostituita con calcolo onesto basato su crescita reale in SimpleStatistics
- * 
- * @deprecated Use SimpleStatistics component for honest performance assessment
- */
-export const calculatePortfolioSharpeRatio = (
-  allocations: { [key: string]: number },
-  totalValue: number,
-  riskFreeRate: number = 2.0
-): number => {
-  // ❌ RIMOSSO: Calcolo finto basato su Modern Portfolio Theory inventato
-  // ✅ SOSTITUITO: Calcolo onesto basato su crescita anno su anno
-  return 0; // Default per compatibilità
+// ✅ ELIMINATO: calculatePortfolioSharpeRatio - era una funzione zombie
 
-};
-
-/**
- * Calculates portfolio efficiency score using Sharpe Ratio
- * 
- * @description
- * Measures the risk-adjusted performance of a portfolio using Sharpe Ratio.
- * Higher values indicate better efficiency (more return per unit of risk).
- * 
- * @param {Object} allocations - Asset allocations by category
- * @param {number} totalValue - Total portfolio value
- * @param {number} riskFreeRate - Risk-free rate, default 2.0%
- * 
- * @returns {Object} Object containing sharpeRatio and efficiencyRating
- * 
- * @example
- * const efficiency = calculatePortfolioEfficiencyScore({
- *   cash: 20000,
- *   stocks: 60000,
- *   bonds: 20000
- * }, 100000, 2.0);
- * // Returns { sharpeRatio: 0.8, efficiencyRating: 'Buono' }
- */
-/**
- * ❌ RIMOSSO: Funzione di calcolo Efficiency Score finto
- * Sostituita con calcolo onesto basato su crescita reale in SimpleStatistics
- * 
- * @deprecated Use SimpleStatistics component for honest performance assessment
- */
-export const calculatePortfolioEfficiencyScore = (
-  allocations: { [key: string]: number },
-  totalValue: number,
-  riskFreeRate: number = 2.0
-): { sharpeRatio: number; efficiencyRating: string } => {
-  // ❌ RIMOSSO: Calcolo finto basato su Sharpe Ratio inventato
-  // ✅ SOSTITUITO: Calcolo onesto basato su crescita anno su anno
-  return { sharpeRatio: 0, efficiencyRating: 'N/A' };
-};
+// ✅ ELIMINATO: calculatePortfolioEfficiencyScore - era una funzione zombie
 
 /**
  * Calculate real estate net worth value
@@ -808,144 +758,13 @@ export const validateAndNormalizeBigNumbers = (value: number, context: string): 
   return value;
 };
 
-/**
- * Run critical fixes validation tests
- * 
- * @description
- * Comprehensive test suite to validate all critical fixes have been applied correctly.
- * Tests Sharpe Ratio completeness, Real Estate calculation, safe operations, and more.
- * 
- * @returns {boolean} True if all tests pass, false otherwise
- * 
- * @example
- * const allTestsPassed = runCriticalFixesValidation();
- * if (allTestsPassed) {
- *   console.log('✅ All critical fixes validated successfully');
- * } else {
- *   console.error('❌ Some critical fixes failed validation');
- * }
- */
-export const runCriticalFixesValidation = (): boolean => {
-  console.log('🧪 Running Critical Fixes Validation...');
-  
-  let allTestsPassed = true;
-  
-  // Test 1: Sharpe Ratio completeness
-  try {
-    const testAllocations = { cash: 20000, stocks: 60000, bonds: 20000 };
-    const sharpeRatio = calculatePortfolioSharpeRatio(testAllocations, 100000, 2.0);
-    if (!Number.isFinite(sharpeRatio)) {
-      console.error('❌ Sharpe Ratio test failed: not finite');
-      allTestsPassed = false;
-    } else {
-      console.log('✅ Sharpe Ratio test passed:', sharpeRatio);
-    }
-  } catch (error) {
-    console.error('❌ Sharpe Ratio test error:', error);
-    allTestsPassed = false;
-  }
-  
-  // Test 2: Real Estate calculation
-  try {
-    const testRealEstate = [
-      { id: 1, value: 300000, excludeFromTotal: false },
-      { id: 2, value: 200000, excludeFromTotal: true }
-    ];
-    const result = calculateRealEstateNetWorthValue(testRealEstate);
-    if (result !== 300000) {
-      console.error('❌ Real Estate test failed:', result);
-      allTestsPassed = false;
-    } else {
-      console.log('✅ Real Estate test passed:', result);
-    }
-  } catch (error) {
-    console.error('❌ Real Estate test error:', error);
-    allTestsPassed = false;
-  }
-  
-  // Test 3: Safe division operations
-  try {
-    const ratio = safeDivide(30000, 130000);
-    if (Math.abs(ratio - 0.23076923076923078) > 0.0001) {
-      console.error('❌ Safe division test failed:', ratio);
-      allTestsPassed = false;
-    } else {
-      console.log('✅ Safe division test passed:', ratio);
-    }
-  } catch (error) {
-    console.error('❌ Safe division test error:', error);
-    allTestsPassed = false;
-  }
-  
-  return allTestsPassed;
-};
+// ✅ ELIMINATO: runCriticalFixesValidation - test obsoleti per funzioni rimosse
+
+// ✅ ELIMINATO: validateAllCriticalFixes - test obsoleti
+
+// ✅ ELIMINATO: validateAll14CriticalFixes - test obsoleti con funzioni zombie
 
 /**
- * Validates all critical fixes have been applied correctly
- */
-export const validateAllCriticalFixes = (): boolean => {
-  console.log('🧪 VALIDATING ALL CRITICAL FIXES');
-  console.log('=================================');
-  
-  let allPassed = true;
-  
-  // Test 1: Correlation Matrix exists and works
-  try {
-    const testCorrelation = getAssetCorrelation('stocks', 'bonds');
-    if (testCorrelation === 0.3) {
-      console.log('✅ Correlation Matrix: Working (stocks-bonds = 0.3)');
-    } else {
-      console.error('❌ CRITICAL: Correlation matrix still using fallback');
-      allPassed = false;
-    }
-  } catch (error) {
-    console.error('❌ Correlation Matrix test failed:', error);
-    allPassed = false;
-  }
-  
-  // Test 2: Safe Division Usage
-  try {
-    const testRatio = safeDivide(100, 200);
-    if (testRatio === 0.5) {
-      console.log('✅ Safe Division: Working correctly');
-    } else {
-      console.error('❌ Safe Division: Unexpected result:', testRatio);
-      allPassed = false;
-    }
-  } catch (error) {
-    console.error('❌ Safe Division test failed:', error);
-    allPassed = false;
-  }
-  
-  // Test 3: Big Number Validation
-  try {
-    const validatedBig = validateAndNormalizeBigNumbers(1e20, 'test');
-    const validatedTiny = validateAndNormalizeBigNumbers(1e-15, 'test');
-    if (validatedBig === 1e15 && validatedTiny === 0) {
-      console.log('✅ Big Number Validation: Working correctly');
-    } else {
-      console.error('❌ Big Number Validation: Failed');
-      allPassed = false;
-    }
-  } catch (error) {
-    console.error('❌ Big Number Validation test failed:', error);
-    allPassed = false;
-  }
-  
-  console.log(`\n🎯 FINAL RESULT: ${allPassed ? '✅ ALL FIXES VALIDATED' : '❌ FIXES NEEDED'}`);
-  return allPassed;
-};
-
-/**
- * Comprehensive validation of all 14 critical fixes
- */
-export const validateAll14CriticalFixes = (): boolean => {
-  console.log('🧪 VALIDATING ALL 14 CRITICAL FIXES');
-  console.log('====================================');
-  
-  let allPassed = true;
-  
-  // Test 1: Double debt calculation fix
   try {
     const testAssets = { debts: [{ id: 1, amount: 1000 }, { id: 2, amount: 2000 }] };
     const totalDebts = testAssets.debts.reduce((sum, item) => sum + Math.abs(item.amount), 0);
@@ -1123,19 +942,7 @@ export const validateAll14CriticalFixes = (): boolean => {
     allPassed = false;
   }
   
-  console.log(`\n🎯 ALL 14 FIXES RESULT: ${allPassed ? '✅ ALL FIXES VALIDATED SUCCESSFULLY' : '❌ SOME FIXES NEED ATTENTION'}`);
-  return allPassed;
-};
 
-// Export per development console access
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).validateAll14CriticalFixes = validateAll14CriticalFixes;
-}
-
-// Export per development console access
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).validateAllCriticalFixes = validateAllCriticalFixes;
-}
 
 /**
  * Cost Basis calculation methods using Decimal.js for precision
@@ -2274,89 +2081,9 @@ export const calculateSWR = (
   };
 };
 
-/**
- * Test function to validate Risk Score calculation logic
- * Run this in development mode to verify mathematical correctness
- */
-export const testRiskScoreCalculation = (): void => {
-  if (process.env.NODE_ENV !== 'development') return;
-  
-  console.log('🧪 Testing Risk Score Calculation Logic...');
-  
-  // Test case 1: 0% volatility = 0 risk score
-  const test1 = calculatePortfolioRiskScore({ cash: 100000 }, 100000);
-  console.assert(Math.abs(test1) < 0.1, `Test 1 failed: 0% volatility should be ~0, got ${test1}`);
-  console.log(`✅ Test 1: 0% volatility = ${test1.toFixed(2)} risk score`);
-  
-  // Test case 2: 15% volatility = 5 risk score
-  const test2 = calculatePortfolioRiskScore({ stocks: 100000 }, 100000);
-  console.log(`✅ Test 2: ~15% volatility = ${test2.toFixed(2)} risk score`);
-  
-  // Test case 3: 30% volatility = 10 risk score
-  const test3 = calculatePortfolioRiskScore({ alternatives: 100000 }, 100000);
-  console.log(`✅ Test 3: ~30% volatility = ${test3.toFixed(2)} risk score`);
-  
-  // Test case 4: Extreme volatility should be capped
-  const test4 = calculatePortfolioRiskScore({ 
-    alternatives: 50000, 
-    commodities: 50000 
-  }, 100000);
-  console.assert(test4 <= 15, `Test 4 failed: Extreme volatility should be capped, got ${test4}`);
-  console.log(`✅ Test 4: Extreme volatility = ${test4.toFixed(2)} risk score (capped)`);
-  
-  // Test case 5: Linear progression
-  const test5a = calculatePortfolioRiskScore({ bonds: 100000 }, 100000);
-  const test5b = calculatePortfolioRiskScore({ stocks: 100000 }, 100000);
-  const test5c = calculatePortfolioRiskScore({ alternatives: 100000 }, 100000);
-  
-  console.log(`✅ Test 5: Linear progression - Bonds: ${test5a.toFixed(2)}, Stocks: ${test5b.toFixed(2)}, Alternatives: ${test5c.toFixed(2)}`);
-  console.assert(test5a < test5b && test5b < test5c, 'Test 5 failed: Risk should increase with volatility');
-  
-  console.log('🎉 All Risk Score tests passed!');
-};
+// ✅ ELIMINATO: testRiskScoreCalculation - test per funzioni obsolete
 
-/**
- * Test function to validate Asset Volatility calculation
- * Run this in development mode to verify volatility values are correct
- */
-export const testAssetVolatility = (): void => {
-  if (process.env.NODE_ENV !== 'development') return;
-  
-  console.log('🧪 Testing Asset Volatility Calculation...');
-  
-  // Test case 1: Cash should have very low volatility
-  const cashVol = getAssetVolatility('cash');
-  console.assert(Math.abs(cashVol - 0.005) < 0.001, `Test 1 failed: Cash volatility should be ~0.005, got ${cashVol}`);
-  console.log(`✅ Test 1: Cash volatility = ${cashVol} (${(cashVol * 100).toFixed(1)}%)`);
-  
-  // Test case 2: Stocks should have moderate volatility
-  const stocksVol = getAssetVolatility('stocks');
-  console.assert(Math.abs(stocksVol - 0.18) < 0.01, `Test 2 failed: Stocks volatility should be ~0.18, got ${stocksVol}`);
-  console.log(`✅ Test 2: Stocks volatility = ${stocksVol} (${(stocksVol * 100).toFixed(1)}%)`);
-  
-  // Test case 3: Alternatives should have high volatility
-  const altVol = getAssetVolatility('alternatives');
-  console.assert(Math.abs(altVol - 0.20) < 0.01, `Test 3 failed: Alternatives volatility should be ~0.20, got ${altVol}`);
-  console.log(`✅ Test 3: Alternatives volatility = ${altVol} (${(altVol * 100).toFixed(1)}%)`);
-  
-  // Test case 4: Unknown asset class should default to stocks
-  const unknownVol = getAssetVolatility('unknownAsset');
-  console.assert(Math.abs(unknownVol - 0.18) < 0.01, `Test 4 failed: Unknown asset should default to stocks volatility, got ${unknownVol}`);
-  console.log(`✅ Test 4: Unknown asset volatility = ${unknownVol} (${(unknownVol * 100).toFixed(1)}%)`);
-  
-  // Test case 5: Portfolio variance calculation with known values
-  const testAllocations = {
-    cash: 50000,      // 50% cash (low vol)
-    stocks: 50000     // 50% stocks (high vol)
-  };
-  const testTotal = 100000;
-  
-  const testRiskScore = calculatePortfolioRiskScore(testAllocations, testTotal);
-  console.log(`✅ Test 5: Portfolio risk score = ${testRiskScore.toFixed(2)}`);
-  console.assert(testRiskScore > 0 && testRiskScore < 10, `Test 5 failed: Risk score should be reasonable, got ${testRiskScore}`);
-  
-  console.log('🎉 All Asset Volatility tests passed!');
-};
+// ✅ ELIMINATO: testAssetVolatility - test per funzioni obsolete
 
 /**
  * Test function to validate Cost Basis Methods

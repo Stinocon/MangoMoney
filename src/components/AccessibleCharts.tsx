@@ -558,7 +558,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
   };
 
   return (
-    <Card>
+    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow-sm border p-6`}>
       <div className="mb-3">
         <h3 className={`text-base font-semibold flex items-center gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={darkMode ? 'text-amber-300' : 'text-amber-600'}>
@@ -608,7 +608,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
           ))}
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 

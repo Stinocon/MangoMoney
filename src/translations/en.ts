@@ -91,7 +91,7 @@ export const en = {
   
   // Statistics
   riskScore: 'Simplified Risk Level',
-  efficiencyScore: 'Efficiency (Sharpe Ratio)',
+  // efficiencyScore: 'Efficiency (Sharpe Ratio)', // ✅ ELIMINATO: funzione zombie
   emergencyFund: 'Emergency Fund',
   diversification: 'Diversification',
   concentration: 'Concentration',
@@ -443,7 +443,7 @@ export const en = {
   
   // Risk score descriptions
   riskScoreDescription: 'Simplified calculation based on asset categories. Suitable for most users.',
-  riskScoreMethod: 'Method: Weighted average by category (not full Modern Portfolio Theory)',
+  riskScoreMethod: 'Method: Weighted average by category (simplified approach)',
   liquidityRiskDescription: 'Liquidity: 1.0 (minimal risk - high liquidity)',
   pensionFundsRiskDescription: 'Pension Funds: 2.0 (medium risk - regulated, long-term)',
   realEstateRiskDescription: 'Real Estate: 2.0 (medium risk - stable but illiquid)',
@@ -451,8 +451,8 @@ export const en = {
   alternativeAssetsRiskDescription: 'Alternative Assets: 5.0 (very high risk - speculative assets)',
 
   investmentsTransactionsRiskDescription: 'Investments/Transactions: 4.0 (high risk - market volatility)',
-  riskScoreBasedOnVolatility: 'Based on portfolio volatility calculated with Modern Portfolio Theory.',
-  efficiencyBasedOnSharpe: 'Based on risk-adjusted return ratio.',
+  // riskScoreBasedOnVolatility: 'Based on portfolio volatility calculated with Modern Portfolio Theory.', // ✅ ELIMINATO: funzione zombie
+  // efficiencyBasedOnSharpe: 'Based on risk-adjusted return ratio.', // ✅ ELIMINATO: funzione zombie
   transactionAnalysisPerYear: 'Transaction analysis per year',
   verifyLinksBetweenTransactionsAssets: 'Verify links between transactions and individual assets',
   filterByAssetType: 'Filter by asset type',
@@ -736,18 +736,7 @@ export const en = {
   riskScoreLimit: 'Risk score assumes markets behave "normally" (spoiler: they don\'t always)',
   professionalAdvice: 'For serious stuff like buying a house or planning retirement, always consult a professional. This app helps you see the situation, but doesn\'t replace advice from someone who really knows.',
   
-  // Sharpe Ratio translations
-  sharpeRatio: 'Sharpe Ratio',
-  sharpeRatioDesc: 'Measures how much return you get for each unit of risk. Higher = better.',
-  riskAdjustedReturn: 'Risk-adjusted return',
-  excellentSharpe: 'Excellent risk-return ratio',
-  goodSharpe: 'Good risk-return ratio',
-  poorSharpe: 'Poor risk-return ratio',
-  veryPoorSharpe: 'Very poor risk-return ratio',
-  sharpeRatioTooltip: 'Each unit of risk generates {sharpe} units of excess return compared to government bonds.',
-  sharpeRatioInfo: 'The Sharpe Ratio measures your portfolio efficiency: how much excess return you get for each additional unit of risk compared to government bonds.',
-  sharpeRatioExample: 'Example: Sharpe 1.5 = for each 1% of extra risk, you gain 1.5% more than BOT.',
-  sharpeRatioLimitations: 'Limitations: Based on historical data, assumes normal distribution of returns (not always true in real markets).',
+  // ✅ ELIMINATO: Traduzioni Sharpe Ratio - funzioni zombie rimosse
   insufficientData: 'Insufficient data for calculation',
   preliminaryCalculation: 'Preliminary calculation - limited data',
   
@@ -755,7 +744,7 @@ export const en = {
   theoreticalSources: 'Theoretical Sources',
   theoreticalSourcesDesc: 'The app is based on principles and methodologies recognized by the financial community:',
   markowitz: 'Harry Markowitz - Modern Portfolio Theory (1952)',
-  sharpe: 'William Sharpe - Capital Asset Pricing Model and Sharpe Ratio',
+  // sharpe: 'William Sharpe - Capital Asset Pricing Model and Sharpe Ratio', // ✅ ELIMINATO: funzione zombie
   graham: 'Benjamin Graham - Security Analysis and Value Investing',
   bogle: 'John Bogle - Diversification principles and low costs',
   merton: 'Robert Merton - Financial Planning and Lifecycle Investing',

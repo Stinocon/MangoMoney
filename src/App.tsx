@@ -32,7 +32,7 @@ import {
   safePercentage, 
   safeCAGR,
   calculatePortfolioRiskScore, 
-  calculatePortfolioEfficiencyScore, 
+  // calculatePortfolioEfficiencyScore, // ✅ ELIMINATO: funzione zombie 
   calculateCapitalGainsTax, 
   calculateEmergencyFundMetrics, 
   analyzeTaxesByYear, 
@@ -2410,8 +2410,7 @@ const NetWorthManager = () => {
 
     const baseRiskScore = calculatePortfolioRiskScore(portfolioAllocations, totalAssets);
     
-    // Efficiency Score calculation
-    const efficiencyScore = calculatePortfolioEfficiencyScore(portfolioAllocations, totalAssets);
+    // ✅ ELIMINATO: Efficiency Score - era una funzione zombie che returnava 0
     
     // Tax Analysis - Analisi fiscale per anno
     if (process.env.NODE_ENV === 'development') {
@@ -2515,7 +2514,7 @@ const NetWorthManager = () => {
     return {
       emergencyFundMetrics,
       baseRiskScore,
-      efficiencyScore,
+      // efficiencyScore, // ✅ ELIMINATO: funzione zombie
       taxAnalysis,
       debtToAssetRatio,
       adjustedRiskScore,
@@ -2541,24 +2540,14 @@ const NetWorthManager = () => {
     
     // ✅ ACCESSO DIRETTO AI VALORI PRE-CALCOLATI senza creare dipendenza circolare
     const emergencyFundMetrics = coreFinancialCalculations.emergencyFundMetrics;
-    const efficiencyScore = coreFinancialCalculations.efficiencyScore;
+    // const efficiencyScore = coreFinancialCalculations.efficiencyScore; // ✅ ELIMINATO: funzione zombie
     const taxAnalysis = coreFinancialCalculations.taxAnalysis;
     const debtToAssetRatio = coreFinancialCalculations.debtToAssetRatio;
     const adjustedRiskScore = coreFinancialCalculations.adjustedRiskScore;
     const allocationPercentages = coreFinancialCalculations.allocationPercentages;
     // Non serve più calcolare realEstateForPercentage, usa totals.realEstate
     
-    const sharpeRatioFormatted = efficiencyScore.sharpeRatio.toFixed(2);
-    
-    // Efficiency Score interpretation
-    const getEfficiencyRating = (efficiency: { sharpeRatio: number; efficiencyRating: string }) => {
-      if (efficiency.sharpeRatio > 1.0) return { rating: efficiency.efficiencyRating, color: 'text-green-600', bgColor: 'bg-green-100' };
-      if (efficiency.sharpeRatio > 0.5) return { rating: efficiency.efficiencyRating, color: 'text-yellow-600', bgColor: 'bg-yellow-100' };
-      if (efficiency.sharpeRatio > 0) return { rating: efficiency.efficiencyRating, color: 'text-orange-600', bgColor: 'bg-orange-100' };
-      return { rating: efficiency.efficiencyRating, color: 'text-red-600', bgColor: 'bg-red-100' };
-    };
-    
-    const efficiencyRating = getEfficiencyRating(efficiencyScore);
+    // ✅ ELIMINATO: Sharpe Ratio e Efficiency Score - erano funzioni zombie
     
     // Count total positions across all sections
     const totalPositions = assets.cash.length + assets.debts.length + 
@@ -2604,10 +2593,10 @@ const NetWorthManager = () => {
       totalGlobalPositions,
       uniqueInvestmentPositions,
       riskScore: adjustedRiskScore.toFixed(1),
-      sharpeRatio: sharpeRatioFormatted,
-      efficiencyRating: efficiencyRating.rating,
-      efficiencyColor: efficiencyRating.color,
-      efficiencyBgColor: efficiencyRating.bgColor,
+      // sharpeRatio: sharpeRatioFormatted, // ✅ ELIMINATO: funzione zombie
+      // efficiencyRating: efficiencyRating.rating, // ✅ ELIMINATO: funzione zombie
+      // efficiencyColor: efficiencyRating.color, // ✅ ELIMINATO: funzione zombie
+      // efficiencyBgColor: efficiencyRating.bgColor, // ✅ ELIMINATO: funzione zombie
       emergencyMonths: emergencyFundMetrics.monthsFormatted,
       emergencyFundValue: emergencyFundMetrics.value,
       emergencyFundStatus: emergencyFundMetrics.status === 'optimal' ? t('optimal') :
@@ -8805,21 +8794,6 @@ const NetWorthManager = () => {
                   <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
               <div className="flex justify-between items-center mb-3">
                 <h3 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('transactionHistory')}</h3>
-                {safeGetTransactions().length > 0 && (
-                  <button
-                    onClick={handleClearAllTransactions}
-                    className={`px-3 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${
-                      darkMode 
-                        ? 'bg-red-600 hover:bg-red-700 text-white border border-red-500' 
-                        : 'bg-red-500 hover:bg-red-600 text-white border border-red-400'
-                    }`}
-                    title={t('clearAllTransactions')}
-                    aria-label={t('clearAllTransactions')}
-                  >
-                    <Trash2 size={12} aria-hidden="true" />
-                    {t('clearAll')}
-                  </button>
-                )}
               </div>
               
               {/* CSV Import Section - removed (now in settings) */}
@@ -8957,8 +8931,23 @@ const NetWorthManager = () => {
                 <span className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                   {t('totalTransactionsLabel')} {formatCurrencyWithPrivacy(safeGetTransactions().reduce((sum: number, item: Transaction) => sum + item.amount, 0))}
                 </span>
-                <div className="mt-2 flex justify-end">
+                <div className="mt-2 flex justify-end gap-2">
                   <AddItemForm section="transactions" compact={true} />
+                  {safeGetTransactions().length > 0 && (
+                    <button
+                      onClick={handleClearAllTransactions}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 text-xs ${
+                        darkMode 
+                          ? 'bg-red-700 hover:bg-red-600 text-red-300 hover:text-red-100' 
+                          : 'bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800'
+                      }`}
+                      title={t('clearAllTransactions')}
+                      aria-label={t('clearAllTransactions')}
+                    >
+                      <Trash2 size={12} aria-hidden="true" />
+                      {t('clearAll')}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -9397,50 +9386,55 @@ const NetWorthManager = () => {
                         {portfolioPerformance.annualizedReturnPercentage.toFixed(2)}%
                       </div>
                     </div>
-                    
-                    {/* Performance Chart */}
-                    <div className="mt-4 col-span-full">
-                      <h5 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <svg className="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                        </svg>
-                        Performance per Asset
-                      </h5>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {/* Performance List */}
-                        <div className="space-y-2">
-                          {portfolioPerformance.assets
-                            .filter((asset: AssetWithPerformance) => asset.currentPrice && asset.currentPrice > 0)
-                            .sort((a: AssetWithPerformance, b: AssetWithPerformance) => b.performance.percentageReturn - a.performance.percentageReturn)
-                            .map((asset: AssetWithPerformance) => (
-                              <div key={asset.id} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                                <div className="flex justify-between items-center">
-                                  <div className="flex-1">
-                                    <div className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                                      {asset.name} ({asset.sector || t('notAvailable')})
+                  </div>
+                  
+                  {/* Performance Charts - Side by Side */}
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Performance per Asset */}
+                        <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                          <h5 className={`text-sm font-medium mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <svg className="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                            Performance per Asset
+                          </h5>
+                          <div className="space-y-2">
+                            {portfolioPerformance.assets
+                              .filter((asset: AssetWithPerformance) => asset.currentPrice && asset.currentPrice > 0)
+                              .sort((a: AssetWithPerformance, b: AssetWithPerformance) => b.performance.percentageReturn - a.performance.percentageReturn)
+                              .map((asset: AssetWithPerformance) => (
+                                <div key={asset.id} className={`p-2 rounded ${darkMode ? 'bg-gray-600' : 'bg-white'}`}>
+                                  <div className="flex justify-between items-center">
+                                    <div className="flex-1">
+                                      <div className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                                        {asset.name} ({asset.sector || t('notAvailable')})
+                                      </div>
+                                      <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {asset.quantity || 0} × {formatCurrencyWithPrivacy(asset.currentPrice || asset.avgPrice || 0)} = {formatCurrencyWithPrivacy((asset.currentPrice || asset.avgPrice || 0) * (asset.quantity || 0))}
+                                      </div>
                                     </div>
-                                    <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                      {asset.quantity || 0} × {formatCurrencyWithPrivacy(asset.currentPrice || asset.avgPrice || 0)} = {formatCurrencyWithPrivacy((asset.currentPrice || asset.avgPrice || 0) * (asset.quantity || 0))}
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className={`text-sm font-medium ${asset.performance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {asset.performance.percentageReturn.toFixed(1)}%
-                                    </div>
-                                    <div className={`text-xs ${asset.performance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {formatCurrencyWithPrivacy(asset.performance.totalReturn)}
+                                    <div className="text-right">
+                                      <div className={`text-sm font-medium ${asset.performance.percentageReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {asset.performance.percentageReturn.toFixed(1)}%
+                                      </div>
+                                      <div className={`text-xs ${asset.performance.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {formatCurrencyWithPrivacy(asset.performance.totalReturn)}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                          </div>
                         </div>
                         
                         {/* Performance Trend Chart */}
                         <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                          <h6 className={`text-sm font-medium mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('performanceTrend')}
-                          </h6>
+                          <h5 className={`text-sm font-medium mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <svg className="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            {t('performanceTrend')}
+                          </h5>
                           <div className="space-y-3">
                             {portfolioPerformance.assets
                               .filter((asset: AssetWithPerformance) => asset.currentPrice && asset.currentPrice > 0)
@@ -9452,9 +9446,9 @@ const NetWorthManager = () => {
                                 return (
                                   <div key={asset.id} className="space-y-1">
                                     <div className="flex justify-between text-xs">
-                                                                              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                         {asset.ticker || asset.sector || asset.name.substring(0, 12)}{(asset.ticker || asset.sector || asset.name).length > 12 ? '...' : ''}
-                                        </span>
+                                      <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        {asset.ticker || asset.sector || asset.name.substring(0, 12)}{(asset.ticker || asset.sector || asset.name).length > 12 ? '...' : ''}
+                                      </span>
                                       <span className={`font-medium ${percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         {percentage.toFixed(1)}%
                                       </span>
@@ -9470,8 +9464,6 @@ const NetWorthManager = () => {
                               })}
                           </div>
                         </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               );
@@ -9862,16 +9854,7 @@ const NetWorthManager = () => {
                         <p className="text-base leading-relaxed">{t('swrDesc')}</p>
                     </div>
                     
-                      <div>
-                        <h5 className="text-base font-semibold mb-2">{t('efficiencyScore')}</h5>
-                        <p className="text-base leading-relaxed">{t('efficiencyBasedOnSharpe')}</p>
-                        <p className="text-base mt-2">
-                        <strong>Esempio:</strong> {t('sharpeRatioExample')}
-                      </p>
-                        <p className="text-sm mt-2 italic">
-                        {t('sharpeRatioLimitations')}
-                      </p>
-                      </div>
+                      {/* ✅ ELIMINATO: Sezione Efficiency Score - funzione zombie rimossa */}
                     </div>
                     
                     {/* Sezione fiscale - IMPORTANTE */}

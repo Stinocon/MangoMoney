@@ -91,7 +91,7 @@ export const it = {
   
   // Statistics
   riskScore: 'Livello di rischio semplificato',
-  efficiencyScore: 'Efficienza (Sharpe Ratio)',
+  // efficiencyScore: 'Efficienza (Sharpe Ratio)', // ✅ ELIMINATO: funzione zombie
   emergencyFund: 'Fondo emergenza',
   diversification: 'Diversificazione',
   concentration: 'Concentrazione',
@@ -436,7 +436,7 @@ export const it = {
   
   // Risk score descriptions
   riskScoreDescription: 'Calcolo semplificato basato su categorie di asset. Adatto per la maggior parte degli utenti.',
-  riskScoreMethod: 'Metodo: Media ponderata per categoria (non Modern Portfolio Theory completa)',
+  riskScoreMethod: 'Metodo: Media ponderata per categoria (approccio semplificato)',
   liquidityRiskDescription: 'Liquidità: 1.0 (rischio minimo - alta liquidità)',
   pensionFundsRiskDescription: 'Fondi pensione: 2.0 (rischio medio - regolamentati, lungo termine)',
   realEstateRiskDescription: 'Immobili: 2.0 (rischio medio - stabili ma illiquidi)',
@@ -444,8 +444,8 @@ export const it = {
   alternativeAssetsRiskDescription: 'Beni alternativi: 5.0 (rischio molto alto - asset speculativi)',
 
   investmentsTransactionsRiskDescription: 'Investimenti/Transazioni: 4.0 (rischio alto - volatilità di mercato)',
-  riskScoreBasedOnVolatility: 'Basato sulla volatilità del portafoglio calcolata con Modern Portafoglio Theory.',
-  efficiencyBasedOnSharpe: 'Basato sul rapporto rischio-rendimento aggiustato.',
+  // riskScoreBasedOnVolatility: 'Basato sulla volatilità del portafoglio calcolata con Modern Portafoglio Theory.', // ✅ ELIMINATO: funzione zombie
+  // efficiencyBasedOnSharpe: 'Basato sul rapporto rischio-rendimento aggiustato.', // ✅ ELIMINATO: funzione zombie
   transactionAnalysisPerYear: 'Analisi delle transazioni per anno',
   verifyLinksBetweenTransactionsAssets: 'Verifica collegamenti tra transazioni e asset individuali',
   filterByAssetType: 'Filtra per tipo asset',
@@ -729,18 +729,7 @@ export const it = {
   riskScoreLimit: 'Il risk score assume che i mercati si comportino "normalmente" (spoiler: non sempre è così)',
   professionalAdvice: 'Per roba seria tipo comprare casa o pianificare la pensione, consulta sempre un professionista. Quest\'app ti aiuta a vedere la situazione, ma non sostituisce il consiglio di chi ne sa davvero.',
   
-  // Sharpe Ratio translations
-  sharpeRatio: 'Sharpe Ratio',
-  sharpeRatioDesc: 'Misura quanto rendimento ottieni per ogni unità di rischio. Più alto = meglio.',
-  riskAdjustedReturn: 'Rendimento aggiustato per il rischio',
-  excellentSharpe: 'Eccellente rapporto rischio-rendimento',
-  goodSharpe: 'Buon rapporto rischio-rendimento',
-  poorSharpe: 'Scarso rapporto rischio-rendimento',
-  veryPoorSharpe: 'Rapporto rischio-rendimento molto scarso',
-  sharpeRatioTooltip: 'Ogni unità di rischio genera {sharpe} unità di rendimento extra rispetto ai titoli di stato.',
-  sharpeRatioInfo: 'Il Sharpe Ratio misura l\'efficienza del tuo portafoglio: quanto rendimento extra ottieni per ogni unità di rischio aggiuntivo rispetto ai titoli di stato.',
-  sharpeRatioExample: 'Esempio: Sharpe 1.5 = per ogni 1% di rischio extra, guadagni 1.5% in più rispetto ai BOT.',
-  sharpeRatioLimitations: 'Limitazioni: Basato su dati storici, assume distribuzione normale dei rendimenti (non sempre vero nei mercati reali).',
+  // ✅ ELIMINATO: Traduzioni Sharpe Ratio - funzioni zombie rimosse
   insufficientData: 'Dati insufficienti per il calcolo',
   preliminaryCalculation: 'Calcolo preliminare - dati limitati',
   
@@ -748,7 +737,7 @@ export const it = {
   theoreticalSources: 'Fonti Teoriche',
   theoreticalSourcesDesc: 'L\'app si basa su principi e metodologie riconosciute dalla comunità finanziaria:',
   markowitz: 'Harry Markowitz - modern portfolio theory (1952)',
-  sharpe: 'William Sharpe - Capital Asset Pricing Model e Sharpe Ratio',
+  // sharpe: 'William Sharpe - Capital Asset Pricing Model e Sharpe Ratio', // ✅ ELIMINATO: funzione zombie
   graham: 'Benjamin Graham - Security Analysis e Value Investing',
   bogle: 'John Bogle - Principi di diversificazione e costi bassi',
   merton: 'Robert Merton - Financial Planning e Lifecycle Investing',

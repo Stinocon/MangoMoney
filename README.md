@@ -17,7 +17,7 @@
 Progettato specificamente per il sistema fiscale italiano: calcolo automatico delle plusvalenze (26% standard, 12.5% obbligazioni whitelist), bollo titoli e valuta EUR. Setup rapido con configurazioni preimpostate per l'Italia.
 
 ### 🇬🇧 **For international investors (full support)**  
-Complete English interface, multiple currencies (USD, GBP, CHF, JPY, EUR), universal calculations (CAGR, SWR, Risk Score), customizable tax rates for any country. All features available with international market standards.
+Complete English interface, multiple currencies (USD, GBP, CHF, JPY, EUR), universal calculations (SWR, Risk Profile, Emergency Fund), customizable tax rates for any country. All features available with international market standards.
 
 ---
 
@@ -47,12 +47,11 @@ Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma m
 Inserisci tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento.
 
 L'app calcola automaticamente:
-- **Net Worth totale** con breakdown per tipologia
-- **Performance** con CAGR e confronti temporali  
-- **Risk Score** basato su volatilità del portafoglio
-- **Efficiency Score** (Sharpe Ratio) per misurare rendimento/rischio
+- **Patrimonio Netto** con breakdown per tipologia
+- **Profilo Rischio** semplificato basato su % investimenti  
 - **Safe Withdrawal Rate** per pianificare la pensione
-- **Tasse** su plusvalenze (configurabile per paese)
+- **Emergency Fund** per coprire le spese impreviste
+- **Tasse** su plusvalenze (configurabile per Italia)
 
 Tutte le funzionalità sono pensate per essere semplici ma complete. L'app ti dirà se i conti tornano.
 
@@ -83,11 +82,11 @@ Per le impostazioni, c'è una configurazione rapida per l'Italia che imposta aut
 - **Transazioni complete** con calcoli cost basis (FIFO, LIFO, Average Cost)
 - **Import/Export** CSV, Excel, JSON, PDF con template predefiniti
 
-### **🧮 Calcoli Finanziari Avanzati** 
-- **CAGR** (Compound Annual Growth Rate) per performance temporali
-- **SWR** (Safe Withdrawal Rate) basato su Trinity Study
-- **Risk Score** semplificato basato su categorie asset (adatto per il 95% degli utenti)
-- **Efficiency Score** (Sharpe Ratio) per analisi rendimento/rischio
+### **🧮 Analisi Finanziarie Semplici e Oneste**
+- **Patrimonio Netto**: Totale asset meno debiti (il tuo valore reale)
+- **Safe Withdrawal Rate**: Quanto puoi prelevare per il pensionamento  
+- **Profilo Rischio**: Basato su % investimenti (Conservativo/Bilanciato/Aggressivo)  
+- **Emergency Fund**: Quanti mesi di spese hai coperti
 - **Simulazioni** vendite con impatto fiscale
 
 ### **🇮🇹 Fisco Italiano Integrato**
@@ -225,4 +224,4 @@ Rilasciato sotto **Creative Commons BY-NC-SA 4.0**.
 
 ---
 
-*Ultimo aggiornamento: 25 Agosto 2025 - Versione 3.2.0*
+*Ultimo aggiornamento: 25 Agosto 2025 - Versione 3.3.0*
