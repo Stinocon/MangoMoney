@@ -67,7 +67,10 @@ export class ExcelExporter {
       ['RIEPILOGO GENERALE'],
       [''],
       ['Patrimonio Netto', this.data.formatCurrency(this.data.totals.total)],
-      ['Patrimonio Lordo', this.data.formatCurrency(this.data.totals.total + Math.abs(this.data.totals.debts))],
+      // 🎯 FIX ERRORE 4: Patrimonio Lordo = somma asset reali (non patrimonio netto + debiti)
+      ['Patrimonio Lordo', this.data.formatCurrency(this.data.totals.cash + this.data.totals.investments + 
+                                                    this.data.totals.realEstate + this.data.totals.pensionFunds + 
+                                                    this.data.totals.otherAccounts + this.data.totals.alternativeAssets)],
       ['Debiti Totali', this.data.formatCurrency(Math.abs(this.data.totals.debts))],
       [''],
       ['ALLOCAZIONE PATRIMONIO'],

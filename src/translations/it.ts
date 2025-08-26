@@ -86,7 +86,7 @@ export const it = {
   type: 'Tipo',
   primaryHome: 'Casa principale',
   secondaryHome: 'Casa secondaria',
-  excludeFromTotal: 'Escludi dal patrimonio totale',
+
   status: 'Stato',
   
   // Statistics
@@ -128,7 +128,7 @@ export const it = {
   swrAdvancedCalculation: 'Calcolo SWR Avanzato',
   swrRiskAdjusted: 'SWR aggiustato per rischio',
   swrInflationAdjusted: 'SWR aggiustato per inflazione',
-  swrNetLiquidAssets: 'Asset liquidi netti',
+  withdrawableAssets: 'Asset prelevabili',
   swrMonthlyExpenses: 'Spese mensili',
   swrAnnualWithdrawal: 'Prelievo annuo',
   swrExplanation: 'Questa simulazione calcola se il prelievo di una certa percentuale dei tuoi asset liquidi netti (contanti + investimenti + altri conti) può coprire le tue spese mensili. Il "Prelievo mensile" mostra quanto riceveresti ogni mese con il tasso di prelievo selezionato.',
@@ -166,7 +166,7 @@ export const it = {
   addTransaction: 'Aggiungi transazione',
   
   // Charts
-  assetDistribution: 'Distribuzione patrimonio',
+  assetDistribution: 'Distribuzione asset',
   categoryComparison: 'Confronto categorie',
   realEstateDistribution: 'Distribuzione immobili',
   

@@ -100,7 +100,10 @@ export class PDFExporter {
     // Total assets and debts
     this.pdf.setFontSize(10);
     this.pdf.setTextColor(107, 114, 128);
-    const totalAssets = this.data.totals.total + Math.abs(this.data.totals.debts);
+    // 🎯 FIX ERRORE 4: Patrimonio Lordo = somma asset reali (non patrimonio netto + debiti)
+    const totalAssets = this.data.totals.cash + this.data.totals.investments + 
+                        this.data.totals.realEstate + this.data.totals.pensionFunds + 
+                        this.data.totals.otherAccounts + this.data.totals.alternativeAssets;
     this.pdf.text(`Patrimonio Lordo: ${this.data.formatCurrency(totalAssets)}`, this.margin + 10, this.currentY + 25);
     this.pdf.text(`Debiti Totali: ${this.data.formatCurrency(Math.abs(this.data.totals.debts))}`, this.margin + 10, this.currentY + 32);
     

@@ -86,7 +86,7 @@ export const en = {
   type: 'Type',
   primaryHome: 'Primary Home',
   secondaryHome: 'Secondary Home',
-  excludeFromTotal: 'Exclude from total net worth',
+
   status: 'Status',
   
   // Statistics
@@ -128,7 +128,7 @@ export const en = {
   swrAdvancedCalculation: 'Advanced SWR Calculation',
   swrRiskAdjusted: 'Risk-adjusted SWR',
   swrInflationAdjusted: 'Inflation-adjusted SWR',
-  swrNetLiquidAssets: 'Net Liquid Assets',
+  withdrawableAssets: 'Withdrawable Assets',
   swrMonthlyExpenses: 'Monthly Expenses',
   swrAnnualWithdrawal: 'Annual Withdrawal',
   swrExplanation: 'This simulation calculates whether withdrawing a certain percentage of your net liquid assets (cash + investments + other accounts) can cover your monthly expenses. The "Monthly Withdrawal" shows how much you would receive each month with the selected withdrawal rate.',
@@ -166,7 +166,7 @@ export const en = {
   addTransaction: 'Add Transaction',
   
   // Charts
-  assetDistribution: 'Asset Distribution',
+  assetDistribution: 'Asset Allocation',
   categoryComparison: 'Category Comparison',
   realEstateDistribution: 'Real Estate Distribution',
   

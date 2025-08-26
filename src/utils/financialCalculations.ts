@@ -432,98 +432,48 @@ export const calculatePortfolioRiskScore = (
 ): number => {
   if (totalValue <= 0) return 5; // Default moderate
   
-  return safePortfolioCalculation(() => {
-    let portfolioVariance = new Decimal(0);
-    
-    // Calculate portfolio variance using Modern Portfolio Theory
-    const assetClasses = Object.keys(allocations);
-    
-    for (let i = 0; i < assetClasses.length; i++) {
-      const assetClass1 = assetClasses[i];
-      const weight1 = new Decimal(allocations[assetClass1]).dividedBy(totalValue);
-      const volatility1 = new Decimal(getAssetVolatility(assetClass1)); // ✅ FIXED: Remove division by 100
-      
-      // Add diagonal terms (own variance)
-      portfolioVariance = portfolioVariance.plus(weight1.times(weight1).times(volatility1.times(volatility1)));
-      
-      // Add cross terms (covariance)
-      for (let j = i + 1; j < assetClasses.length; j++) {
-        const assetClass2 = assetClasses[j];
-        const weight2 = new Decimal(allocations[assetClass2]).dividedBy(totalValue);
-        const volatility2 = new Decimal(getAssetVolatility(assetClass2)); // ✅ FIXED: Remove division by 100
-        
-        // ✅ SAFE: Usa funzione helper per accesso sicuro alla matrice di correlazione
-        const correlation = getAssetCorrelation(assetClass1, assetClass2);
-        
-        portfolioVariance = portfolioVariance.plus(
-          weight1.times(weight2).times(volatility1).times(volatility2).times(correlation).times(2)
-        );
-      }
-      
-    }
-    
-    const portfolioVolatility = portfolioVariance.sqrt();
-    
-    // ✅ VALIDAZIONE PORTFOLIO VARIANCE - Debug per verificare calcoli
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Portfolio Variance Debug:', {
-        allocations,
-        totalValue,
-        volatilities: Object.keys(allocations).map(asset => ({
-          asset,
-          weight: allocations[asset] / totalValue,
-          volatility: getAssetVolatility(asset),
-          volatilityPercent: getAssetVolatility(asset) * 100
-        })),
-        portfolioVariance: portfolioVariance.toNumber(),
-        portfolioVolatility: portfolioVolatility.toNumber(),
-        portfolioVolatilityPercent: portfolioVolatility.times(100).toNumber()
-      });
-    }
-    
-    // ✅ RISK SCORE SCALING FIXED - Linear scaling with intelligent cap (Decimal.js)
-    const volatilityPercent = portfolioVolatility.times(100);
-    
-    // Linear scaling: 0-30% volatility = 0-10 risk score
-    // Formula: RiskScore = min(10, max(0, (volatility% / 3)))
-    let riskScore = toNumber(calculateWithDecimal.divide(volatilityPercent, 3));
-    
-    // Soft cap for extreme volatility (>30%)
-    if (riskScore > 10) {
-      // Logarithmic scaling beyond 30%: log₁.₅(vol/30) + 10
-      const excessFactor = toNumber(calculateWithDecimal.divide(volatilityPercent, 30));
-      riskScore = 10 + Math.log(excessFactor) / Math.log(1.5);
-      riskScore = Math.min(15, riskScore); // Hard cap at 15
-    }
-    
-    // ✅ VALIDATION TESTS - Ensure mathematical correctness
-    if (process.env.NODE_ENV === 'development') {
-      // Test cases for mathematical validation
-      const testVol0 = new Decimal(0);
-      const testVol15 = new Decimal(0.15);
-      const testVol30 = new Decimal(0.30);
-      const testVol50 = new Decimal(0.50);
-      
-      const testScore0 = toNumber(calculateWithDecimal.divide(testVol0.times(100), 3));
-      const testScore15 = toNumber(calculateWithDecimal.divide(testVol15.times(100), 3));
-      const testScore30 = toNumber(calculateWithDecimal.divide(testVol30.times(100), 3));
-      
-      console.assert(testScore0 === 0, 'Risk score 0% volatility should be 0');
-      console.assert(Math.abs(testScore15 - 5) < 0.1, 'Risk score 15% volatility should be ~5');
-      console.assert(Math.abs(testScore30 - 10) < 0.1, 'Risk score 30% volatility should be ~10');
-      
-      // Test extreme volatility cap
-      let testScore50 = toNumber(calculateWithDecimal.divide(testVol50.times(100), 30));
-      if (testScore50 > 10) {
-        const excessFactor = toNumber(calculateWithDecimal.divide(testVol50.times(100), 30));
-        testScore50 = 10 + Math.log(excessFactor) / Math.log(1.5);
-        testScore50 = Math.min(15, testScore50);
-      }
-      console.assert(testScore50 <= 15, 'Risk score should be capped at 15');
-    }
-
-    return Math.max(0, Math.min(15, riskScore));
-  }, 5, 'Portfolio risk score calculation'); // Default to moderate risk (5/10) if calculation fails
+  // 🎯 SEMPLIFICAZIONE 4: Simple weighted average approach
+  const weights = {
+    cash: 1,              // Molto sicuro
+    otherAccounts: 1,     // Conti = sicuri
+    pensionFunds: 3,      // Moderato (regolamentato)
+    realEstate: 4,        // Medio (stabile ma illiquid)
+    investments: 7,       // Alto (volatile)
+    alternativeAssets: 9  // Molto alto (speculativo)
+  };
+  
+  let weightedSum = 0;
+  let totalWeight = 0;
+  
+  for (const [assetType, value] of Object.entries(allocations)) {
+    const weight = weights[assetType as keyof typeof weights] || 5; // Default moderate
+    const assetWeight = value / totalValue;
+    weightedSum += weight * assetWeight;
+    totalWeight += assetWeight;
+  }
+  
+  // 🎯 SEMPLIFICAZIONE 4: Simple calculation
+  const riskScore = Math.round(totalWeight > 0 ? weightedSum / totalWeight : 5);
+  
+  // 🎯 SEMPLIFICAZIONE 4: Debug in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🎯 SEMPLIFICAZIONE 4 - Simple Risk Score:', {
+      allocations,
+      totalValue,
+      weights: Object.entries(allocations).map(([asset, value]) => ({
+        asset,
+        value,
+        weight: weights[asset as keyof typeof weights] || 5,
+        percentage: (value / totalValue) * 100
+      })),
+      weightedSum,
+      totalWeight,
+      riskScore,
+      isSimple: true
+    });
+  }
+  
+  return Math.max(0, Math.min(10, riskScore)); // Ensure 0-10 range
 };
 
 /**
@@ -898,7 +848,7 @@ export const calculateRealEstateNetWorthValue = (realEstateAssets: any[]): numbe
         continue;
       }
       
-      if (asset.excludeFromTotal === true) continue;
+      // 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal - tutti gli immobili contano nel patrimonio
       
       // CRITICAL FIX: Validate value type
       let numericValue = 0;
@@ -1938,7 +1888,7 @@ export const calculateCapitalGainsTax = (
  * @throws {Error} Returns safe defaults for invalid inputs
  */
 /**
- * Calculates emergency fund months with bulletproof edge case handling
+ * 🎯 SEMPLIFICAZIONE 5: Calculate emergency fund metrics - Simple and reliable
  */
 export const calculateEmergencyFundMetrics = (
   assets: any,
@@ -1947,144 +1897,58 @@ export const calculateEmergencyFundMetrics = (
   adequateMonths: number = 3,
   optimalMonths: number = 6
 ) => {
-  try {
-    // ✅ ROBUST INPUT VALIDATION
-    if (!assets || typeof assets !== 'object') {
-      console.warn('calculateEmergencyFundMetrics: Invalid assets object');
-      return getSafeEmergencyFundDefaults();
-    }
-
-    // ✅ PREVENT EXTREME VALUES THAT COULD CAUSE OVERFLOW
-    if (monthlyExpenses > 1000000) {
-      console.warn('calculateEmergencyFundMetrics: Monthly expenses exceeds €1M, capping');
-      monthlyExpenses = 1000000;
-    }
-
-    if (adequateMonths > 120 || optimalMonths > 120) {
-      console.warn('calculateEmergencyFundMetrics: Target months exceeds 10 years, capping');
-      adequateMonths = Math.min(adequateMonths, 120);
-      optimalMonths = Math.min(optimalMonths, 120);
-    }
-
-    // ✅ ENHANCED EMERGENCY FUND ACCOUNT VALIDATION
-    const emergencyValidation = validateEmergencyFundAccount(assets, emergencyFundAccount);
-    if (!emergencyValidation.isValid) {
-      console.warn(`calculateEmergencyFundMetrics: ${emergencyValidation.error}`);
-      return getSafeEmergencyFundDefaults();
-    }
-
-    // ✅ SAFE NUMERIC VALIDATION
-    const safeMonthlyExpenses = validateAndNormalizeBigNumbers(monthlyExpenses, 'monthlyExpenses');
-    const safeAdequateMonths = validateFiniteNumber(adequateMonths, 'adequateMonths', 3);
-    const safeOptimalMonths = validateFiniteNumber(optimalMonths, 'optimalMonths', 6);
-
-    // ✅ SAFE EMERGENCY FUND VALUE EXTRACTION
-    const emergencyAccount = emergencyValidation.account;
-    const rawEmergencyFundValue = emergencyAccount?.amount || 0;
-    const emergencyFundValue = validateAndNormalizeBigNumbers(rawEmergencyFundValue, 'emergencyFundValue');
-
-    // ✅ PREVENT EXTREME EMERGENCY FUND VALUES
-    if (emergencyFundValue > 100000000) { // €100M cap
-      console.warn('calculateEmergencyFundMetrics: Emergency fund value exceeds €100M');
-      return getSafeEmergencyFundDefaults();
-    }
-
-    // ✅ BULLETPROOF DIVISION CON MULTIPLE CHECKS
-    let emergencyMonths = 0;
-    
-    if (emergencyFundValue > 0 && safeMonthlyExpenses > 0) {
-      try {
-        // ✅ CHECK FOR POTENTIAL OVERFLOW BEFORE DIVISION
-        if (emergencyFundValue / safeMonthlyExpenses > 10000) {
-          console.warn('calculateEmergencyFundMetrics: Division would result in >10,000 months, capping');
-          emergencyMonths = 10000;
-        } else {
-          const monthsDecimal = new Decimal(emergencyFundValue).dividedBy(safeMonthlyExpenses);
-          
-          // Verifica che il risultato sia finito
-          if (monthsDecimal.isFinite() && !monthsDecimal.isNaN()) {
-            const monthsNumber = monthsDecimal.toNumber();
-            
-            // Double check che il result sia numerico e sensato
-            if (Number.isFinite(monthsNumber) && monthsNumber >= 0 && monthsNumber <= 10000) {
-              emergencyMonths = monthsNumber;
-            } else {
-              console.warn(`calculateEmergencyFundMetrics: Invalid months result: ${monthsNumber}`);
-              emergencyMonths = 0;
-            }
-          } else {
-            console.warn(`calculateEmergencyFundMetrics: Decimal division resulted in non-finite value`);
-            emergencyMonths = 0;
-          }
-        }
-      } catch (divisionError) {
-        console.error('calculateEmergencyFundMetrics: Error in division calculation:', divisionError);
-        emergencyMonths = 0;
-      }
-    }
-
-    // ✅ SAFE STATUS DETERMINATION
-    let emergencyFundStatus: 'optimal' | 'adequate' | 'insufficient' = 'insufficient';
-    
-    if (emergencyMonths >= safeOptimalMonths) {
-      emergencyFundStatus = 'optimal';
-    } else if (emergencyMonths >= safeAdequateMonths) {
-      emergencyFundStatus = 'adequate';
-    }
-
-    // ✅ SAFE OPTIMAL AMOUNT CALCULATION
-    let missingForOptimal = 0;
-    try {
-      const optimalAmount = new Decimal(safeOptimalMonths).times(safeMonthlyExpenses);
-      const missing = optimalAmount.minus(emergencyFundValue);
-      
-      if (missing.isFinite() && !missing.isNaN()) {
-        missingForOptimal = Math.max(0, missing.toNumber());
-      }
-    } catch (error) {
-      console.warn('calculateEmergencyFundMetrics: Error calculating missing amount:', error);
-      missingForOptimal = 0;
-    }
-
-    // ✅ SAFE PERCENTAGE CALCULATION
-    let percentage = 0;
-    if (safeOptimalMonths > 0) {
-      try {
-        const percentageDecimal = new Decimal(emergencyMonths).dividedBy(safeOptimalMonths).times(100);
-        
-        if (percentageDecimal.isFinite() && !percentageDecimal.isNaN()) {
-          percentage = Math.min(1000, Math.max(0, percentageDecimal.toNumber())); // Cap a 1000%
-        }
-      } catch (error) {
-        console.warn('calculateEmergencyFundMetrics: Error calculating percentage:', error);
-        percentage = 0;
-      }
-    }
-
-    // ✅ FINAL VALIDATION DELL'OUTPUT
-    const result = {
-      value: emergencyFundValue,
-      months: emergencyMonths,
-      monthsFormatted: emergencyMonths.toFixed(1),
-      status: emergencyFundStatus,
-      isAdequate: emergencyMonths >= safeAdequateMonths,
-      isOptimal: emergencyMonths >= safeOptimalMonths,
-      missingForOptimal,
-      percentage
-    };
-
-    // Validate ogni campo dell'output
-    if (!validateEmergencyFundResult(result)) {
-      console.error('calculateEmergencyFundMetrics: Output validation failed, returning safe defaults');
-      return getSafeEmergencyFundDefaults();
-    }
-
-    return result;
-
-  } catch (error) {
-    console.error('calculateEmergencyFundMetrics: Unexpected error:', error);
+  // 🎯 SEMPLIFICAZIONE 5: Simple validation
+  if (!assets || typeof assets !== 'object') {
     return getSafeEmergencyFundDefaults();
   }
+
+  // 🎯 SEMPLIFICAZIONE 5: Simple emergency fund account validation
+  const emergencyValidation = validateEmergencyFundAccount(assets, emergencyFundAccount);
+  if (!emergencyValidation.isValid) {
+    return getSafeEmergencyFundDefaults();
+  }
+
+  // 🎯 SEMPLIFICAZIONE 5: Simple value extraction
+  const emergencyAccount = emergencyValidation.account;
+  const emergencyFundValue = Math.max(0, Number(emergencyAccount?.amount || 0));
+  const safeMonthlyExpenses = Math.max(1, Number(monthlyExpenses || 1)); // Avoid division by 0
+
+  // 🎯 SEMPLIFICAZIONE 5: Simple calculation
+  const months = emergencyFundValue / safeMonthlyExpenses;
+  
+  // 🎯 SEMPLIFICAZIONE 5: Simple status determination
+  const status = months >= optimalMonths ? 'optimal' : 
+                 months >= adequateMonths ? 'adequate' : 
+                 'insufficient';
+  
+  // 🎯 SEMPLIFICAZIONE 5: Simple derived calculations
+  const missingForOptimal = Math.max(0, (optimalMonths * safeMonthlyExpenses) - emergencyFundValue);
+  const percentage = Math.min(100, (months / optimalMonths) * 100);
+  
+  // 🎯 SEMPLIFICAZIONE 5: Debug in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🎯 SEMPLIFICAZIONE 5 - Simple Emergency Fund:', {
+      emergencyFundValue,
+      safeMonthlyExpenses,
+      months: Math.round(months * 10) / 10,
+      status,
+      missingForOptimal,
+      percentage: Math.round(percentage),
+      isSimple: true
+    });
+  }
+      
+  // 🎯 SEMPLIFICAZIONE 5: Simple return object
+  return {
+    value: emergencyFundValue,
+    months: Math.round(months * 10) / 10, // 1 decimale
+    monthsFormatted: (Math.round(months * 10) / 10).toFixed(1),
+    status,
+    isAdequate: months >= adequateMonths,
+    isOptimal: months >= optimalMonths,
+    missingForOptimal,
+    percentage: Math.round(percentage)
+  };
 };
 
 // ✅ HELPER FUNCTIONS
@@ -2426,7 +2290,7 @@ export const analyzeTaxesByYear = (
 };
 
 export interface SWRResult {
-  netLiquidAssets: number;
+  withdrawableAssets: number;
   annualWithdrawal: number;
   monthlyWithdrawal: number;
   yearsOfSupport: number;
@@ -2471,10 +2335,11 @@ export const calculateSWR = (
   const safeInflationRate = Math.max(0, Math.min(20, inflationRate || 2));
   const safeMonthlyExpenses = Math.max(0, monthlyExpenses || 0);
   
-  // Calculate liquid assets (exclude real estate as it's not liquid)
-  const liquidAssets = safeAdd(
+  // 🎯 SEMPLIFICAZIONE 1: Calcola asset prelevabili (withdrawable assets)
+  // Esclusi sempre: realEstate (illiquid), pensionFunds (locked until retirement)
+  const withdrawableAssets = safeAdd(
     safeAdd(totals.cash || 0, totals.investments || 0),
-    safeAdd(totals.pensionFunds || 0, totals.otherAccounts || 0)
+    totals.otherAccounts || 0
   );
   
   // Risk assessment based on portfolio composition
@@ -2498,7 +2363,7 @@ export const calculateSWR = (
   const adjustedSWR = Math.max(1.0, safeSwrRate + riskAdjustments[riskLevel]);
   
   // Calculate withdrawals
-  const annualWithdrawal = safeMultiply(liquidAssets, safeDivide(adjustedSWR, 100));
+  const annualWithdrawal = safeMultiply(withdrawableAssets, safeDivide(adjustedSWR, 100));
   const monthlyWithdrawal = safeDivide(annualWithdrawal, 12);
   
   // Real SWR rate (inflation-adjusted)
@@ -2515,7 +2380,7 @@ export const calculateSWR = (
     if (monthlyWithdrawal >= safeMonthlyExpenses) {
       yearsOfSupport = 30; // Trinity study assumes 30-year retirement
     } else {
-      yearsOfSupport = Math.min(30, safeDivide(liquidAssets, Math.max(1, inflationAdjustedAnnualExpenses)));
+      yearsOfSupport = Math.min(30, safeDivide(withdrawableAssets, Math.max(1, inflationAdjustedAnnualExpenses)));
     }
   } else {
     if (translate) {
@@ -2526,7 +2391,7 @@ export const calculateSWR = (
   }
   
   // Generate warnings
-  if (liquidAssets < 100000) {
+  if (withdrawableAssets < 100000) {
     if (translate) {
       warnings.push(translate('swrSmallPortfolioWarning'));
     } else {
@@ -2551,7 +2416,7 @@ export const calculateSWR = (
   }
   
   return {
-    netLiquidAssets: liquidAssets,
+    withdrawableAssets: withdrawableAssets,
     annualWithdrawal,
     monthlyWithdrawal,
     yearsOfSupport,

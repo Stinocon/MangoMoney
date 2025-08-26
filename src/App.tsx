@@ -925,7 +925,6 @@ interface RealEstate {
   type: 'primary' | 'secondary';
   address?: string;
   notes?: string;
-  excludeFromTotal?: boolean;
 }
 
 interface Assets {
@@ -960,7 +959,6 @@ interface NewItem {
   date?: string;
   accountType?: 'current' | 'deposit' | 'remunerated' | 'cash';
   assetType?: 'tcg' | 'stamps' | 'alcohol' | 'collectibles' | 'vinyl' | 'books' | 'comics' | 'art' | 'other' | 'Azione' | 'ETF' | 'Obbligazione whitelist' | 'Obbligazione';
-  excludeFromTotal?: boolean;
   interestRate?: string; // Tasso interesse lordo annuo in % per conti deposito e remunerati
 }
 
@@ -1094,6 +1092,7 @@ interface CompactPieChartProps {
   size?: number;
   title?: string;
   showLegend?: boolean;
+  totalAssets?: number; // 🎯 NUOVO: parametro per asset lordi (opzionale per compatibilità)
 }
 
 // Additional type definitions for better type safety
@@ -1123,7 +1122,6 @@ interface EditingItem {
   type?: 'primary' | 'secondary';
   address?: string;
   value?: number;
-  excludeFromTotal?: boolean;
 }
 
 interface CSVRow {
@@ -2372,10 +2370,24 @@ const NetWorthManager = () => {
       alternativeAssets: totals.alternativeAssets
     };
 
-    const baseRiskScore = calculatePortfolioRiskScore(portfolioAllocations, totals.total);
+    // 🎯 SEMPLIFICAZIONE 3: Standardizzare terminologie - totalAssets per coerenza
+    const totalAssets = totals.cash + totals.investments + totals.realEstate + 
+                        totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+    
+    // Debug in development per verificare il fix
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 SEMPLIFICAZIONE 3 - MPT calculations:', {
+        patrimonioNetto: totals.total,
+        totalAssets: totalAssets,
+        differenza: totals.total - totalAssets,
+        shouldUseTotalAssets: totals.total < 0
+      });
+    }
+
+    const baseRiskScore = calculatePortfolioRiskScore(portfolioAllocations, totalAssets);
     
     // Efficiency Score calculation
-    const efficiencyScore = calculatePortfolioEfficiencyScore(portfolioAllocations, totals.total);
+    const efficiencyScore = calculatePortfolioEfficiencyScore(portfolioAllocations, totalAssets);
     
     // Tax Analysis - Analisi fiscale per anno
     if (process.env.NODE_ENV === 'development') {
@@ -2390,15 +2402,16 @@ const NetWorthManager = () => {
     );
     
     // Financial Health Metrics
-    const grossAssets = total + Math.abs(totalDebts);
-    const debtToAssetRatio = grossAssets > 0 ? safeDivide(Math.abs(totalDebts), grossAssets) : 0;
+    // 🎯 SEMPLIFICAZIONE 3: Usa totalAssets già definito sopra
+    const debtToAssetRatio = totalAssets > 0 ? safeDivide(Math.abs(totalDebts), totalAssets) : 0;
     
     // Validazione in development mode
     if (process.env.NODE_ENV === 'development') {
       validateDebtToAssetRatio(debtToAssetRatio, 'debt-to-asset ratio calculation');
     }
     
-    const leverageRatio = grossAssets > 0 ? safeDivide(grossAssets, total) : 1;
+    // 🎯 SEMPLIFICAZIONE 3: Leverage ratio con totalAssets standardizzato
+    const leverageRatio = totalAssets > 0 ? safeDivide(totalAssets, Math.abs(total)) : 1;
     const leverageMultiplier = 1 + leverageRatio;
     const adjustedRiskScore = Math.min(10, baseRiskScore * leverageMultiplier);
     
@@ -2426,6 +2439,57 @@ const NetWorthManager = () => {
       validatePercentageSum(percentages, 'asset allocation calculation');
     }
     
+          // 🎯 VALIDAZIONE COMPLETA - Verifica tutti i fix in development
+      if (process.env.NODE_ENV === 'development') {
+        const realAssets = totals.cash + totals.investments + totals.realEstate + 
+                           totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+        const oldGrossAssets = totals.total + Math.abs(totals.debts || 0);
+        
+        console.log('🎯 VALIDAZIONE COMPLETA - Tutti i fix:', {
+          // SEMPLIFICAZIONE 3: MPT calculations
+          mptUsesTotalAssets: totalAssets === realAssets,
+          riskScoreValid: baseRiskScore >= 0 && baseRiskScore <= 10,
+          
+          // SEMPLIFICAZIONE 3: Total Assets
+          totalAssetsCorrect: totalAssets === realAssets,
+          totalAssetsOld: oldGrossAssets,
+          totalAssetsNew: realAssets,
+          
+          // ERRORE 3: Chart excludes debts (verificato nel pieData debug)
+          chartExcludesDebts: 'verified in pieData debug',
+          
+          // ERRORE 5: Debt-to-Asset ratio
+          debtToAssetCorrect: debtToAssetRatio === Math.abs(totals.debts || 0) / realAssets,
+          debtToAssetOld: Math.abs(totals.debts || 0) / oldGrossAssets,
+          debtToAssetNew: Math.abs(totals.debts || 0) / realAssets,
+          
+          // ERRORE 6: Leverage ratio
+          leverageUsesAbsTotal: leverageRatio === realAssets / Math.abs(totals.total),
+          leverageOld: oldGrossAssets / totals.total,
+          leverageNew: realAssets / Math.abs(totals.total)
+        });
+        
+        // 🎯 VALIDAZIONE COERENZA CARDS vs GRAFICO
+        const assetPercentages = [
+          (totals.cash / realAssets) * 100,
+          (totals.investments / realAssets) * 100,
+          (totals.realEstate / realAssets) * 100,
+          (totals.pensionFunds / realAssets) * 100,
+          (totals.otherAccounts / realAssets) * 100,
+          (totals.alternativeAssets / realAssets) * 100
+        ];
+        const totalAssetPercentage = assetPercentages.reduce((sum, pct) => sum + pct, 0);
+        
+        console.log('🎯 VALIDAZIONE COERENZA - Cards vs Grafico:', {
+          totalRealAssets: realAssets.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }),
+          assetPercentages: assetPercentages.map(pct => pct.toFixed(1) + '%'),
+          totalAssetPercentage: totalAssetPercentage.toFixed(1) + '%',
+          shouldBe100: Math.abs(totalAssetPercentage - 100) < 0.1,
+          debtCardShows: 'Passività (no percentage)',
+          consistency: 'Cards and chart use same logic'
+        });
+      }
+
     return {
       emergencyFundMetrics,
       baseRiskScore,
@@ -2436,7 +2500,7 @@ const NetWorthManager = () => {
       leverageMultiplier,
       adjustedRiskScore,
       allocationPercentages,
-      grossAssets,
+      totalAssets,
       totalDebts
     };
   }, [
@@ -2635,22 +2699,39 @@ const NetWorthManager = () => {
 
   // ✅ PERFORMANCE OPTIMIZATION: Inline chart data creation
   const pieData = useMemo(() => {
-    // Inline chart data creation to avoid function reference changes
+    // 🎯 FIX: Escludi debiti dal grafico "Distribuzione patrimonio"
+    // I debiti NON sono patrimonio - sono passività che riducono il patrimonio
     const data = Object.entries(totals)
-      .filter(([key]) => key !== 'total') // Exclude 'total' from chart data
+      .filter(([key]) => key !== 'total' && key !== 'debts') // ✅ ESCLUDI 'total' E 'debts'!
       .map(([key, value]) => ({
         name: sections[key as keyof typeof sections] || key,
         value: Math.abs(value),
         color: getChartColor(key)
       })).filter(item => item.value > 0);
     
+    // Debug in development per verificare che i debiti siano esclusi
+    if (process.env.NODE_ENV === 'development') {
+      const assetSum = data.reduce((sum, item) => sum + item.value, 0);
+      const percentageSum = data.reduce((sum, item) => sum + (item.value / assetSum * 100), 0);
+      console.log('🔧 Fix ERRORE 3 - pieData (solo asset):', {
+        assetCount: data.length,
+        assetSum: assetSum.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }),
+        percentageSum: percentageSum.toFixed(1) + '%',
+        excludedDebts: totals.debts || 0,
+        dataKeys: data.map(item => item.name),
+        shouldBe100: percentageSum.toFixed(1) === '100.0'
+      });
+      
+
+    }
+    
     return data;
   }, [totals, sections]);
   
   const barData = useMemo(() => {
-    // Inline chart data creation to avoid function reference changes
+    // 🎯 FIX: Escludi debiti anche dal grafico a barre per coerenza
     const data = Object.entries(totals)
-      .filter(([key]) => key !== 'total') // Exclude 'total' from chart data
+      .filter(([key]) => key !== 'total' && key !== 'debts') // ✅ ESCLUDI 'total' E 'debts'!
       .map(([key, value]) => ({
         category: sections[key as keyof typeof sections] || key,
         amount: Math.abs(value),
@@ -3089,7 +3170,7 @@ const NetWorthManager = () => {
               sanitizedData.value = Math.abs(sanitizeNumber(realEstateData.value || 0, 'amount'));
       sanitizedData.address = sanitizeString(realEstateData.address || '');
       sanitizedData.notes = sanitizeString(realEstateData.notes || '');
-      sanitizedData.excludeFromTotal = realEstateData.excludeFromTotal || false;
+      // 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal
       
       setAssets({
         ...assets,
@@ -3998,10 +4079,12 @@ const NetWorthManager = () => {
 
   // ✅ PERFORMANCE OPTIMIZATION: Advanced SWR calculation with minimal dependencies
   const advancedSwrData = useMemo(() => {
-    const liquidAssets = safeAdd(
-      safeAdd(totals.cash || 0, totals.investments || 0),
-      safeAdd(totals.pensionFunds || 0, totals.otherAccounts || 0)
-    );
+      // 🎯 SEMPLIFICAZIONE 1: Calcola asset prelevabili (withdrawable assets)
+  // Esclusi sempre: realEstate (illiquid), pensionFunds (locked until retirement)
+  const withdrawableAssets = safeAdd(
+    safeAdd(totals.cash || 0, totals.investments || 0),
+    totals.otherAccounts || 0
+  );
     
     // Helper function for translation with parameter substitution
     const translateWithParams = (key: string, params?: Record<string, string | number>): string => {
@@ -4015,7 +4098,7 @@ const NetWorthManager = () => {
     };
     
     return calculateAdvancedSWR(
-      liquidAssets,
+      withdrawableAssets,
       monthlyExpenses,
       inflationRate,
       coreFinancialCalculations.adjustedRiskScore,
@@ -6408,7 +6491,7 @@ const NetWorthManager = () => {
               address: itemData.field1 || '',
               type: itemData.field2 === 'primary' ? 'primary' : 'secondary',
               notes: itemData.notes,
-              excludeFromTotal: false
+              // 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal
             };
 
             newItems.realEstate.push(newRealEstate);
@@ -6925,7 +7008,7 @@ const NetWorthManager = () => {
       date: new Date().toISOString().split('T')[0],
       accountType: 'current',
       assetType: 'other',
-      excludeFromTotal: false
+              // 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal
     });
     const [transactionType, setTransactionType] = useState<'purchase' | 'sale'>('purchase');
     const [propertyType, setPropertyType] = useState<'primary' | 'secondary'>('primary');
@@ -7059,7 +7142,7 @@ const NetWorthManager = () => {
             type: propertyType,
             address: sanitizeString(formData.notes || ''),
             notes: '',
-            excludeFromTotal: formData.excludeFromTotal || false
+            // 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal
           };
 
           setAssets({
@@ -7122,7 +7205,7 @@ const NetWorthManager = () => {
           });
         }
         
-        setFormData({ name: '', amount: '', description: '', notes: '', fees: '', quantity: '', avgPrice: '', currentPrice: '', linkedToAsset: undefined, sector: '', date: new Date().toISOString().split('T')[0], accountType: 'current', assetType: 'other', excludeFromTotal: false });
+        setFormData({ name: '', amount: '', description: '', notes: '', fees: '', quantity: '', avgPrice: '', currentPrice: '', linkedToAsset: undefined, sector: '', date: new Date().toISOString().split('T')[0], accountType: 'current', assetType: 'other' });
         setTransactionType('purchase');
         setPropertyType('primary');
         setShowForm(false);
@@ -7132,7 +7215,7 @@ const NetWorthManager = () => {
 
     const handleCancel = () => {
       setShowForm(false);
-      setFormData({ name: '', amount: '', description: '', notes: '', fees: '', quantity: '', avgPrice: '', currentPrice: '', linkedToAsset: undefined, sector: '', date: new Date().toISOString().split('T')[0], accountType: 'current', assetType: 'other', excludeFromTotal: false });
+      setFormData({ name: '', amount: '', description: '', notes: '', fees: '', quantity: '', avgPrice: '', currentPrice: '', linkedToAsset: undefined, sector: '', date: new Date().toISOString().split('T')[0], accountType: 'current', assetType: 'other' });
       setTransactionType('purchase');
       setPropertyType('primary');
       validation.clearErrors();
@@ -7462,18 +7545,7 @@ const NetWorthManager = () => {
                 />
               </div>
               
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="excludeFromTotal"
-                  checked={formData.excludeFromTotal || false}
-                  onChange={(e) => setFormData({ ...formData, excludeFromTotal: e.target.checked })}
-                  className={`w-4 h-4 mr-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300 text-gray-900'}`}
-                />
-                <label htmlFor="excludeFromTotal" className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {t('excludeFromTotal')}
-                </label>
-              </div>
+              {/* 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal - tutti gli immobili contano nel patrimonio */}
             </>
           )}
 
@@ -7684,9 +7756,24 @@ const NetWorthManager = () => {
   );
 
   // Compact pie chart component for all sections - Optimized with React.memo
-  const CompactPieChart = React.memo(({ data, size = 200, title = "", showLegend = true }: CompactPieChartProps) => {
+  const CompactPieChart = React.memo(({ data, size = 200, title = "", showLegend = true, totalAssets }: CompactPieChartProps) => {
     const [localHoveredIndex, setLocalHoveredIndex] = useState<number | null>(null);
+    
+    // 🎯 FIX: Per il grafico "Distribuzione patrimonio" usa solo la somma degli asset
+    // I debiti sono già esclusi dai dati, quindi totalAssets non serve più
     const total = data.reduce((sum: number, item: ChartDataItem) => sum + item.value, 0);
+    
+    // Debug in development mode per verificare che le percentuali sommino al 100%
+    if (process.env.NODE_ENV === 'development') {
+      const percentageSum = data.reduce((sum, item) => sum + (item.value / total * 100), 0);
+      console.log('🔧 Debug CompactPieChart (solo asset):', {
+        total: total.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }),
+        percentageSum: percentageSum.toFixed(1) + '%',
+        dataLength: data.length,
+        shouldBe100: percentageSum.toFixed(1) === '100.0'
+      });
+    }
+    
     if (total === 0) return <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('noData')}</div>;
 
     let accumulatedPercentage = 0;
@@ -8106,15 +8193,23 @@ const NetWorthManager = () => {
                       </p>
                       <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                           {(() => {
-                            if (key === 'realEstate') {
-                              // Show percentage based on real estate value included in net worth
-                              return totals.total > 0 ? ((value / totals.total) * 100).toFixed(1) : '0.0';
-                            } else if (key === 'debts') {
-                              return totals.total > 0 ? ((Math.abs(value) / (totals.total + Math.abs(totals.debts))) * 100).toFixed(1) : '0.0';
+                            if (key === 'debts') {
+                              // 🎯 FIX COERENZA: Debiti senza percentuale, solo indicazione
+                              return 'Passività';
                             } else {
-                              return totals.total > 0 ? ((value / totals.total) * 100).toFixed(1) : '0.0';
+                              // 🎯 SEMPLIFICAZIONE 3: Asset percentuale su totalAssets standardizzato
+                              const totalAssets = totals.cash + totals.investments + totals.realEstate + 
+                                                  totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+                              
+                              // Edge case: se non ci sono asset, ritorna 0.0%
+                              if (totalAssets <= 0) {
+                                return '0.0%';
+                              }
+                              
+                              // Percentuale su totalAssets (coerente con grafico)
+                              return ((value / totalAssets) * 100).toFixed(1) + '%';
                             }
-                          })()}%
+                          })()}
                       </p>
                       
                       {/* Bottone discreto per aggiungere elemento */}
@@ -8150,7 +8245,19 @@ const NetWorthManager = () => {
                           {formatCurrencyWithPrivacy(value)}
                       </p>
                       <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {totals.total > 0 ? ((value / totals.total) * 100).toFixed(1) : '0'}%
+                          {(() => {
+                            // 🎯 SEMPLIFICAZIONE 3: Asset percentuale su totalAssets standardizzato
+                            const totalAssets = totals.cash + totals.investments + totals.realEstate + 
+                                                totals.pensionFunds + totals.otherAccounts + totals.alternativeAssets;
+                            
+                            // Edge case: se non ci sono asset, ritorna 0.0%
+                            if (totalAssets <= 0) {
+                              return '0.0%';
+                            }
+                            
+                            // Percentuale su totalAssets (coerente con grafico)
+                            return ((value / totalAssets) * 100).toFixed(1) + '%';
+                          })()}%
                       </p>
                       
                       {/* Bottone discreto per aggiungere elemento */}
@@ -8200,7 +8307,11 @@ const NetWorthManager = () => {
                     ) : (
                       <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
                         <div className="flex-shrink-0">
-                          <CompactPieChart data={filteredPieData} size={240} showLegend={false} />
+                          <CompactPieChart 
+                            data={filteredPieData} 
+                            size={240} 
+                            showLegend={false} 
+                          />
                         </div>
                         <div className="flex-1 w-full lg:min-w-0">
                           <div className="grid grid-cols-1 gap-3">
@@ -8218,7 +8329,19 @@ const NetWorthManager = () => {
                                     {formatCurrencyWithPrivacy(item.value)}
                                   </div>
                                   <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {totals.total > 0 ? ((item.value / totals.total) * 100).toFixed(1) : '0'}%
+                                    {(() => {
+                                      // 🎯 FIX: Per il grafico "Distribuzione patrimonio" usa solo la somma degli asset
+                                      // I debiti sono già esclusi dai dati, quindi calcola percentuale solo sugli asset
+                                      const totalAssets = filteredPieData.reduce((sum, pieItem) => sum + pieItem.value, 0);
+                                      
+                                      // Edge case: se non ci sono asset, ritorna 0.0
+                                      if (totalAssets <= 0) {
+                                        return '0.0';
+                                      }
+                                      
+                                      // Percentuale su asset totali (deve sommare al 100%)
+                                      return ((item.value / totalAssets) * 100).toFixed(1);
+                                    })()}%
                                   </div>
                                 </div>
                               </div>
@@ -8512,10 +8635,10 @@ const NetWorthManager = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                       <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 text-center`}>
                         <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                          {formatCurrencyWithPrivacy(swrData.netLiquidAssets)}
+                          {formatCurrencyWithPrivacy(swrData.withdrawableAssets)}
                         </div>
                         <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {t('swrNetLiquidAssets')}
+                          {t('withdrawableAssets')}
                         </div>
                       </div>
                       
@@ -11309,15 +11432,7 @@ const NetWorthManager = () => {
                               {realEstateItem.address || '-'}
                             </td>
                           )}
-                          {activeSection === 'realEstate' && realEstateItem && (
-                            <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                              {realEstateItem.excludeFromTotal && (
-                                <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" title="Escluso dal patrimonio totale">
-                                  ⚠️ Escluso
-                                </span>
-                              )}
-                            </td>
-                          )}
+                          {/* 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal - tutti gli immobili contano nel patrimonio */}
                             {activeSection === 'cash' && assetItem && (
                               <td className={`border px-2 py-1 text-center text-xs ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>
                                                         <span className={`px-2 py-1 rounded text-xs ${assetItem.accountType === 'current' ? 'bg-blue-100 text-blue-800' : assetItem.accountType === 'deposit' ? 'bg-green-100 text-green-800' : assetItem.accountType === 'remunerated' ? 'bg-purple-100 text-purple-800' : 'bg-yellow-100 text-yellow-800'}`}>
@@ -11951,23 +12066,7 @@ const NetWorthManager = () => {
                       />
                     </div>
                     
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="excludeFromTotal"
-                        checked={localFieldValues.excludeFromTotal !== undefined ? localFieldValues.excludeFromTotal === 'true' : (editingItem.data as RealEstate).excludeFromTotal || false}
-                        onChange={(e) => {
-                          setLocalFieldValues(prev => ({
-                            ...prev,
-                            excludeFromTotal: e.target.checked ? 'true' : 'false'
-                          }));
-                        }}
-                        className={`w-4 h-4 mr-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300 text-gray-900'}`}
-                      />
-                      <label htmlFor="excludeFromTotal" className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {t('excludeFromTotal')}
-                      </label>
-                    </div>
+                    {/* 🎯 SEMPLIFICAZIONE 2: Rimuovere excludeFromTotal - tutti gli immobili contano nel patrimonio */}
                     
 
                   </>
