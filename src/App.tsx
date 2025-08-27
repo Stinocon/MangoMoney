@@ -9903,6 +9903,70 @@ const NetWorthManager = () => {
                   </div>
                 </div>
 
+                {/* Sezione Smart Insights Realistici */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">{t('aboutSmartInsights')}</h3>
+                  <p className="text-lg leading-relaxed mb-4">
+                    {t('aboutSmartInsightsDesc')}
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-base font-semibold mb-2">{t('aboutEmergencyFund')}</h4>
+                      <p className="text-base leading-relaxed">
+                        Calcolo diretto dei mesi di spese coperte dalla liquidità designata, con soglie configurabili.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-base font-semibold mb-2">{t('aboutSWR')}</h4>
+                      <p className="text-base leading-relaxed">
+                        Safe Withdrawal Rate basato sul Trinity Study con aggiustamenti per inflazione configurabili.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-base font-semibold mb-2">{t('aboutDebtRatio')}</h4>
+                      <p className="text-base leading-relaxed">
+                        Rapporto debiti/patrimonio con soglie per gestione del rischio finanziario.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-base font-semibold mb-2">{t('aboutTaxOptimization')}</h4>
+                      <p className="text-base leading-relaxed">
+                        Timing per tax harvesting e promemoria per soglie fiscali italiane.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-base font-semibold mb-2">{t('aboutPortfolioSize')}</h4>
+                      <p className="text-base leading-relaxed">
+                        Strategie appropriate in base alle dimensioni del portfolio.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Sezione "Cosa NON calcoliamo" */}
+                  <div className={`p-4 rounded-lg mt-6 ${darkMode ? 'bg-orange-900/20 border border-orange-700' : 'bg-orange-50 border border-orange-200'}`}>
+                    <h4 className={`text-base font-semibold mb-3 ${darkMode ? 'text-orange-300' : 'text-orange-800'}`}>
+                      {t('aboutWhatWeCannotDo')}
+                    </h4>
+                    <p className={`text-base leading-relaxed mb-3 ${darkMode ? 'text-orange-100' : 'text-orange-700'}`}>
+                      {t('aboutWhatWeCannotDoDesc')}
+                    </p>
+                    <ul className={`list-disc list-inside space-y-1 text-base ${darkMode ? 'text-orange-100' : 'text-orange-700'}`}>
+                      <li>{t('aboutNoRiskScore')}</li>
+                      <li>{t('aboutNoDiversification')}</li>
+                      <li>{t('aboutNoAssetAdvice')}</li>
+                      <li>{t('aboutNoPerformance')}</li>
+                    </ul>
+                    <p className={`text-sm mt-3 italic ${darkMode ? 'text-orange-100' : 'text-orange-700'}`}>
+                      {t('aboutPrivacyFirstDesc')}
+                    </p>
+                  </div>
+                </div>
+
                 <div>
                   <h3 className="text-xl font-semibold mb-4">Rendimento Lordo vs Netto</h3>
                   <div className="space-y-4">

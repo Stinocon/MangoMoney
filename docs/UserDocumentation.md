@@ -129,268 +129,141 @@ Risk Score semplificato, adatto al 95% degli utenti. Per analisi avanzate di por
 
 ---
 
-### 🤖 **4. Smart Insights - Guida Completa**
+### 🤖 **4. Smart Insights Realistici - Guida Completa**
 
-Gli Smart Insights sono suggerimenti automatici basati sui tuoi dati che ti aiutano a identificare opportunità di miglioramento del tuo portafoglio. Ogni insight è calcolato usando metriche specifiche e soglie precise.
+#### **🎯 Filosofia: Solo Insights Verificabili**
 
-#### **🎯 Come Funzionano gli Smart Insights**
+MangoMoney calcola **esclusivamente** insights basati su dati disponibili e accurati. Non forniamo analisi fake o imprecise per "sembrare più smart".
 
-**Frequenza di aggiornamento:** Gli insights si aggiornano automaticamente ogni volta che modifichi i tuoi dati.
+#### **✅ Insights Implementati**
 
-**Priorità:** Gli insights sono ordinati per priorità (da 1 a 10, dove 10 è la massima urgenza).
+##### **🛡️ Fondo di Emergenza**
+**Cosa controlla:** Mesi di spese mensili coperti da liquidità designata
 
-**Configurazione:** Puoi abilitare/disabilitare ogni categoria di insight dalle impostazioni.
+**Soglie configurabili:**
+- **Insufficiente:** < mesi adeguati (default: 3)
+- **Adeguato:** tra mesi adeguati e ottimali (default: 3-6)  
+- **Ottimale:** ≥ mesi ottimali (default: 6)
+- **Sovradimensionato:** > 2× mesi ottimali (default: >12)
 
----
+**Formula:** `Valore Fondo Designato ÷ Spese Mensili`
 
-#### **🆘 Emergency Fund Insights**
+**Esempio:**
+- Fondo designato: €15,000
+- Spese mensili: €2,500  
+- Risultato: 6 mesi = "Ottimale"
 
-**Cosa controlla:** La sufficienza del tuo fondo di emergenza rispetto all'obiettivo di 6 mesi di spese.
+##### **💰 Safe Withdrawal Rate (SWR)**
+**Cosa controlla:** Sostenibilità prelievi per indipendenza finanziaria
 
-**Soglie numeriche:**
-- 🔴 **Critico:** < 50% dell'obiettivo (< 3 mesi) - Aumenta liquidità immediatamente
-- 🔵 **Info:** > 250% dell'obiettivo (> 15 mesi) - Considera investimenti più redditizi
+**Formula base:** `(Patrimonio Liquido × SWR%) ÷ 12`
+**Aggiustamenti:**
+- Inflazione > 2%: -30% dell'eccesso
+- Range finale: 2.5% - 6.0%
 
-**Formula di calcolo:**
-```
-emergencyRatio = emergencyFundMonths / 6
-```
+**Soglie:**
+- **Insufficiente:** < 80% copertura spese mensili
+- **Quasi raggiunto:** 80-100% copertura
+- **Indipendenza:** > 100% copertura
 
-**Esempio pratico 1:**
-- Situazione: €3000 spese mensili, €9000 liquidità
-- Calcolo: 9000 ÷ 3000 = 3 mesi → 3 ÷ 6 = 0.5 (50%)
-- Risultato: 🔴 **Critico** - "Fondo emergenza critico: 50% dell'obiettivo minimo"
-- Interpretazione: Hai solo 3 mesi di spese coperte, sotto il minimo consigliato
+**Esempio:**
+- Patrimonio liquido: €800,000
+- SWR: 4% (€32,000/anno = €2,667/mese)
+- Spese: €2,200/mese
+- Risultato: 121% = "Indipendenza raggiunta"
 
-**Esempio pratico 2:**
-- Situazione: €2000 spese mensili, €40000 liquidità  
-- Calcolo: 40000 ÷ 2000 = 20 mesi → 20 ÷ 6 = 3.33 (333%)
-- Risultato: 🔵 **Info** - "Fondo emergenza sovradimensionato: 20.0 mesi di spese"
-- Interpretazione: Hai troppa liquidità, potresti investire parte dei fondi
+##### **⚖️ Gestione Debiti** 
+**Cosa controlla:** Rapporto debiti totali su patrimonio totale
 
-**Azioni consigliate:**
-- Se critico: Aumenta liquidità fino ad almeno 6 mesi di spese
-- Se sovradimensionato: Considera di investire l'eccesso in asset più redditizi
+**Formula:** `Debiti Totali ÷ Patrimonio Totale × 100`
 
-**Limitazioni:**
-- Non considera la stabilità del tuo reddito
-- Non valuta la liquidità degli altri asset
-- Assume spese mensili costanti
+**Soglie:**
+- **Moderato:** < 30%
+- **Elevato:** 30-50%  
+- **Eccessivo:** > 50%
+- **Critico:** > 70%
 
----
+##### **📊 Maturità Portfolio**
+**Cosa controlla:** Appropriatezza strategie in base alle dimensioni
 
-#### **⚠️ Risk Score Insights**
+**Soglie:**
+- **Fase iniziale:** < €10,000 - Focus su risparmio costante
+- **Crescita:** €10,000-100,000 - SWR prematuro  
+- **Maturo:** > €100,000 - Strategie avanzate appropriate
+- **High Net Worth:** > €1,000,000 - Consulenza professionale raccomandata
 
-**Cosa controlla:** Il livello di rischio del tuo portafoglio su una scala da 0 a 10.
+##### **🧾 Ottimizzazione Fiscale**
+**Cosa controlla:** Opportunità timing fiscale e soglie normative
 
-**Soglie numeriche:**
-- 🔵 **Info:** < 2.5 - Portfolio molto conservativo
-- 🟢 **Success:** 4.0-6.0 - Portfolio ben bilanciato
-- 🟡 **Warning:** > 7.5 - Portfolio ad alto rischio
+**Controlli:**
+- Tax harvesting in dicembre se plusvalenze > €0
+- Bollo titoli se liquidità > €5,000
+- Timing vendite strategiche
 
-**Pesi di rischio per categoria:**
-- Contanti: 1 (molto sicuro)
-- Fondi pensione: 3 (moderato, regolamentato)
-- Immobili: 4 (medio, stabile ma illiquido)
-- Investimenti: 7 (alto, volatile)
-- Beni alternativi: 9 (molto alto, speculativo)
+#### **❌ Insights NON Implementati (e Perché)**
 
-**Esempio pratico 1:**
-- Situazione: 80% azioni, 20% contanti
-- Calcolo: (80% × 7) + (20% × 1) = 5.6 + 0.2 = 5.8
-- Risultato: 🟢 **Success** - "Portfolio ben bilanciato - rischio moderato e diversificato"
-- Interpretazione: Rischio moderato, adatto per obiettivi di medio termine
+##### **Risk Score Dettagliato**  
+**Motivo:** Richiede composizione specifica investimenti (ETF equity vs bond vs crypto)
+**Impossibile perché:** App vede solo macro-categoria "Investimenti"
+**Alternative:** Consulenza professionale con analisi portfolio dettagliata
 
-**Esempio pratico 2:**
-- Situazione: 60% crypto, 30% azioni, 10% contanti
-- Calcolo: (60% × 9) + (30% × 7) + (10% × 1) = 5.4 + 2.1 + 0.1 = 7.6
-- Risultato: 🟡 **Warning** - "Portfolio ad alto rischio - elevata concentrazione in asset volatili"
-- Interpretazione: Rischio elevato, adatto solo per investitori esperti
+##### **Diversificazione Precisa**
+**Motivo:** Serve asset class specifiche, settori, geografie  
+**Impossibile perché:** HHI su macro-categorie è misleading
+**Alternative:** Analisi contenuto specifico investimenti
 
-**Azioni consigliate:**
-- Se conservativo: Considera di includere asset con rendimenti più elevati
-- Se bilanciato: Mantieni l'equilibrio attuale
-- Se ad alto rischio: Considera di bilanciare con asset più stabili
+##### **Asset Allocation Advice**
+**Motivo:** "Aumenta esposizione azionaria" senza sapere composizione attuale
+**Impossibile perché:** Consigli specifici richiedono dati specifici  
+**Alternative:** Consulente finanziario qualificato
 
-**Limitazioni:**
-- Non considera correlazioni tra asset
-- Pesi fissi per categoria (non dinamici)
-- Non valuta la tua tolleranza al rischio personale
+#### **⚙️ Personalizzazione**
+Tutti gli insights utilizzano **parametri configurabili** nelle Impostazioni:
+- Soglie emergency fund (adeguato/ottimale mesi)
+- Tasso SWR base e inflazione
+- Abilitazione/disabilitazione categorie insights
 
----
+#### **🔬 Limitazioni e Disclaimer**
+- Insights basati su **dati inseriti manualmente** 
+- **Non sostituiscono consulenza finanziaria** professionale
+- Accurati per **macro-allocazione**, limitati per analisi dettagliate
+- Per decisioni importanti consultare **esperti qualificati**
 
-#### **💰 Tax Optimization Insights**
 
-**Cosa controlla:** Opportunità di ottimizzazione fiscale e adempimenti fiscali.
-
-**Soglie numeriche:**
-- 🔵 **Info:** Dicembre + plusvalenze non realizzate > €0
-- 🔵 **Info:** Conti deposito > €5000 per bollo titoli
-
-**Esempio pratico 1:**
-- Situazione: Dicembre, €10000 in ETF con plusvalenza di €2000
-- Risultato: 🔵 **Info** - "Plusvalenze non realizzate: €2.000"
-- Interpretazione: Potresti considerare tax-loss harvesting prima di fine anno
-
-**Esempio pratico 2:**
-- Situazione: €8000 in conto deposito
-- Risultato: 🔵 **Info** - "Conti deposito > €5K: ricorda bollo titoli 0.2%"
-- Interpretazione: Devi pagare €16 di bollo titoli (8000 × 0.2%)
-
-**Azioni consigliate:**
-- Per plusvalenze: Valuta harvesting fiscale prima di fine anno
-- Per bollo titoli: Verifica adempimenti fiscali con il tuo commercialista
-
-**Limitazioni:**
-- Non considera la tua situazione fiscale specifica
-- Non valuta l'impatto di altre detrazioni/deduzioni
-- Non sostituisce consulenza fiscale professionale
 
 ---
 
-#### **📈 Performance Insights**
-
-**Cosa controlla:** Variazioni significative nella performance del portafoglio rispetto al periodo precedente.
-
-**Soglie numeriche:**
-- 🟢 **Success:** Miglioramento > +5%
-- 🟡 **Warning:** Peggioramento > -5%
-
-**Formula di calcolo:**
-```
-change = current.performance - previous.performance
-```
-
-**Esempio pratico 1:**
-- Situazione: Performance passata 8%, performance attuale 12%
-- Calcolo: 12% - 8% = +4%
-- Risultato: Nessun insight (cambiamento < 5%)
-
-**Esempio pratico 2:**
-- Situazione: Performance passata 5%, performance attuale 12%
-- Calcolo: 12% - 5% = +7%
-- Risultato: 🟢 **Success** - "Performance migliorata del 7.0%"
-- Interpretazione: Trend positivo significativo
-
-**Azioni consigliate:**
-- Se miglioramento: Monitora per mantenere trend positivo
-- Se peggioramento: Analizza cause del calo
-
-**Limitazioni:**
-- Richiede dati di performance precedenti
-- Non considera la volatilità del mercato
-- Non valuta la qualità della performance
-
 ---
 
-#### **🌐 Diversification Insights**
+#### **❓ FAQ Smart Insights Realistici**
 
-**Cosa controlla:** Il livello di diversificazione del tuo portafoglio.
-
-**Soglie numeriche:**
-- 🟡 **Warning:** < 50% - Diversificazione limitata
-- 🟢 **Success:** > 80% - Eccellente diversificazione
-
-**Esempio pratico 1:**
-- Situazione: 90% in singolo titolo, 10% in altri asset
-- Risultato: 🟡 **Warning** - "Diversificazione limitata: concentrazione eccessiva"
-- Interpretazione: Troppo concentrato in un singolo asset
-
-**Esempio pratico 2:**
-- Situazione: Portfolio ben distribuito tra diverse categorie
-- Risultato: 🟢 **Success** - "Eccellente diversificazione del portafoglio"
-- Interpretazione: Buona distribuzione del rischio
-
-**Azioni consigliate:**
-- Se limitata: Diversifica in più settori e asset class
-- Se eccellente: Mantieni la strategia di diversificazione
-
-**Limitazioni:**
-- Non considera correlazioni tra asset
-- Basato su allocazione percentuale
-- Non valuta la qualità della diversificazione
-
----
-
-#### **💳 Debt-to-Asset Ratio Insights**
-
-**Cosa controlla:** Il rapporto tra i tuoi debiti e il tuo patrimonio totale.
-
-**Soglie numeriche:**
-- 🔴 **Critical:** > 50% - Rapporto debiti/patrimonio elevato
-
-**Formula di calcolo:**
-```
-debtToAssetRatio = (totaleDebiti / totaleAsset) * 100
-```
-
-**Esempio pratico:**
-- Situazione: €200000 debiti, €300000 asset totali
-- Calcolo: (200000 ÷ 300000) × 100 = 66.7%
-- Risultato: 🔴 **Critical** - "Rapporto debiti/patrimonio elevato (>50%)"
-- Interpretazione: I debiti rappresentano più della metà del patrimonio
-
-**Azioni consigliate:**
-- Riduci debiti o aumenta patrimonio
-- Considera consolidamento debiti
-- Valuta strategie di riduzione del debito
-
-**Limitazioni:**
-- Non considera la qualità dei debiti
-- Non valuta la capacità di servizio del debito
-- Non considera il tipo di debito (buono vs cattivo)
-
----
-
-#### **🔧 Configurazione Insights**
-
-**Come abilitare/disabilitare:**
-Gli insights sono configurati automaticamente, ma puoi personalizzare le soglie modificando le impostazioni dell'app.
-
-**Categorie disponibili:**
-- Emergency: Fondo di emergenza
-- Risk: Risk score e debito
-- Tax: Ottimizzazione fiscale
-- Performance: Trend di performance
-- Allocation: Diversificazione
-
-**Integrazione con impostazioni:**
-Gli insights si adattano automaticamente alle tue impostazioni personali (spese mensili, obiettivi, ecc.).
-
----
-
-#### **❓ FAQ Smart Insights**
-
-**Q: Perché non vedo alcuni insights?**
-A: Gli insights appaiono solo quando le condizioni sono soddisfatte. Se non vedi un insight, significa che la tua situazione è nella norma.
-
-**Q: Come migliorare il risk score?**
-A: Riduci la percentuale di asset ad alto rischio (investimenti, beni alternativi) e aumenta asset più stabili (contanti, fondi pensione).
-
-**Q: Cosa significa diversificazione limitata?**
-A: Significa che hai troppa concentrazione in pochi asset o categorie. Considera di distribuire meglio i tuoi investimenti.
+**Q: Perché non calcolate un risk score dettagliato?**
+A: Per calcolare un risk score accurato servirebbero dati specifici sulla composizione dei tuoi investimenti (ETF equity vs bond vs crypto). L'app vede solo macro-categorie, quindi preferiamo non fornire analisi imprecise.
 
 **Q: Gli insights sono consigli di investimento?**
 A: **NO.** Gli insights sono suggerimenti basati sui tuoi dati, ma non sostituiscono la consulenza professionale. Le decisioni di investimento sono sempre tue.
+
+**Q: Perché non ci sono consigli di asset allocation?**
+A: Per dare consigli specifici servirebbero dati dettagliati sulla composizione attuale del tuo portfolio. Preferiamo rimandare a consulenti finanziari qualificati per analisi approfondite.
 
 **Q: Quanto spesso si aggiornano gli insights?**
 A: Gli insights si aggiornano automaticamente ogni volta che modifichi i tuoi dati nel portafoglio.
 
 ---
 
-#### **⚠️ Disclaimer Insights**
+#### **⚠️ Disclaimer Insights Realistici**
 
-**Basati su metriche semplificate:**
-Gli insights utilizzano calcoli semplificati adatti per il 95% degli utenti. Per analisi più sofisticate, consulta un professionista.
+**Solo insights verificabili:**
+MangoMoney calcola esclusivamente insights basati su dati disponibili e accurati. Non forniamo analisi fake o imprecise.
 
 **Non sostituiscono consulenza professionale:**
 Gli insights sono strumenti informativi, non raccomandazioni di investimento. Consulta sempre un consulente finanziario per decisioni importanti.
 
-**Calibrati su situazione italiana standard:**
-Le soglie e i calcoli sono ottimizzati per la situazione fiscale e finanziaria italiana media.
+**Privacy prima di tutto:**
+Preferiamo dire "non lo sappiamo" piuttosto che fornire analisi imprecise con i tuoi dati.
 
-**Potrebbero non essere appropriati per situazioni specifiche:**
-Se hai una situazione finanziaria complessa o specifica, considera la consulenza professionale.
+**Per analisi avanzate:**
+Per analisi portfolio dettagliate, risk score specifici e consigli di asset allocation, consulta un consulente finanziario qualificato.
 
 ---
 

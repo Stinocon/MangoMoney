@@ -387,6 +387,70 @@ export const it = {
   // Smart Insights Configuration
   smartInsightsTitle: 'Smart Insights Realistici',
   smartInsightsDescription: 'Analisi basate sui dati disponibili nell\'app',
+  insightLimitations: 'Limitazioni degli insights',
+  insightLimitationsDesc: 'Gli insights si basano solo sui dati inseriti. Per analisi dettagliate consulta un consulente finanziario.',
+  
+  // Insight Categories
+  emergencyFundInsight: 'Fondo di emergenza',
+  swrInsight: 'Sostenibilità prelievi',
+  debtInsight: 'Gestione debiti',
+  sizeInsight: 'Maturità portfolio',
+  taxInsight: 'Ottimizzazione fiscale',
+  allocationInsight: 'Allocazione macro',
+  
+  // Emergency Fund Messages
+  emergencyInsufficient: 'Fondo emergenza insufficiente',
+  emergencyAdequate: 'Fondo emergenza adeguato',
+  emergencyOptimal: 'Fondo emergenza ottimale',
+  emergencyOverdimensioned: 'Fondo emergenza sovradimensionato',
+  
+  // SWR Messages
+  swrInsufficient: 'SWR insufficiente per indipendenza',
+  swrAlmostThere: 'SWR quasi raggiunto',
+  swrAchieved: 'Indipendenza finanziaria raggiunta',
+  swrInflationWarning: 'Inflazione riduce SWR',
+  
+  // Debt Messages
+  debtExcessive: 'Debiti eccessivi',
+  debtElevated: 'Debiti elevati',
+  debtModerate: 'Debiti moderati',
+  
+  // Size Messages
+  portfolioEarly: 'Portfolio fase iniziale',
+  portfolioGrowing: 'Portfolio in crescita',
+  portfolioMature: 'Portfolio maturo',
+  
+  // Tax Messages
+  taxHarvestingOpportunity: 'Opportunità tax harvesting',
+  stampDutyReminder: 'Promemoria bollo titoli',
+  
+  // Allocation Warnings
+  excessiveInvestmentConcentration: 'Concentrazione eccessiva investimenti',
+  excessiveLiquidityConcentration: 'Portfolio troppo liquido',
+  
+  // Removed Insights Notice
+  removedInsightsNotice: 'Alcuni insights precedenti sono stati rimossi perché richiedevano dati non disponibili nell\'app',
+  removedInsightsList: 'Risk score dettagliato, diversificazione specifica, consigli asset allocation richiedono analisi professionale',
+  consultAdviser: 'Per analisi portfolio avanzate consulta un consulente finanziario qualificato',
+  
+  // About section - Smart Insights realistici
+  aboutSmartInsights: 'Smart Insights Realistici',
+  aboutSmartInsightsDesc: 'MangoMoney calcola solo insights verificabili con i dati disponibili:',
+  aboutEmergencyFund: 'Fondo emergenza: mesi di copertura spese',
+  aboutSWR: 'Safe Withdrawal Rate: sostenibilità prelievi mensili',
+  aboutDebtRatio: 'Gestione debiti: rapporto debiti/patrimonio',
+  aboutTaxOptimization: 'Ottimizzazione fiscale: timing e soglie',
+  aboutPortfolioSize: 'Maturità portfolio: dimensioni e strategie appropriate',
+  
+  aboutWhatWeCannotDo: 'Cosa NON calcoliamo',
+  aboutWhatWeCannotDoDesc: 'Per mantenere privacy e accuratezza, non calcoliamo:',
+  aboutNoRiskScore: 'Risk score dettagliato (serve composizione specifica investimenti)',
+  aboutNoDiversification: 'Diversificazione precisa (serve asset class specifiche)',
+  aboutNoAssetAdvice: 'Consigli asset allocation (serve analisi professionale)',
+  aboutNoPerformance: 'Performance vs mercato (serve dati in tempo reale)',
+  
+  aboutPrivacyFirst: 'Privacy prima di tutto',
+  aboutPrivacyFirstDesc: 'Preferiamo dire "non sappiamo" piuttosto che fornire analisi imprecise con i tuoi dati.',
   insightsConfiguration: 'Configurazione Insights',
   enableEmergencyInsights: 'Abilita insights fondo emergenza',
   enableSwrInsights: 'Safe Withdrawal Rate (SWR)',

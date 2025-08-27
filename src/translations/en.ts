@@ -394,6 +394,70 @@ export const en = {
   // Smart Insights Configuration
   smartInsightsTitle: 'Realistic Smart Insights',
   smartInsightsDescription: 'Analysis based on available app data',
+  insightLimitations: 'Insight limitations',
+  insightLimitationsDesc: 'Insights are based only on entered data. For detailed analysis consult a financial advisor.',
+  
+  // Insight Categories
+  emergencyFundInsight: 'Emergency fund',
+  swrInsight: 'Withdrawal sustainability',
+  debtInsight: 'Debt management',
+  sizeInsight: 'Portfolio maturity',
+  taxInsight: 'Tax optimization',
+  allocationInsight: 'Macro allocation',
+  
+  // Emergency Fund Messages
+  emergencyInsufficient: 'Insufficient emergency fund',
+  emergencyAdequate: 'Adequate emergency fund',
+  emergencyOptimal: 'Optimal emergency fund',
+  emergencyOverdimensioned: 'Overdimensioned emergency fund',
+  
+  // SWR Messages
+  swrInsufficient: 'Insufficient SWR for independence',
+  swrAlmostThere: 'SWR almost reached',
+  swrAchieved: 'Financial independence achieved',
+  swrInflationWarning: 'Inflation reduces SWR',
+  
+  // Debt Messages
+  debtExcessive: 'Excessive debts',
+  debtElevated: 'Elevated debts',
+  debtModerate: 'Moderate debts',
+  
+  // Size Messages
+  portfolioEarly: 'Early stage portfolio',
+  portfolioGrowing: 'Growing portfolio',
+  portfolioMature: 'Mature portfolio',
+  
+  // Tax Messages
+  taxHarvestingOpportunity: 'Tax harvesting opportunity',
+  stampDutyReminder: 'Stamp duty reminder',
+  
+  // Allocation Warnings
+  excessiveInvestmentConcentration: 'Excessive investment concentration',
+  excessiveLiquidityConcentration: 'Excessively liquid portfolio',
+  
+  // Removed Insights Notice
+  removedInsightsNotice: 'Some previous insights have been removed because they required data not available in the app',
+  removedInsightsList: 'Detailed risk score, specific diversification, asset allocation advice require professional analysis',
+  consultAdviser: 'For advanced portfolio analysis consult a qualified financial advisor',
+  
+  // About section - Smart Insights realistici
+  aboutSmartInsights: 'Realistic Smart Insights',
+  aboutSmartInsightsDesc: 'MangoMoney calculates only verifiable insights with available data:',
+  aboutEmergencyFund: 'Emergency fund: months of expense coverage',
+  aboutSWR: 'Safe Withdrawal Rate: monthly withdrawal sustainability',
+  aboutDebtRatio: 'Debt management: debt-to-asset ratio',
+  aboutTaxOptimization: 'Tax optimization: timing and thresholds',
+  aboutPortfolioSize: 'Portfolio maturity: appropriate strategies for size',
+  
+  aboutWhatWeCannotDo: 'What we DON\'T calculate',
+  aboutWhatWeCannotDoDesc: 'To maintain privacy and accuracy, we don\'t calculate:',
+  aboutNoRiskScore: 'Detailed risk score (requires specific investment composition)',
+  aboutNoDiversification: 'Precise diversification (requires specific asset classes)',
+  aboutNoAssetAdvice: 'Asset allocation advice (requires professional analysis)',
+  aboutNoPerformance: 'Market performance (requires real-time data)',
+  
+  aboutPrivacyFirst: 'Privacy first',
+  aboutPrivacyFirstDesc: 'We prefer to say "we don\'t know" rather than provide inaccurate analysis with your data.',
   insightsConfiguration: 'Insights Configuration',
   enableEmergencyInsights: 'Enable emergency fund insights',
   enableSwrInsights: 'Safe Withdrawal Rate (SWR)',
