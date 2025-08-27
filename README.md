@@ -34,11 +34,11 @@ Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma m
 
 ---
 
-> ## 🛠️ **Disclaimer Sviluppo**
+> ## 🛠️ **Note sullo Sviluppo**
 > 
-> Giusto per essere trasparenti: io non sono uno sviluppatore di professione e non ho particolare interesse a diventarlo. Questo progetto è nato dal bisogno personale di avere uno strumento decente per tracciare il patrimonio, e ho fatto largo, larghissimo uso dell'intelligenza artificiale per svilupparlo. Alcuni potrebbero chiamarlo "vibe coding" - io lo chiamo pragmatismo.
+> Questo progetto è stato sviluppato con un approccio pragmatico, facendo ampio uso di strumenti AI per accelerare lo sviluppo. Il risultato è un'applicazione funzionale che fa quello che promette, anche se il codice potrebbe non seguire sempre le convenzioni accademiche.
 >
-> Il risultato è un'app funzionante (credo) che fa quello che deve fare, ma probabilmente troverete codice scritto in modo poco ortodosso, soluzioni creative (eufemismo per "accrocchi") e magari qualche bug qua e là. Il bello dell'open source è che se trovate problemi potete segnalarmeli e, ancora meglio, fixarli voi stessi. Win-win per tutti! 🚀
+> Se trovi problemi o hai suggerimenti, sentiti libero di aprire una issue su GitHub. Il bello dell'open source è la collaborazione! 🚀
 
 ---
 
@@ -46,16 +46,16 @@ Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma m
 
 Inserisci tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento.
 
-L'app calcola automaticamente:
+L'app calcola basandosi sui dati inseriti manualmente:
 - **Patrimonio Netto** con breakdown per tipologia
 - **Profilo Rischio** semplificato basato su % investimenti  
 - **Safe Withdrawal Rate** per pianificare la pensione
 - **Emergency Fund** per coprire le spese impreviste
 - **Tasse** su plusvalenze (configurabile per Italia)
 
-Tutte le funzionalità sono pensate per essere semplici ma complete. L'app ti dirà se i conti tornano.
+Tutte le funzionalità sono pensate per essere semplici ma complete. Strumenti per verificare la coerenza dei dati.
 
-Per le impostazioni, c'è una configurazione rapida per l'Italia che imposta automaticamente le aliquote fiscali più comuni.
+Per le impostazioni, c'è una configurazione preimpostata con aliquote italiane standard.
 
 ---
 
@@ -94,7 +94,7 @@ Per le impostazioni, c'è una configurazione rapida per l'Italia che imposta aut
 - **Regime amministrato vs dichiarativo**
 - **Bollo titoli** su depositi superiori a €5K
 - **Breakdown fiscale** per anno e tipologia asset
-- **Simulazioni vendite** con calcolo tasse in tempo reale
+- **Simulazioni vendite** con calcolo tasse basato sui dati inseriti
 
 ### **🔒 Privacy e Sicurezza**
 - **100% offline**: Dati solo nel browser (localStorage)
@@ -138,7 +138,7 @@ npm start
 - **Bundle size**: 406 kB (ottimizzato con tree shaking)
 
 ### **Architecture Highlights**
-- **Modern Portfolio Theory** per calcoli rischio
+- **Risk Score semplificato** basato su categorie asset
 - **Trinity Study** per calcoli SWR
 - **Cost basis methods**: FIFO, LIFO, Average Cost
 - **Accessibility-first**: Focus trap, keyboard navigation, ARIA labels
@@ -157,30 +157,30 @@ npm run type-check      # TypeScript validation
 ### **Quick Start (5 minuti)**
 1. **Apri** [stinocon.github.io/MangoMoney](https://stinocon.github.io/MangoMoney/)
 2. **Scegli la tua lingua** (🇮🇹 Italiano / 🇬🇧 English) 
-3. **Configura le impostazioni** - Per Italia c'è un setup automatico
+3. **Configura le impostazioni** - Per Italia c'è una configurazione preimpostata
 4. **Aggiungi il tuo primo asset** - Inizia dalla liquidità
-5. **Guarda le statistiche** aggiornarsi in tempo reale
+5. **Guarda le statistiche** basate sui dati inseriti
 
 ### **Configurazione Avanzata**
 - **Import da CSV**: Scarica i template dall'app per il formato corretto
 - **Collegamento posizioni**: Collega posizioni globali ↔ individuali ↔ transazioni  
-- **Fondo emergenza**: Configura spese mensili per calcoli automatici
+- **Fondo emergenza**: Configura spese mensili per calcoli del fondo
 - **Tasse personalizzate**: Imposta le tue aliquote fiscali
 
 ## 🎯 Funzionalità Avanzate
 
 ### **Smart Insights** 
-L'app genera automaticamente insights intelligenti:
-- **Performance alerts**: "Portfolio +15% vs periodo precedente"
-- **Risk warnings**: "Rischio troppo alto, diversifica"  
-- **Emergency fund alerts**: "Fondo emergenza sotto 3 mesi"
-- **Tax optimization**: "Plusvalenze €5K, tasse stimate €1.3K"
+L'app include insights di base su portfolio e allocazione:
+- **Profilo rischio**: Valutazione semplificata basata su categorie asset
+- **Asset allocation**: Suggerimenti di bilanciamento conservativo/aggressivo  
+- **Emergency fund**: Valutazione adeguatezza del fondo emergenza
+- **Risk management**: Alert su concentrazione eccessiva in asset volatili
 
-### **Riconciliazione Automatica**
-- **Verifica discrepanze** tra posizioni e transazioni
-- **Tolleranza configurabile** (default 5%)
-- **Highlighting problemi** con suggerimenti correzione
-- **Calcolo cost basis** multipli (FIFO, LIFO, Average)
+### **Riconciliazione dei Dati**
+- **Strumenti per verificare** corrispondenza tra posizioni e transazioni
+- **Rilevamento discrepanze** con soglie configurabili
+- **Calcolo cost basis** multipli (FIFO, LIFO, Average Cost)
+- **Supporto manuale** per correzione inconsistenze
 
 ### **Analisi Fiscali Avanzate** 
 Per utenti italiani:
@@ -204,8 +204,22 @@ Per utenti italiani:
 
 ## ⚖️ Disclaimer & Licenza
 
-### **⚠️ IMPORTANTE** 
-MangoMoney è uno strumento di **monitoraggio**, non fornisce consigli di investimento. I calcoli sono indicativi e basati su dati storici. Per decisioni importanti consulta sempre un **consulente finanziario qualificato**.
+### **⚠️ IMPORTANTE - COSA FA E NON FA**
+
+✅ **COSA FA L'APP**:
+- Organizza e calcola il tuo patrimonio
+- Applica formule finanziarie standard (CAGR, SWR)  
+- Calcola tasse indicative (sistema italiano)
+- Fornisce metriche di rischio semplificate
+
+❌ **COSA NON FA**:
+- Non fornisce consigli di investimento
+- Non aggiorna prezzi automaticamente
+- Non garantisce accuratezza dei calcoli
+- Non sostituisce consulenza professionale
+- Non ha accesso a dati di mercato in tempo reale
+
+**DISCLAIMER**: MangoMoney è uno strumento di **monitoraggio**, non fornisce consigli di investimento. I calcoli sono indicativi e basati su dati storici. Per decisioni importanti consulta sempre un **consulente finanziario qualificato**.
 
 ### **📄 Licenza**
 Rilasciato sotto **Creative Commons BY-NC-SA 4.0**. 

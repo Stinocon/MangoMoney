@@ -393,7 +393,7 @@ export const en = {
   
   // Smart Insights Configuration
   smartInsightsTitle: 'Smart Insights',
-  smartInsightsDescription: 'Personalized suggestions based on your portfolio',
+  smartInsightsDescription: 'Basic suggestions on portfolio and allocation',
   insightsConfiguration: 'Insights Configuration',
   enableEmergencyInsights: 'Enable emergency fund insights',
   enableTaxInsights: 'Enable tax insights',
@@ -743,7 +743,7 @@ export const en = {
   // Theoretical sources
   theoreticalSources: 'Theoretical Sources',
   theoreticalSourcesDesc: 'The app is based on principles and methodologies recognized by the financial community:',
-  markowitz: 'Harry Markowitz - Modern Portfolio Theory (1952)',
+  markowitz: 'Harry Markowitz - portfolio diversification principles (1952)',
   // sharpe: 'William Sharpe - Capital Asset Pricing Model and Sharpe Ratio', // ✅ ELIMINATO: funzione zombie
   graham: 'Benjamin Graham - Security Analysis and Value Investing',
   bogle: 'John Bogle - Diversification principles and low costs',

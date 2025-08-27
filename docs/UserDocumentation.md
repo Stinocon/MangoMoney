@@ -98,7 +98,7 @@ Portafoglio bilanciato (40% investimenti, 40% immobili, 20% contanti):
 
 **Perché semplificato:**
 - 95% degli utenti necessitano di una valutazione semplice e comprensibile
-- Calcoli MPT complessi possono essere confusi e soggetti a errori
+- Calcoli complessi possono essere confusi e soggetti a errori
 - Questo approccio fornisce accuratezza sufficiente per la finanza personale
 - Facile da spiegare e giustificare agli utenti
 
@@ -108,22 +108,24 @@ Portafoglio bilanciato (40% investimenti, 40% immobili, 20% contanti):
 - Pianificare asset allocation
 - Monitorare cambiamenti nel rischio
 
-**Vantaggi del nuovo sistema:**
-- ✅ **Scientificamente accurato**: Basato su Modern Portfolio Theory
-- ✅ **Volatilità storica**: Usa dati reali Vanguard/Morningstar (2000-2023)
-- ✅ **Correlazioni dinamiche**: Considera relazioni tra asset class
-- ✅ **Scala lineare**: Basata su volatilità portfolio (0-30%+)
-- ✅ **Separazione concetti**: Risk Score separato da Efficiency Score
+**Vantaggi del sistema semplificato:**
+- ✅ **Facile comprensione**: Basato su categorie intuitive
+- ✅ **Adatto al 95% degli utenti**: Precisione sufficiente per finanza personale
+- ✅ **Trasparente**: Algoritmo semplice e verificabile
+- ✅ **Pratico**: Non richiede dati di mercato esterni
 
 **Limitazioni:**
-- Usa correlazioni e volatilità storiche (potrebbero cambiare)
-- Assume distribuzione normale dei rendimenti
-- Non considera eventi estremi (tail risk)
-- Basato su dati di mercato globali
+- Semplificazione di realtà complesse
+- Non considera correlazioni tra asset
+- Basato su categorizzazioni generali
+- Per analisi avanzate consultare un consulente
+
+**Disclaimer:** 
+Risk Score semplificato, adatto al 95% degli utenti. Per analisi avanzate di portafoglio consultare un consulente finanziario qualificato.
 
 **Fonti:**
-- Markowitz, H.M. (1952): "Portfolio Selection"
-- Vanguard Research: "Global Capital Markets Assumptions" (2023)
+- Principi base di asset allocation
+- Standards di categorizzazione finanziaria
 
 ---
 
@@ -364,32 +366,32 @@ Sharpe Ratio = (Return - Risk Free Rate) / Volatility
 
 ---
 
-### 🎯 **11. Cosa NON fa MangoMoney (e perché)**
+### 🎯 **11. Limitazioni e cosa NON fa l'app**
 
-**Prezzi real-time:**
-- **Cosa:** Niente API esterne per prezzi in tempo reale
-- **Perché:** Privacy totale - tutti i dati rimangono sul tuo dispositivo
-- **Alternativa:** Inserimento manuale prezzi quando necessario
+**❌ NON aggiorna prezzi automaticamente:**
+- **Perché:** Privacy totale - nessuna connessione a API esterne
+- **Implicazioni:** Prezzi devono essere aggiornati manualmente
+- **Alternativa:** Inserimento periodico dei prezzi quando necessario
 
-**Modern Portfolio Theory completa:**
-- **Cosa:** Calcoli semplificati invece di correlazioni complesse
-- **Perché:** 95% degli utenti necessitano di semplicità, non precisione accademica
-- **Alternativa:** Metodo ponderato per categoria, facile da capire
+**❌ NON ha dati storici di mercato:**
+- **Perché:** Tutto rimane nel tuo browser, nessun database
+- **Implicazioni:** Non può calcolare performance passate automaticamente
+- **Alternativa:** Inserimento manuale delle performance per calcoli storici
 
-**Predizioni future:**
-- **Cosa:** Usa solo dati storici, non previsioni
-- **Perché:** Indicativo, non predittivo - più onesto
-- **Alternativa:** Analisi basata su performance passate
+**❌ NON usa analisi portfolio avanzate:**
+- **Perché:** Sistema semplificato per accessibilità
+- **Implicazioni:** Risk Score basato su categorie, non correlazioni
+- **Alternativa:** Per analisi portfolio avanzate consultare un consulente
 
-**Consigli investimento:**
-- **Cosa:** Strumento di monitoraggio, non consulenza
-- **Perché:** Tu decidi, noi calcoliamo - responsabilità personale
-- **Alternativa:** Strumenti per informare le tue decisioni
+**❌ NON fornisce consigli di investimento:**
+- **Perché:** Strumento di monitoraggio, non consulenza
+- **Implicazioni:** Calcoli indicativi, decisioni tue
+- **Alternativa:** Strumenti per informare le tue scelte
 
-**Gestione automatica:**
-- **Cosa:** Nessun trading automatico o rebalancing
-- **Perché:** Controllo totale dell'utente sui propri asset
-- **Alternativa:** Notifiche e suggerimenti per azioni manuali
+**❌ NON garantisce accuratezza dei calcoli:**
+- **Perché:** Dati inseriti manualmente, calcoli semplificati
+- **Implicazioni:** Risultati indicativi, non certificati
+- **Alternativa:** Validazione con consulente per decisioni importanti
 
 ---
 

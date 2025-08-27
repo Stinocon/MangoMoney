@@ -385,8 +385,8 @@ export const it = {
   dynamicToleranceExplanation: 'Tolleranza variabile: ±10% per importi < €1K, ±5% per importi < €10K, ±3% per importi < €100K, ±2% per importi maggiori',
   
   // Smart Insights Configuration
-  smartInsightsTitle: 'Insights Intelligenti',
-  smartInsightsDescription: 'Suggerimenti personalizzati basati sul tuo portafoglio',
+  smartInsightsTitle: 'Insights automatici',
+  smartInsightsDescription: 'Suggerimenti di base su portfolio e allocazione',
   insightsConfiguration: 'Configurazione Insights',
   enableEmergencyInsights: 'Abilita insights fondo emergenza',
   enableTaxInsights: 'Abilita insights fiscali',
@@ -394,14 +394,14 @@ export const it = {
   enableRiskInsights: 'Abilita insights rischio',
   enableAllocationInsights: 'Abilita insights allocazione',
   autolinkTransactions: 'Autolink Transazioni',
-  autolinkDescription: 'Collega automaticamente le transazioni alle posizioni individuali basandosi sull\'ISIN',
+  autolinkDescription: 'Strumento per collegare le transazioni alle posizioni individuali basandosi sull\'ISIN',
   autolinkCompleted: 'Autolink completato',
   autolinkNoTransactions: 'Nessuna transazione da collegare. Verifica che gli ISIN corrispondano.',
   investmentValuesInfo: 'Informazioni sui valori degli investimenti',
   calculatedFromTransactions: 'Valore calcolato dalle transazioni',
   manualGlobalPositions: 'Valore posizioni globali manuali',
   difference: 'Differenza',
-  investmentValuesExplanation: 'Il valore mostrato nella panoramica è calcolato automaticamente dalle transazioni. Per allineare i valori, aggiorna le posizioni globali manuali o usa l\'autolink per collegare le transazioni.',
+  investmentValuesExplanation: 'Il valore mostrato nella panoramica è calcolato dalle transazioni. Per allineare i valori, aggiorna le posizioni globali manuali o usa l\'autolink per collegare le transazioni.',
   discrepancyVerificationStatus: 'Verifica discrepanze e stato collegamenti',
   backupSecurityHeading: 'Backup e sicurezza',
   jsonCsvExcelPdfExport: 'Esportazione JSON, CSV, Excel, PDF',
@@ -681,7 +681,7 @@ export const it = {
   whatIsMangoMoneyDesc: 'MangoMoney è un portfolio tracker pensato per chi vuole tenere sotto controllo il proprio patrimonio senza complicazioni. L\'idea è nata perché gestire tutto su Excel non è il massimo dal punto di vista estetico, e i servizi online... beh, preferisco tenere i miei dati per me.',
   nameOrigin: 'Il nome viene da "mangano i money" → mancano i soldi. Un po\' stupido, ma mi diverte.',
   howItWorks: 'Come funziona',
-  howItWorksDesc: 'Puoi inserire tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento. L\'app calcola automaticamente il tuo patrimonio netto e ti dà alcune statistiche interessanti, come quanto potresti "prelevare" ogni mese senza intaccare il capitale o quanto durerebbe il tuo fondo di emergenza.',
+  howItWorksDesc: 'Puoi inserire tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento. L\'app calcola il tuo patrimonio netto basandosi sui dati inseriti e ti dà alcune statistiche interessanti, come quanto potresti "prelevare" ogni mese senza intaccare il capitale o quanto durerebbe il tuo fondo di emergenza.',
   investmentsTracking: 'Per gli investimenti, puoi tracciare sia le posizioni complessive (quello che hai sul conto del broker) sia i singoli titoli. Se registri anche le transazioni di acquisto e vendita, l\'app calcolerà le performance in modo più preciso.',
   
   // Sezioni per calcoli implementati
@@ -709,7 +709,7 @@ export const it = {
   // Precisione e funzionalità implementate
   calculationPrecision: 'Precisione dei calcoli',
   precisionDesc: 'Usa matematica finanziaria precisa (niente errori di arrotondamento)',
-  italianTaxes: 'Calcola automaticamente le imposte italiane (plusvalenze, bolli conti)',
+  italianTaxes: 'Calcola le imposte italiane sui dati inseriti (plusvalenze, bolli conti)',
   italianConfigTitle: 'Preset fiscali italiani',
   italianConfigDesc1: 'Configurazione predefinita con aliquote italiane',
   italianConfigDesc2: 'Sistema di calcolo imposte integrato e automatico',
@@ -717,7 +717,7 @@ export const it = {
   italianConfigDesc4: 'Template CSV ottimizzati per la normativa italiana',
   isinLinking: 'Collega automaticamente transazioni e asset tramite codice ISIN',
   emergencyFundSmart: 'Fondo di emergenza intelligente',
-  emergencyFundSmartDesc: 'Calcola automaticamente quanti mesi di spese copre. Ti dice se è adeguato (3-6 mesi) o ottimale (6+ mesi). Tiene conto della tua situazione specifica.',
+  emergencyFundSmartDesc: 'Calcola quanti mesi di spese copre basandosi sui dati inseriti. Ti dice se è adeguato (3-6 mesi) o ottimale (6+ mesi). Tiene conto della tua situazione specifica.',
   
   // Sezione "Cosa c'è sotto il cofano"
   underTheHood: 'Cosa c\'è sotto il cofano',
@@ -736,7 +736,7 @@ export const it = {
   // Fonti teoriche
   theoreticalSources: 'Fonti Teoriche',
   theoreticalSourcesDesc: 'L\'app si basa su principi e metodologie riconosciute dalla comunità finanziaria:',
-  markowitz: 'Harry Markowitz - modern portfolio theory (1952)',
+  markowitz: 'Harry Markowitz - principi di diversificazione del portafoglio (1952)',
   // sharpe: 'William Sharpe - Capital Asset Pricing Model e Sharpe Ratio', // ✅ ELIMINATO: funzione zombie
   graham: 'Benjamin Graham - Security Analysis e Value Investing',
   bogle: 'John Bogle - Principi di diversificazione e costi bassi',
@@ -747,13 +747,13 @@ export const it = {
 
   usefulThings: 'Alcune cose utili da sapere',
   totalPrivacy: 'Privacy totale: Tutto rimane nel tuo browser. Nessun dato viene mai inviato da nessuna parte. Puoi anche scaricare l\'app e usarla completamente offline.',
-  automaticBackupsDesc: 'Backup automatici: L\'app salva automaticamente ogni 5 minuti una copia dei tuoi dati. Puoi anche esportare tutto in vari formati quando vuoi.',
+  automaticBackupsDesc: 'Backup automatici: L\'app salva ogni 5 minuti una copia dei tuoi dati nel browser. Puoi anche esportare tutto in vari formati quando vuoi.',
   multiCurrencyLanguages: 'Multi-valuta e lingue: Supporta diverse valute (EUR, USD, GBP, CHF, JPY) e due lingue (italiano e inglese).',
   responsive: 'Responsive: Funziona bene sia su desktop che su mobile, con interfacce ottimizzate per ogni dispositivo.',
   standardizedFiscalInfo: 'Informazioni fiscali standardizzate: Bollo sempre evidenziato in rosso, rendimenti netti evidenziati per chiarezza.',
   howToStart: 'Come iniziare',
   howToStartDesc: 'Il consiglio è di partire dalle basi: aggiungi prima i conti bancari e la liquidità, poi gli investimenti principali. Se hai un broker, inserisci prima il valore totale del conto, poi i singoli titoli. L\'app ti dirà se i conti tornano.',
-  settingsConfig: 'Per le impostazioni, c\'è una configurazione rapida per l\'Italia che imposta automaticamente le aliquote fiscali più comuni.',
+  settingsConfig: 'Per le impostazioni, c\'è una configurazione preimpostata per l\'Italia con le aliquote fiscali più comuni.',
   limitationsDisclaimer: 'Limitazioni e disclaimer',
   limitationsDesc: 'I prezzi non si aggiornano automaticamente - devi inserirli tu. I calcoli sono puramente indicativi e non sostituiscono in alcun modo una consulenza finanziaria professionale. Questo software viene fornito "così com\'è" senza alcuna garanzia di accuratezza, completezza o idoneità per scopi specifici. L\'app non fornisce consigli di investimento e non costituisce un\'offerta di vendita o sollecitazione all\'acquisto di titoli o altri strumenti finanziari. È sempre opportuno e consigliabile affidarsi a professionisti qualificati per decisioni di investimento.',
   practicalNote: 'In pratica: uso a tuo rischio e pericolo, ma dovrebbe aiutarti a vedere la situazione più chiaramente.',
