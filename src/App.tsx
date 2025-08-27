@@ -12,7 +12,7 @@ import jsPDF from 'jspdf';
 // Screenshot capture utility - used in exportToPDF function (line 5198)
 import html2canvas from 'html2canvas';
 // UI Icons - used throughout the application for buttons and indicators
-import { PlusCircle, Trash2, Moon, Sun, Plus } from 'lucide-react';
+import { PlusCircle, Trash2, Moon, Sun } from 'lucide-react';
 // Chart components - used in MemoizedBarChart component (lines 6280-6309)
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 // Virtualized table component - used for large data sets (line 10567)
@@ -42,56 +42,31 @@ import {
 } from './utils/financialCalculations';
 
 // Validation utilities - used for input validation in development mode (lines 2169, 2185, 2194, 2195, 2213, 2330)
-import { validateDebtToAssetRatio, validateRiskScore, validateLeverageMultiplier, validatePortfolioStatistics, validateTaxRates, validatePercentageSum } from './utils/validations';
+import { validateDebtToAssetRatio, validateRiskScore, validatePortfolioStatistics, validateTaxRates, validatePercentageSum } from './utils/validations';
 
 
 // Security utilities - used for input sanitization throughout the application (multiple lines)
 import { sanitizeString, sanitizeAmount, sanitizeCSVCell } from './utils/security';
 // ✅ SECURITY: Enhanced secure storage with encryption
-import { secureLocalStorage, initializeSecureStorage } from './utils/secureStorage';
-// ✅ PRIVACY: GDPR compliance utilities
-import { privacyCompliance } from './utils/privacyCompliance';
+import { initializeSecureStorage } from './utils/secureStorage';
 // ✅ SECURITY: Advanced security utilities
 import { auditTrail, rateLimiter, secureErrorHandler } from './utils/advancedSecurity';
 // ✅ UX/UI: Design system and accessible components
 import './styles/designSystem.css';
 import {
-  Button,
-  Input,
-  Card,
-  ResponsiveTable,
-  Collapsible,
-  Modal,
-  Tooltip as AccessibleTooltip,
-  Skeleton,
-  ContextualHelp,
-  MetricCard,
-  Navigation
+  Skeleton
 } from './components/AccessibleComponents';
 import {
-  AccessiblePieChart,
-  AccessibleBarChart,
-  AccessibleLineChart,
-  SmartInsights,
-  generateInsights
+  SmartInsights
 } from './components/AccessibleCharts';
 import SwrSimplified from './components/SwrSimplified';
 import SimpleStatistics from './components/SimpleStatistics';
-import { FloatingActionButton, SwipeHint, ProgressBar } from './components/MobileOptimizations';
+import { SwipeHint } from './components/MobileOptimizations';
 // Internationalization utilities - used for multi-language support (lines 1436, 7275, 7370)
 import { translations, languages, type TranslationKey, type Language } from './translations';
 
 // ✅ PERFORMANCE OPTIMIZATION: Extracted constants to prevent recreation
 const CHART_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16', '#a855f7', '#ec4899', '#f97316'] as const;
-const DEFAULT_CHART_CONFIG = {
-  margin: { top: 20, right: 30, left: 20, bottom: 5 },
-  barSize: 40,
-} as const;
-
-// ✅ PERFORMANCE OPTIMIZATION: Memoized chart color function
-const getChartColor = (index: number): string => {
-  return CHART_COLORS[index % CHART_COLORS.length];
-};
 
 // ✅ BUNDLE OPTIMIZATION: Lazy load heavy components (placeholder for future implementation)
 // const PDFExport = lazy(() => import('./components/PDFExport').catch(() => ({ default: () => <div>PDF Export not available</div> })));
