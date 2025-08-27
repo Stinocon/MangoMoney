@@ -12,7 +12,7 @@ import jsPDF from 'jspdf';
 // Screenshot capture utility - used in exportToPDF function (line 5198)
 import html2canvas from 'html2canvas';
 // UI Icons - used throughout the application for buttons and indicators
-import { PlusCircle, Trash2, Moon, Sun } from 'lucide-react';
+import { PlusCircle, Trash2, Moon, Sun, Plus } from 'lucide-react';
 // Chart components - used in MemoizedBarChart component (lines 6280-6309)
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 // Virtualized table component - used for large data sets (line 10567)
@@ -77,6 +77,7 @@ import {
 } from './components/AccessibleCharts';
 import SwrSimplified from './components/SwrSimplified';
 import SimpleStatistics from './components/SimpleStatistics';
+import { FloatingActionButton, SwipeHint, ProgressBar } from './components/MobileOptimizations';
 // Internationalization utilities - used for multi-language support (lines 1436, 7275, 7370)
 import { translations, languages, type TranslationKey, type Language } from './translations';
 
@@ -2588,6 +2589,31 @@ const NetWorthManager = () => {
     const investmentEfficiency = netWorth > 0 ? (investments / netWorth) : 0;
     const investmentPercentage = (investmentEfficiency * 100).toFixed(1);
 
+    // ✅ FATTIBILE: Calcolo metriche per Smart Insights
+    const currentYear = new Date().getFullYear();
+    const yearlyCommissions = assets.transactions
+      .filter(t => new Date(t.date).getFullYear() === currentYear)
+      .reduce((sum, t) => sum + (t.commissions || 0), 0);
+
+    const unrealizedLosses = assets.investments
+      .filter(asset => {
+        const currentValue = (asset.quantity || 0) * (asset.currentPrice || 0);
+        const originalValue = (asset.quantity || 0) * (asset.avgPrice || 0);
+        return currentValue < originalValue;
+      })
+      .reduce((sum, asset) => {
+        const currentValue = (asset.quantity || 0) * (asset.currentPrice || 0);
+        const originalValue = (asset.quantity || 0) * (asset.avgPrice || 0);
+        return sum + (originalValue - currentValue);
+      }, 0);
+
+    const totalPortfolioValue = netWorth;
+    const positionsUnder1Percent = assets.investments
+      .filter(asset => {
+        const positionValue = (asset.quantity || 0) * (asset.currentPrice || 0);
+        return totalPortfolioValue > 0 && (positionValue / totalPortfolioValue) < 0.01;
+      }).length;
+
     const statisticsResult = {
       allocationPercentages,
       totalPositions,
@@ -2598,6 +2624,12 @@ const NetWorthManager = () => {
       // sharpeRatio: sharpeRatioFormatted, // ✅ ELIMINATO: funzione zombie
       // efficiencyRating: efficiencyRating.rating, // ✅ ELIMINATO: funzione zombie
       // efficiencyColor: efficiencyRating.color, // ✅ ELIMINATO: funzione zombie
+      // ✅ FATTIBILE: Metriche per Smart Insights
+      yearlyCommissions,
+      unrealizedLosses,
+      numberOfPositions: assets.investments.length,
+      positionsUnder1Percent,
+      totalPortfolioValue,
       // efficiencyBgColor: efficiencyRating.bgColor, // ✅ ELIMINATO: funzione zombie
       emergencyMonths: emergencyFundMetrics.monthsFormatted,
       emergencyFundValue: emergencyFundMetrics.value,
@@ -6706,14 +6738,17 @@ const NetWorthManager = () => {
 
     if (transactions.length > 100) { // Usa virtualizzazione solo per liste lunghe
       return (
-        <VirtualizedTable
-          data={transactions}
-          rowHeight={48}
-          containerHeight={400}
-          renderRow={renderTransactionRow}
-          renderHeader={renderHeader}
-          className={`border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}
-        />
+        <>
+          <SwipeHint />
+          <VirtualizedTable
+            data={transactions}
+            rowHeight={48}
+            containerHeight={400}
+            renderRow={renderTransactionRow}
+            renderHeader={renderHeader}
+            className={`border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}
+          />
+        </>
       );
     }
 
@@ -12026,6 +12061,8 @@ const NetWorthManager = () => {
             </div>
           </div>
         )}
+
+
 
       </main>
     </div>

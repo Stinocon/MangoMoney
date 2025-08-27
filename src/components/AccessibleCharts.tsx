@@ -825,6 +825,74 @@ export const generateInsights = (
       value: (current.debtToAssetRatio ?? 0) * 100
     });
   }
+
+  // ✅ FATTIBILE: Concentration Risk Alert
+  if (config?.allocation !== false && current.netWorth > 0) {
+    const allocations = [
+      (current.cashRatio ?? 0) * 100,
+      (current.investmentRatio ?? 0) * 100, 
+      (current.realEstateRatio ?? 0) * 100,
+      (current.pensionRatio ?? 0) * 100,
+      (current.alternativesRatio ?? 0) * 100
+    ];
+    
+    const maxAllocation = Math.max(...allocations);
+    
+    if (maxAllocation > 75) {
+      insights.push({
+        type: 'warning',
+        category: 'allocation',
+        message: `Concentrazione eccessiva: ${maxAllocation.toFixed(0)}% in singola categoria`,
+        action: 'Diversifica per ridurre il rischio di concentrazione',
+        priority: 8,
+        value: maxAllocation
+      });
+    }
+  }
+
+  // ✅ FATTIBILE: High Fees Alert (da commissioni transazioni)
+  if (config?.performance !== false && current.totalPortfolioValue > 0) {
+    const annualCommissions = (current.yearlyCommissions ?? 0); // Calcola da transazioni ultimo anno
+    const feeRatio = (annualCommissions / current.totalPortfolioValue) * 100;
+    
+    if (feeRatio > 1.0 && annualCommissions > 100) {
+      insights.push({
+        type: 'warning', 
+        category: 'performance',
+        message: `Commissioni elevate: ${feeRatio.toFixed(1)}% del patrimonio annuo (€${annualCommissions.toFixed(0)})`,
+        action: 'Considera broker o ETF a commissioni più basse',
+        priority: 6,
+        value: feeRatio
+      });
+    }
+  }
+
+  // ✅ FATTIBILE: Loss Harvesting Alert (da transazioni vendite)
+  if (config?.tax !== false && (current.unrealizedLosses ?? 0) > 500) {
+    insights.push({
+      type: 'info',
+      category: 'tax',
+      message: `Minusvalenze disponibili: €${(current.unrealizedLosses ?? 0).toFixed(0)}`,
+      action: 'Considera vendita strategica per compensazione fiscale',
+      priority: 5,
+      value: current.unrealizedLosses ?? 0
+    });
+  }
+
+  // ✅ FATTIBILE: Small Position Alert  
+  if (config?.allocation !== false && (current.numberOfPositions ?? 0) > 10) {
+    const smallPositionsCount = current.positionsUnder1Percent ?? 0;
+    if (smallPositionsCount > 5) {
+      insights.push({
+        type: 'info',
+        category: 'allocation', 
+        message: `${smallPositionsCount} posizioni sotto 1% del portfolio`,
+        action: 'Considera consolidamento per ridurre complessità',
+        priority: 3,
+        value: smallPositionsCount
+      });
+    }
+  }
   
   // Sort by priority (highest first)
   insights.sort((a, b) => b.priority - a.priority);
