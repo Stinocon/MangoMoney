@@ -303,3 +303,60 @@ export const validatePortfolioStatistics = (stats: any, context: string): void =
     console.error(`Error in portfolio validation for ${context}:`, error);
   }
 };
+
+/**
+ * Valida coerenza tra Overview e Statistics
+ */
+export const validateTabConsistency = (
+  overviewData: any, 
+  statisticsData: any, 
+  tolerance: number = 0.01
+): void => {
+  if (process.env.NODE_ENV !== 'development') return;
+  
+  const overviewTotal = overviewData.netWorth || 0;
+  const statsTotal = statisticsData.netWorth || 0;
+  const difference = Math.abs(overviewTotal - statsTotal);
+  const relativeDiff = overviewTotal > 0 ? difference / overviewTotal : 0;
+  
+  if (relativeDiff > tolerance) {
+    console.error(
+      `❌ Tab inconsistency detected: Overview=${overviewTotal.toFixed(2)}, ` +
+      `Statistics=${statsTotal.toFixed(2)}, diff=${difference.toFixed(2)} ` +
+      `(${(relativeDiff * 100).toFixed(2)}%)`
+    );
+  }
+};
+
+/**
+ * Valida coerenza posizioni globali vs individuali
+ */
+export const validatePositionReconciliation = (
+  globalPositions: any[], 
+  individualPositions: any[],
+  tolerance: number = 0.05
+): void => {
+  if (process.env.NODE_ENV !== 'development') return;
+  
+  globalPositions.forEach(global => {
+    const linkedIndividual = individualPositions.filter(ind => 
+      ind.linkedToGlobal === global.id
+    );
+    
+    const globalValue = global.amount || 0;
+    const individualTotal = linkedIndividual.reduce((sum, ind) => 
+      sum + ((ind.quantity || 0) * (ind.currentPrice || 0)), 0
+    );
+    
+    const difference = Math.abs(globalValue - individualTotal);
+    const relativeDiff = globalValue > 0 ? difference / globalValue : 0;
+    
+    if (relativeDiff > tolerance) {
+      console.warn(
+        `⚠️ Position mismatch for "${global.name}": ` +
+        `Global=${globalValue.toFixed(2)}, Individual=${individualTotal.toFixed(2)}, ` +
+        `diff=${difference.toFixed(2)} (${(relativeDiff * 100).toFixed(1)}%)`
+      );
+    }
+  });
+};

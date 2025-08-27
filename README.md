@@ -175,6 +175,15 @@ L'app fornisce insights essenziali per la gestione del portfolio:
 - **Asset allocation**: Suggerimenti di bilanciamento conservativo/aggressivo  
 - **Emergency fund**: Valutazione adeguatezza del fondo emergenza
 - **Risk management**: Alert su concentrazione eccessiva in asset volatili
+- **Concentrazione**: Alert per eccessiva concentrazione in singola categoria
+- **Commissioni**: Monitoraggio costi di gestione portfolio
+- **Ribilanciamento**: Promemoria per mantenere allocazione target
+
+### **Validazioni Avanzate**
+- **Controlli di coerenza** tra sezioni dell'app
+- **Riconciliazione automatica** tra posizioni globali e individuali  
+- **Verifica integrità** transazioni vs posizioni
+- **Alert discrepanze** con soglie configurabili
 
 ### **Riconciliazione dei Dati**
 - **Strumenti per verificare** corrispondenza tra posizioni e transazioni
@@ -188,6 +197,9 @@ Per utenti italiani:
 - **Breakdown per tipo asset** (standard vs whitelist)  
 - **Simulazione vendite** con calcolo tasse
 - **Regime amministrato vs dichiarativo**
+- **Loss harvesting suggestions** per ottimizzazione fiscale
+- **Timing alerts** per vendite strategiche
+- **Simulazioni impatto fiscale** per diverse strategie
 
 ## 🆘 Supporto & Documentazione
 

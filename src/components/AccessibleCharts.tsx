@@ -698,6 +698,56 @@ export const generateInsights = (
   }
   
   // Tax Optimization (per utenti italiani)
+  
+  // Concentration Risk Alert
+  if (config?.allocation !== false) {
+    // Trova la concentrazione massima
+    const maxAllocation = Math.max(
+      (current.cashRatio ?? 0) * 100,
+      (current.investmentRatio ?? 0) * 100,
+      (current.realEstateRatio ?? 0) * 100,
+      (current.alternativesRatio ?? 0) * 100
+    );
+    
+    if (maxAllocation > 70) {
+      insights.push({
+        type: 'warning',
+        category: 'allocation',
+        message: `Concentrazione eccessiva: ${maxAllocation.toFixed(0)}% in singola categoria`,
+        action: 'Diversifica per ridurre il rischio di concentrazione',
+        priority: 8,
+        value: maxAllocation
+      });
+    }
+  }
+
+  // High Fees Alert (se disponibili dati commissioni)
+  if (config?.performance !== false && (current.totalCommissions ?? 0) > 0) {
+    const feeRatio = ((current.totalCommissions ?? 0) / (current.totalPortfolioValue ?? 1)) * 100;
+    
+    if (feeRatio > 1.5) {
+      insights.push({
+        type: 'warning',
+        category: 'performance',
+        message: `Commissioni elevate: ${feeRatio.toFixed(1)}% del patrimonio annuo`,
+        action: 'Considera ETF a commissioni più basse',
+        priority: 6,
+        value: feeRatio
+      });
+    }
+  }
+
+  // Rebalancing Alert
+  if (config?.allocation !== false && (current.lastRebalanceMonths ?? 0) > 12) {
+    insights.push({
+      type: 'info',
+      category: 'allocation',
+      message: `Portfolio non riequilibrato da ${current.lastRebalanceMonths} mesi`,
+      action: 'Considera un ribilanciamento per mantenere allocazione target',
+      priority: 4,
+      value: current.lastRebalanceMonths
+    });
+  }
   if (config?.tax !== false) {
     const currentMonth = new Date().getMonth() + 1; // 1-12
     if (currentMonth === 12 && (current.unrealizedGains ?? 0) > 0) {

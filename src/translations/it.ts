@@ -438,12 +438,12 @@ export const it = {
   riskScoreDescription: 'Calcolo semplificato basato su categorie di asset. Adatto per la maggior parte degli utenti.',
   riskScoreMethod: 'Metodo: Media ponderata per categoria (approccio semplificato)',
   liquidityRiskDescription: 'Liquidità: 1.0 (rischio minimo - alta liquidità)',
-  pensionFundsRiskDescription: 'Fondi pensione: 2.0 (rischio medio - regolamentati, lungo termine)',
-  realEstateRiskDescription: 'Immobili: 2.0 (rischio medio - stabili ma illiquidi)',
-  globalPositionsRiskDescription: 'Posizioni globali: 3.0 (rischio medio-alto - conti broker)',
-  alternativeAssetsRiskDescription: 'Beni alternativi: 5.0 (rischio molto alto - asset speculativi)',
+  pensionFundsRiskDescription: 'Fondi pensione: 3.0 (rischio medio - regolamentati, lungo termine)',
+realEstateRiskDescription: 'Immobili: 4.0 (rischio medio-alto - stabili ma illiquidi)',
+globalPositionsRiskDescription: 'Posizioni globali: 7.0 (rischio alto - conti broker con volatilità)',
+alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - asset speculativi)',
 
-  investmentsTransactionsRiskDescription: 'Investimenti/Transazioni: 4.0 (rischio alto - volatilità di mercato)',
+  investmentsTransactionsRiskDescription: 'Investimenti/Transazioni: 7.0 (rischio alto - volatilità di mercato)',
   // riskScoreBasedOnVolatility: 'Basato sulla volatilità del portafoglio calcolata con Modern Portafoglio Theory.', // ✅ ELIMINATO: funzione zombie
   // efficiencyBasedOnSharpe: 'Basato sul rapporto rischio-rendimento aggiustato.', // ✅ ELIMINATO: funzione zombie
   transactionAnalysisPerYear: 'Analisi delle transazioni per anno',

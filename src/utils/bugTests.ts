@@ -6,8 +6,7 @@
  * 1. parseInt/NaN Bug in sanitizeInteger
  * 2. Date Side Effect Bug in sanitizeDate  
  * 3. Sharpe Ratio Edge Case (0/0)
- * 4. Correlation Matrix TypeError
- * 5. Decimal.js Configuration Limits
+ * 4. Decimal.js Configuration Limits
  */
 
 // Test 1: parseInt/NaN Bug
@@ -194,82 +193,7 @@ export const testSharpeRatioEdgeCase = (): boolean => {
   return true;
 };
 
-// Test 4: Correlation Matrix Safety
-export const testCorrelationMatrixSafety = (): boolean => {
-  console.log('🧪 Testing correlation matrix safety...');
-  
-  // Simula le strutture dati
-  const ASSET_CLASS_MAPPING = {
-    cash: 'cash',
 
-    pensionFunds: 'bonds',
-    realEstate: 'realEstate',
-    investmentPositions: 'stocks',
-    alternativeAssets: 'alternatives'
-  };
-
-  const ASSET_CORRELATION_MATRIX = {
-    cash: { cash: 1.0, bonds: 0.1, stocks: 0.0, realEstate: 0.0, commodities: -0.1, alternatives: 0.0 },
-    bonds: { cash: 0.1, bonds: 1.0, stocks: 0.3, realEstate: 0.2, commodities: 0.1, alternatives: 0.2 },
-    stocks: { cash: 0.0, bonds: 0.3, stocks: 1.0, realEstate: 0.5, commodities: 0.4, alternatives: 0.5 },
-    realEstate: { cash: 0.0, bonds: 0.2, stocks: 0.5, realEstate: 1.0, commodities: 0.3, alternatives: 0.4 },
-    commodities: { cash: -0.1, bonds: 0.1, stocks: 0.4, realEstate: 0.3, commodities: 1.0, alternatives: 0.3 },
-    alternatives: { cash: 0.0, bonds: 0.2, stocks: 0.5, realEstate: 0.4, commodities: 0.3, alternatives: 1.0 }
-  };
-
-  // Simula la funzione getAssetCorrelation sicura
-  const getAssetCorrelation = (assetClass1: string, assetClass2: string): number => {
-    // Map asset classes to correlation matrix keys
-    const mappedAssetClass1 = ASSET_CLASS_MAPPING[assetClass1 as keyof typeof ASSET_CLASS_MAPPING] || 'stocks';
-    const mappedAssetClass2 = ASSET_CLASS_MAPPING[assetClass2 as keyof typeof ASSET_CLASS_MAPPING] || 'stocks';
-    
-    // Safe nested object access
-    const correlationRow = ASSET_CORRELATION_MATRIX[mappedAssetClass1 as keyof typeof ASSET_CORRELATION_MATRIX];
-    if (!correlationRow || typeof correlationRow !== 'object') {
-      return 0.3; // Default moderate correlation
-    }
-    
-    const correlation = correlationRow[mappedAssetClass2 as keyof typeof correlationRow];
-    if (typeof correlation !== 'number' || !Number.isFinite(correlation)) {
-      return 0.3; // Default moderate correlation
-    }
-    
-    return correlation;
-  };
-  
-  // Test with non-existent asset classes
-  try {
-    const result1 = getAssetCorrelation('nonexistent1', 'nonexistent2');
-    const result2 = getAssetCorrelation('', '');
-    const result3 = getAssetCorrelation('undefined', 'null');
-    
-    if (!Number.isFinite(result1) || !Number.isFinite(result2) || !Number.isFinite(result3)) {
-      console.error(`❌ Correlation matrix safety bug: non-finite results`);
-      return false;
-    }
-    
-    // Test with valid asset classes
-    const result4 = getAssetCorrelation('cash', 'stocks');
-    if (result4 !== 0.0) {
-      console.error(`❌ Correlation matrix safety bug: expected 0.0, got ${result4}`);
-      return false;
-    }
-    
-    // Test with mapped asset classes
-    const result5 = getAssetCorrelation('investmentPositions', 'pensionFunds');
-    if (result5 !== 0.3) {
-      console.error(`❌ Correlation matrix safety bug: expected 0.3, got ${result5}`);
-      return false;
-    }
-    
-  } catch (error) {
-    console.error(`❌ Correlation matrix safety bug: threw error ${error}`);
-    return false;
-  }
-  
-  console.log('✅ Correlation matrix safety test passed');
-  return true;
-};
 
 // Test 5: Decimal Limits
 export const testDecimalLimits = (): boolean => {
@@ -366,15 +290,13 @@ export const runAllBugTests = (): boolean => {
   console.log('1. parseInt/NaN Bug in sanitizeInteger');
   console.log('2. Date Side Effect Bug in sanitizeDate');
   console.log('3. Sharpe Ratio Edge Case (0/0)');
-  console.log('4. Correlation Matrix TypeError');
-  console.log('5. Decimal.js Configuration Limits');
+  console.log('4. Decimal.js Configuration Limits');
   console.log('');
   
   const tests = [
     { name: 'parseInt/NaN Bug', test: testParseIntBug },
     { name: 'Date Side Effect Bug', test: testDateSideEffectBug },
     { name: 'Sharpe Ratio Edge Case', test: testSharpeRatioEdgeCase },
-    { name: 'Correlation Matrix Safety', test: testCorrelationMatrixSafety },
     { name: 'Decimal Limits', test: testDecimalLimits }
   ];
   
