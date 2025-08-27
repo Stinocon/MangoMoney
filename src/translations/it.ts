@@ -386,7 +386,7 @@ export const it = {
   
   // Smart Insights Configuration
   smartInsightsTitle: 'Smart Insights Realistici',
-  smartInsightsDescription: 'Analisi basate sui dati disponibili nell\'app',
+
   insightLimitations: 'Limitazioni degli insights',
   insightLimitationsDesc: 'Gli insights si basano solo sui dati inseriti. Per analisi dettagliate consulta un consulente finanziario.',
   
@@ -855,4 +855,6 @@ alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - a
   valueLabel: 'Valore',
   confirmDelete: 'Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.',
   savedBackups: 'Backup Salvati',
+  
+
 };

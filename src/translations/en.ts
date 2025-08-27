@@ -100,6 +100,29 @@ export const en = {
   investmentEfficiency: 'Investment Efficiency',
   growthPotential: 'Growth Potential',
   
+  // Smart Insights - Realistic System
+  smartInsightsRealistic: 'Smart Insights - Calculable',
+  insightLimitations: 'Insight limitations',
+  insightLimitationsDesc: 'Insights are based only on entered data. For detailed analysis consult a financial advisor.',
+
+  // Size Messages
+  portfolioEarly: 'Portfolio early stage',
+  portfolioGrowing: 'Portfolio growing',
+  portfolioMature: 'Portfolio mature',
+
+  // Tax Messages
+  taxHarvestingOpportunity: 'Tax harvesting opportunity',
+  stampDutyReminder: 'Stamp duty reminder',
+
+  // Allocation Warnings
+  excessiveInvestmentConcentration: 'Excessive investment concentration',
+  excessiveLiquidityConcentration: 'Excessive liquidity concentration',
+
+  // Removed Insights Notice
+  removedInsightsNotice: 'Some previous insights have been removed because they required data not available in the app',
+  removedInsightsList: 'Detailed risk score, specific diversification, asset allocation advice require professional analysis',
+  consultAdviser: 'For advanced portfolio analysis consult a qualified financial advisor',
+  
   // Safe Withdrawal Rate
   swrSimulation: 'Safe Withdrawal Rate Simulation',
   swrRate: 'Safe Withdrawal Rate',
@@ -393,9 +416,6 @@ export const en = {
   
   // Smart Insights Configuration
   smartInsightsTitle: 'Realistic Smart Insights',
-  smartInsightsDescription: 'Analysis based on available app data',
-  insightLimitations: 'Insight limitations',
-  insightLimitationsDesc: 'Insights are based only on entered data. For detailed analysis consult a financial advisor.',
   
   // Insight Categories
   emergencyFundInsight: 'Emergency fund',
@@ -422,23 +442,7 @@ export const en = {
   debtElevated: 'Elevated debts',
   debtModerate: 'Moderate debts',
   
-  // Size Messages
-  portfolioEarly: 'Early stage portfolio',
-  portfolioGrowing: 'Growing portfolio',
-  portfolioMature: 'Mature portfolio',
-  
-  // Tax Messages
-  taxHarvestingOpportunity: 'Tax harvesting opportunity',
-  stampDutyReminder: 'Stamp duty reminder',
-  
-  // Allocation Warnings
-  excessiveInvestmentConcentration: 'Excessive investment concentration',
-  excessiveLiquidityConcentration: 'Excessively liquid portfolio',
-  
-  // Removed Insights Notice
-  removedInsightsNotice: 'Some previous insights have been removed because they required data not available in the app',
-  removedInsightsList: 'Detailed risk score, specific diversification, asset allocation advice require professional analysis',
-  consultAdviser: 'For advanced portfolio analysis consult a qualified financial advisor',
+
   
   // About section - Smart Insights realistici
   aboutSmartInsights: 'Realistic Smart Insights',

@@ -5,8 +5,7 @@
  * Tests all the critical bugs that were fixed:
  * 1. parseInt/NaN Bug in sanitizeInteger
  * 2. Date Side Effect Bug in sanitizeDate  
- * 3. Sharpe Ratio Edge Case (0/0)
- * 4. Decimal.js Configuration Limits
+ * 3. Decimal.js Configuration Limits
  */
 
 // Test 1: parseInt/NaN Bug
@@ -124,74 +123,7 @@ export const testDateSideEffectBug = (): boolean => {
   return true;
 };
 
-// Test 3: Sharpe Ratio Edge Case
-export const testSharpeRatioEdgeCase = (): boolean => {
-  console.log('🧪 Testing Sharpe Ratio edge case...');
-  
-  // Simula la funzione calculateSharpeRatio fixata
-  const calculateSharpeRatio = (portfolioReturn: number, portfolioVolatility: number, riskFreeRate: number = 2.0): number => {
-    // Handle edge cases with zero volatility
-    if (portfolioVolatility <= 0) {
-      const excessReturn = portfolioReturn - riskFreeRate;
-      
-      // ✅ CORRETTO: Gestione matematicamente accurata
-      if (excessReturn === 0) {
-        // 0/0 case: return 0 (neutral performance)
-        return 0;
-      } else if (excessReturn > 0) {
-        // Positive excess return with no risk = excellent
-        return 10;
-      } else {
-        // Negative excess return with no risk = terrible  
-        return -10;
-      }
-    }
 
-    // Calculate excess return
-    const excessReturn = portfolioReturn - riskFreeRate;
-    
-    // Calculate Sharpe Ratio
-    const sharpeRatio = excessReturn / portfolioVolatility;
-    
-    // Cap between -10 and +10 for UI sanity
-    if (sharpeRatio > 10) return 10;
-    if (sharpeRatio < -10) return -10;
-    
-    return sharpeRatio;
-  };
-  
-  // Test 0/0 case: should return 0, not -10
-  const result1 = calculateSharpeRatio(2.0, 0, 2.0); // 0 excess return, 0 volatility
-  if (result1 !== 0) {
-    console.error(`❌ Sharpe Ratio edge case bug: expected 0, got ${result1}`);
-    return false;
-  }
-  
-  // Test positive excess return with zero volatility
-  const result2 = calculateSharpeRatio(5.0, 0, 2.0); // 3% excess return, 0 volatility
-  if (result2 !== 10) {
-    console.error(`❌ Sharpe Ratio edge case bug: expected 10, got ${result2}`);
-    return false;
-  }
-  
-  // Test negative excess return with zero volatility
-  const result3 = calculateSharpeRatio(1.0, 0, 2.0); // -1% excess return, 0 volatility
-  if (result3 !== -10) {
-    console.error(`❌ Sharpe Ratio edge case bug: expected -10, got ${result3}`);
-    return false;
-  }
-  
-  // Test normal case
-  const result4 = calculateSharpeRatio(8.0, 15.0, 2.0); // 6% excess return, 15% volatility
-  const expected4 = 6.0 / 15.0; // 0.4
-  if (Math.abs(result4 - expected4) > 0.01) {
-    console.error(`❌ Sharpe Ratio normal case bug: expected ${expected4}, got ${result4}`);
-    return false;
-  }
-  
-  console.log('✅ Sharpe Ratio edge case test passed');
-  return true;
-};
 
 
 
@@ -289,14 +221,12 @@ export const runAllBugTests = (): boolean => {
   console.log('Testing all critical bug fixes:');
   console.log('1. parseInt/NaN Bug in sanitizeInteger');
   console.log('2. Date Side Effect Bug in sanitizeDate');
-  console.log('3. Sharpe Ratio Edge Case (0/0)');
-  console.log('4. Decimal.js Configuration Limits');
+  console.log('3. Decimal.js Configuration Limits');
   console.log('');
   
   const tests = [
     { name: 'parseInt/NaN Bug', test: testParseIntBug },
     { name: 'Date Side Effect Bug', test: testDateSideEffectBug },
-    { name: 'Sharpe Ratio Edge Case', test: testSharpeRatioEdgeCase },
     { name: 'Decimal Limits', test: testDecimalLimits }
   ];
   

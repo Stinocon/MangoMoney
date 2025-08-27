@@ -553,6 +553,67 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
     );
   };
 
+  const getCategoryIcon = (category: string) => {
+    const iconClass = 'w-4 h-4';
+    const colorClass = darkMode ? 'text-gray-300' : 'text-gray-600';
+    
+    switch(category) {
+      case 'emergency':
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        );
+      case 'swr':
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2v20"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        );
+      case 'debt':
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2v20"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        );
+      case 'size':
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 3v18h18"/>
+            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+          </svg>
+        );
+      case 'tax':
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 14l6-6"/>
+            <path d="M9.5 8.5h5"/>
+            <path d="M9.5 11.5h5"/>
+            <path d="M9.5 14.5h5"/>
+          </svg>
+        );
+      case 'allocation':
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 3v18h18"/>
+            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+          </svg>
+        );
+      default:
+        return (
+          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+        );
+    }
+  };
+
   const getContainerClasses = (severity: string) => {
     const base = 'p-3 border rounded-md';
     if (darkMode) {
@@ -568,6 +629,23 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
     }
   };
 
+  const formatValue = (insight: any) => {
+    if (insight.value === undefined) return null;
+    
+    switch(insight.type) {
+      case 'emergency':
+        return `${insight.value.toFixed(1)}m`;
+      case 'swr':
+        return `${insight.value.toFixed(0)}%`;
+      case 'debt':
+        return `${insight.value.toFixed(0)}%`;
+      case 'allocation':
+        return `${insight.value.toFixed(1)}%`;
+      default:
+        return insight.value.toFixed(1);
+    }
+  };
+
   return (
     <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow-sm border p-6`}>
       <div className="mb-3">
@@ -575,14 +653,17 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={darkMode ? 'text-amber-300' : 'text-amber-600'}>
             <path d="M9 18h6M10 22h4M2 12a10 10 0 1 1 20 0c0 3-2 5-5 6H7c-3-1-5-3-5-6Z" />
           </svg>
-          Insight automatici
+          Smart Insights
         </h3>
-        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Suggerimenti compatti basati sui tuoi dati</p>
+        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          Analisi basate sui dati disponibili nell'app
+        </p>
       </div>
 
       {insights.length === 0 ? (
         <div className={`text-center py-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           <p className="text-sm">Nessun insight al momento.</p>
+          <p className="text-xs mt-1">Aggiungi più dati per ricevere suggerimenti personalizzati.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -597,15 +678,13 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
               <Icon severity={insight.severity} />
               <div className="flex-1">
                 <div className={`flex items-center justify-between gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                  <h4 className="text-sm font-semibold truncate">{insight.title}</h4>
+                  <div className="flex items-center gap-1">
+                    {getCategoryIcon(insight.type)}
+                    <h4 className="text-sm font-semibold truncate">{insight.title}</h4>
+                  </div>
                   {insight.value !== undefined && (
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${darkMode ? 'bg-white/10 text-gray-200' : 'bg-white/70 text-gray-800'}`}>
-                      {insight.type === 'performance' && `${insight.value > 0 ? '+' : ''}${insight.value.toFixed(1)}%`}
-                      {insight.type === 'risk' && `${insight.value.toFixed(1)}/10`}
-                      {insight.type === 'emergency' && `${insight.value.toFixed(1)}m`}
-                      {insight.type === 'swr' && `${insight.value.toFixed(0)}%`}
-                      {insight.type === 'debt' && `${insight.value.toFixed(0)}%`}
-                      {insight.type === 'allocation' && `${insight.value.toFixed(1)}%`}
+                      {formatValue(insight)}
                     </span>
                   )}
                 </div>
@@ -621,6 +700,13 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
           ))}
         </div>
       )}
+      
+      {/* Footer con disclaimer */}
+      <div className={`mt-4 pt-3 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          💡 Gli insights si basano solo sui dati inseriti. Per analisi dettagliate consulta un consulente finanziario.
+        </p>
+      </div>
     </div>
   );
 };
@@ -660,10 +746,10 @@ export const generateInsights = (
 ): Insight[] => {
   const insights: SmartInsight[] = [];
   
-  // ✅ INSIGHT 1: EMERGENCY FUND - Usa settings configurabili
+  // ✅ INSIGHT 1: EMERGENCY FUND - Logica corretta
   if (config?.emergency !== false && current.emergencyFundMonths >= 0) {
-    const optimalMonths = settings?.emergencyFundOptimalMonths ?? 6;
-    const adequateMonths = settings?.emergencyFundAdequateMonths ?? 3;
+    const optimalMonths = settings?.emergencyFundOptimalMonths ?? 12; // Cambiato da 6 a 12
+    const adequateMonths = settings?.emergencyFundAdequateMonths ?? 6; // Cambiato da 3 a 6
     const currentMonths = current.emergencyFundMonths;
     
     if (currentMonths < adequateMonths) {
@@ -671,7 +757,7 @@ export const generateInsights = (
         type: 'critical',
         category: 'emergency',
         message: `Fondo emergenza insufficiente: ${currentMonths.toFixed(1)} mesi (minimo: ${adequateMonths})`,
-        action: 'Incrementa liquidità designata per raggiungere almeno 3 mesi di spese',
+        action: `Incrementa liquidità designata per raggiungere almeno ${adequateMonths} mesi di spese`,
         priority: 10,
         value: currentMonths
       });
@@ -680,11 +766,11 @@ export const generateInsights = (
         type: 'warning', 
         category: 'emergency',
         message: `Fondo emergenza adeguato: ${currentMonths.toFixed(1)} mesi (obiettivo: ${optimalMonths})`,
-        action: 'Considera di raggiungere 6 mesi per maggiore sicurezza',
+        action: `Aggiungi liquidità per raggiungere ${optimalMonths} mesi di copertura`,
         priority: 6,
         value: currentMonths
       });
-    } else if (currentMonths <= optimalMonths * 2) {
+    } else if (currentMonths <= optimalMonths * 1.5) {
       insights.push({
         type: 'success',
         category: 'emergency', 
@@ -718,12 +804,12 @@ export const generateInsights = (
     const monthlyWithdrawal = (withdrawableAssets * adjustedSWR / 100) / 12;
     const coverage = (monthlyWithdrawal / (settings?.monthlyExpenses ?? 1)) * 100;
     
-    if (coverage < 80) {
+    if (coverage < 70) {
       insights.push({
         type: 'critical',
         category: 'swr',
         message: `SWR insufficiente: copre ${coverage.toFixed(0)}% delle spese mensili`,
-        action: 'Aumenta risparmio o riduci spese per indipendenza finanziaria',
+        action: 'Aumenta risparmio o riduci spese per raggiungere indipendenza finanziaria',
         priority: 9,
         value: coverage
       });
@@ -732,7 +818,7 @@ export const generateInsights = (
         type: 'warning',
         category: 'swr', 
         message: `SWR quasi sufficiente: copre ${coverage.toFixed(0)}% delle spese`,
-        action: 'Ultimo sforzo per raggiungere l\'indipendenza finanziaria',
+        action: 'Ultimo sforzo per raggiungere il 100% di copertura',
         priority: 7,
         value: coverage
       });
@@ -759,7 +845,7 @@ export const generateInsights = (
     }
   }
   
-  // ✅ INSIGHT 3: DEBT-TO-ASSET RATIO
+  // ✅ INSIGHT 3: DEBT-TO-ASSET RATIO - Solo se problematico
   if (config?.debt !== false && (current.debtToAssetRatio ?? 0) > 0) {
     const ratio = (current.debtToAssetRatio ?? 0) * 100;
     
@@ -793,25 +879,18 @@ export const generateInsights = (
     }
   }
   
-  // ✅ INSIGHT 4: PORTFOLIO SIZE MATURITY
+  // ✅ INSIGHT 4: PORTFOLIO SIZE MATURITY - Solo se rilevante
   if (config?.size !== false) {
     const totalValue = current.totalValue ?? 0;
     
-    if (totalValue < 10000) {
+    // Solo se il portfolio è molto piccolo (bisogno di guida) o molto grande (opportunità)
+    if (totalValue < 5000) {
       insights.push({
         type: 'info',
         category: 'size',
         message: 'Portfolio in fase iniziale: concentrati su risparmio costante',
         action: 'Priorità: emergency fund e risparmio regolare',
         priority: 3
-      });
-    } else if (totalValue < 100000) {
-      insights.push({
-        type: 'info', 
-        category: 'size',
-        message: 'Portfolio in crescita: SWR ancora prematuro',
-        action: 'Continua accumulo prima di pensare a prelievi sistematici',
-        priority: 2
       });
     } else if (totalValue > 1000000) {
       insights.push({
@@ -824,12 +903,12 @@ export const generateInsights = (
     }
   }
   
-  // ✅ INSIGHT 5: TAX OPTIMIZATION  
+  // ✅ INSIGHT 5: TAX OPTIMIZATION - Solo se rilevante
   if (config?.tax !== false) {
     const currentMonth = new Date().getMonth() + 1;
     
-    // Tax loss harvesting in dicembre
-    if (currentMonth === 12 && (current.unrealizedGains ?? 0) > 0) {
+    // Tax loss harvesting in dicembre - solo se ci sono plusvalenze significative
+    if (currentMonth === 12 && (current.unrealizedGains ?? 0) > 1000) {
       insights.push({
         type: 'info',
         category: 'tax',
@@ -839,35 +918,47 @@ export const generateInsights = (
       });
     }
     
-    // Bollo conti deposito
-    if ((current.cashAccounts ?? 0) > 5000) {
+    // Bollo conti deposito - solo se liquidità molto elevata
+    if ((current.cashAccounts ?? 0) > 10000) {
       insights.push({
         type: 'info',
         category: 'tax', 
-        message: 'Liquidità >€5K: bollo 0.2% su conti deposito/titoli',
+        message: 'Liquidità >€10K: bollo 0.2% su conti deposito',
         action: 'Verifica applicazione bollo e considera ottimizzazioni',
         priority: 3
       });
     }
+    
+    // Reminder dichiarazione redditi - solo se plusvalenze significative
+    if ((currentMonth >= 3 && currentMonth <= 5) && (current.unrealizedGains ?? 0) > 2000) {
+      insights.push({
+        type: 'info',
+        category: 'tax',
+        message: `Plusvalenze significative: ${(current.unrealizedGains ?? 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`,
+        action: 'Ricorda di dichiarare eventuali plusvalenze nella dichiarazione dei redditi',
+        priority: 4
+      });
+    }
   }
   
-  // ⚠️ WARNING GENERICI per sostitutire risk score fake
+  // ⚠️ WARNING ALLOCAZIONE - Solo se problematico
   const totalAssets = (current.totalValue ?? 0);
   const investmentsRatio = totalAssets > 0 ? ((current.totalValue ?? 0) - (current.cashAccounts ?? 0)) / totalAssets : 0;
   
-  if (investmentsRatio > 0.95) {
+  // Solo se estremamente sbilanciato
+  if (investmentsRatio > 0.98) {
     insights.push({
       type: 'warning',
       category: 'allocation',
-      message: 'Concentrazione eccessiva in investimenti (>95%)',
-      action: 'Mantieni almeno 5% in liquidità per flessibilità',
+      message: 'Concentrazione eccessiva in investimenti (>98%)',
+      action: 'Mantieni almeno 2% in liquidità per flessibilità',
       priority: 7
     });
-  } else if (investmentsRatio < 0.1 && totalAssets > 50000) {
+  } else if (investmentsRatio < 0.05 && totalAssets > 100000) {
     insights.push({
       type: 'info', 
       category: 'allocation',
-      message: 'Portfolio molto liquido (<10% investito)',
+      message: 'Portfolio molto liquido (<5% investito)',
       action: 'Considera investimenti per crescita long-term dopo emergency fund',
       priority: 4
     });

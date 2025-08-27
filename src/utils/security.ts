@@ -9,7 +9,6 @@
 import { 
   sanitizeString as advancedSanitizeString, 
   sanitizeAmount, 
-  sanitizeCSVCell,
   secureInputValidation,
   auditTrail
 } from './advancedSecurity';

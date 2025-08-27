@@ -198,6 +198,23 @@ MangoMoney fornisce solo insights calcolabili accuratamente con i dati disponibi
 - **Accuratezza:** 100% - regole fiscali definite
 
 #### **📈 Allocazione Macro**
+- **Cosa calcola:** Concentrazione eccessiva in macro-categorie
+- **Soglie:** >95% investimenti, <10% liquidità per portfolio >€50K
+- **Accuratezza:** 100% - calcolo diretto
+
+---
+
+### **❌ Cosa NON Calcoliamo**
+
+**Per mantenere privacy e accuratezza, MangoMoney NON fornisce:**
+- ❌ **Risk score dettagliato** - Serve composizione specifica investimenti
+- ❌ **Diversificazione precisa** - Serve asset class specifiche  
+- ❌ **Consigli asset allocation** - Serve analisi professionale
+- ❌ **Performance vs mercato** - Serve dati tempo reale (privacy violation)
+
+**💡 Perché questi limiti?**
+Preferiamo dire "non lo sappiamo" piuttosto che fornire analisi imprecise.
+Per analisi portfolio avanzate raccomandiamo consulenti finanziari qualificati.
 - **Cosa calcola:** Warning concentrazione eccessiva in macro-categorie
 - **Soglie:** >95% investimenti, <10% liquidità per portfolio grandi
 - **Accuratezza:** 100% - basato su allocazione macro

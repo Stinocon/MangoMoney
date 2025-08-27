@@ -82,55 +82,11 @@ const debounce = <T extends (...args: any[]) => any>(func: T, delay: number): T 
   }) as T;
 };
 
-// ✅ PERFORMANCE OPTIMIZATION: Smart precision calculation
-const smartCalculation = (a: number, b: number, operation: 'add' | 'multiply' | 'divide'): number => {
-  // Use Decimal.js only for large amounts or critical calculations
-  if (Math.abs(a) > 1000000 || Math.abs(b) > 1000000) {
-    switch (operation) {
-      case 'add': return safeAdd(a, b);
-      case 'multiply': return safeMultiply(a, b);
-      case 'divide': return safeDivide(a, b);
-      default: return a;
-    }
-  }
-  
-  // Use native Number for small amounts (10x faster)
-  switch (operation) {
-    case 'add': return Number((a + b).toFixed(2));
-    case 'multiply': return Number((a * b).toFixed(2));
-    case 'divide': return b !== 0 ? Number((a / b).toFixed(2)) : 0;
-    default: return a;
-  }
-};
 
-// ✅ PERFORMANCE OPTIMIZATION: Performance monitoring utility
-const performanceTest = (name: string, fn: () => any) => {
-  if (process.env.NODE_ENV === 'development') {
-    const start = performance.now();
-    const result = fn();
-    const end = performance.now();
-    console.log(`📊 ${name}: ${(end - start).toFixed(2)}ms`);
-    
-    if (end - start > 100) {
-      console.warn(`⚠️ ${name} is slow (>${100}ms)`);
-    }
-    
-    return result;
-  }
-  return fn();
-};
 
-// ✅ PERFORMANCE OPTIMIZATION: Memory monitoring
-const memoryMonitor = () => {
-  if (process.env.NODE_ENV === 'development' && 'memory' in performance) {
-    const memory = (performance as any).memory;
-    console.log('Memory Usage:', {
-      used: `${(memory.usedJSHeapSize / 1048576).toFixed(2)}MB`,
-      allocated: `${(memory.totalJSHeapSize / 1048576).toFixed(2)}MB`,
-      limit: `${(memory.jsHeapSizeLimit / 1048576).toFixed(2)}MB`
-    });
-  }
-};
+
+
+
 
 interface ErrorLogEntry {
   context: string;
@@ -203,22 +159,7 @@ interface SectionErrorBoundaryProps {
  * Performance monitoring component for useMemo hooks in development
  * Provides timing information for expensive calculations
  */
-const ProfiledUseMemo = ({ children, deps, name }: {
-  children: () => any;
-  deps: any[];
-  name: string;
-}) => {
-  return useMemo(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const start = performance.now();
-      const result = children();
-      const end = performance.now();
-      console.log(`📊 ${name} calculation took ${(end - start).toFixed(2)}ms`);
-      return result;
-    }
-    return children();
-  }, deps);
-};
+
 
 class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, { 
   hasError: boolean; 
@@ -2646,62 +2587,7 @@ const NetWorthManager = () => {
 
 
 
-  // ✅ UNIFIED CHART DATA FACTORY
-  const createChartData = useCallback((dataType: 'pie' | 'bar') => {
-    const baseData = [
-      { 
-        id: 'cash',
-        label: t('cash'), 
-        value: totals.cash, 
-        color: '#3b82f6' 
-      },
-      { 
-        id: 'debts',
-        label: t('debts'), 
-        value: Math.abs(totals.debts), 
-        color: '#dc2626' 
-      },
-      { 
-        id: 'investments',
-        label: t('investments'), 
-        value: totals.investments, 
-        color: '#10b981' 
-      },
-      { 
-        id: 'realEstate',
-        label: t('realEstate'), 
-        value: totals.realEstate, 
-        color: '#8b5cf6' 
-      },
-      { 
-        id: 'pensionFunds',
-        label: t('pensionFunds'), 
-        value: totals.pensionFunds, 
-        color: '#ef4444' 
-      },
 
-      { 
-        id: 'alternativeAssets',
-        label: t('alternativeAssets'), 
-        value: totals.alternativeAssets, 
-        color: '#84cc16' 
-      }
-    ];
-
-    if (dataType === 'pie') {
-      return baseData.map(item => ({
-        name: item.label,
-        value: item.value,
-        color: item.color
-      })) as ChartDataItem[];
-    } else {
-      return baseData.map(item => ({
-        category: item.label,
-        amount: item.value,
-        color: item.color
-      })) as any[];
-    }
-  }, [totals, t]);
 
   // ✅ PERFORMANCE OPTIMIZATION: Memoized chart color function
   const getChartColor = (key: string): string => {
@@ -10649,7 +10535,7 @@ const NetWorthManager = () => {
                   </h3>
                   <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
                     <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {t('smartInsightsDescription')}
+                      Analisi basate sui dati disponibili nell'app
                     </p>
                     
                     <div className="space-y-3">

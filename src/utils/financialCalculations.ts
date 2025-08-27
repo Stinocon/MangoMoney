@@ -237,17 +237,7 @@ export const safeCAGR = (initialValue: number, finalValue: number, years: number
 
 
 
-/**
- * Asset class mapping for risk calculation
- */
-const ASSET_CLASS_MAPPING = {
-  cash: 'cash',
-  
-  pensionFunds: 'pensionFunds', // ✅ FIXED: separate category
-  realEstate: 'realEstate',
-  investmentPositions: 'mixed', // ✅ FIXED: analyze individual positions
-  alternativeAssets: 'alternatives'
-};
+
 
 
 
@@ -365,95 +355,8 @@ export const calculatePortfolioRiskScore = (
   return Math.max(0, Math.min(10, riskScore));
 };
 
-/**
- * Calculates Sharpe Ratio for portfolio risk-adjusted performance
- * 
- * @description
- * Sharpe Ratio measures the excess return per unit of risk compared to risk-free rate.
- * Higher values indicate better risk-adjusted performance. This is the standalone version
- * that takes pre-calculated return and volatility values.
- * 
- * @formula
- * Sharpe Ratio = (Portfolio Return - Risk Free Rate) / Portfolio Volatility
- * 
- * @param {number} portfolioReturn - Annualized portfolio return (%)
- * @param {number} portfolioVolatility - Portfolio volatility/standard deviation (%)
- * @param {number} riskFreeRate - Risk-free rate, default 2% (%)
- * 
- * @returns {number} Sharpe Ratio (capped between -10 and +10 for UI)
- * 
- * @example
- * // Portfolio with 8% return, 15% volatility, 2% risk-free rate
- * const sharpe = calculateSharpeRatio(8, 15, 2); // Returns 0.4
- * 
- * @interpretation
- * - > 1.0: Excellent (high excess return for risk)
- * - 0.5-1.0: Good (adequate return for risk)
- * - 0-0.5: Poor (low return for risk)
- * - < 0: Very poor (return below risk-free rate)
- * 
- * @edgeCases
- * - Zero volatility with zero excess return: Returns 0 (neutral performance)
- * - Zero volatility with positive excess return: Returns +10 (perfect risk-free gain)
- * - Zero volatility with negative excess return: Returns -10 (loss with no risk)
- * - Negative volatility: Treated as zero volatility
- * - Extreme values: Capped at ±10 for UI sanity
- * 
- * @mathematicalNotes
- * Edge case handling for zero volatility:
- * - Excess return = 0, Volatility = 0 → Sharpe = 0 (neutral)
- * - Excess return > 0, Volatility = 0 → Sharpe = +10 (perfect risk-free gain)
- * - Excess return < 0, Volatility = 0 → Sharpe = -10 (loss with no risk)
- * 
- * This is more mathematically sound than treating 0/0 as negative.
- * 
- * @limitations
- * - Assumes normal distribution of returns
- * - Doesn't account for skewness or kurtosis
- * - Historical volatility may not predict future
- * 
- * @references
- * - Sharpe, W.F. (1964): "Capital Asset Pricing Model"
- * - CFA Institute: "Investment Performance Measurement"
- * 
- * @throws {Error} Returns 0 for invalid inputs
- */
-export const calculateSharpeRatio = (
-  portfolioReturn: number,
-  portfolioVolatility: number,
-  riskFreeRate: number = 2.0
-): number => {
-  return safeFinancialOperation(() => {
-    // Handle edge cases with zero volatility
-    if (portfolioVolatility <= 0) {
-      const excessReturn = new Decimal(portfolioReturn).minus(riskFreeRate);
-      
-      // ✅ CORRETTO: Gestione matematicamente accurata
-      if (excessReturn.equals(0)) {
-        // 0/0 case: return 0 (neutral performance)
-        return new Decimal(0);
-      } else if (excessReturn.greaterThan(0)) {
-        // Positive excess return with no risk = excellent
-        return new Decimal(10);
-      } else {
-        // Negative excess return with no risk = terrible  
-        return new Decimal(-10);
-      }
-    }
 
-    // Calculate excess return
-    const excessReturn = new Decimal(portfolioReturn).minus(riskFreeRate);
-    
-    // Calculate Sharpe Ratio
-    const sharpeRatio = excessReturn.dividedBy(portfolioVolatility);
-    
-    // Cap between -10 and +10 for UI sanity
-    if (sharpeRatio.greaterThan(10)) return new Decimal(10);
-    if (sharpeRatio.lessThan(-10)) return new Decimal(-10);
-    
-    return sharpeRatio;
-  }, 0);
-};
+
 
 /**
  * Calculates portfolio Sharpe Ratio using historical data
@@ -700,35 +603,7 @@ export const validateAndNormalizeBigNumbers = (value: number, context: string): 
     allPassed = false;
   }
   
-  // Test 4: Cost basis average method
-  try {
-    const testAllocations = { cash: 20000, stocks: 60000, bonds: 20000 };
-    const sharpeRatio = calculatePortfolioSharpeRatio(testAllocations, 100000, 2.0);
-    if (Number.isFinite(sharpeRatio) && sharpeRatio >= -10 && sharpeRatio <= 10) {
-      console.log('✅ Fix #4: Cost basis average method - WORKING');
-    } else {
-      console.error('❌ Fix #4: Cost basis average method - FAILED');
-      allPassed = false;
-    }
-  } catch (error) {
-    console.error('❌ Fix #4 test failed:', error);
-    allPassed = false;
-  }
-  
-  // Test 5: Dynamic expected returns
-  try {
-    const testAllocations = { cash: 100000 };
-    const sharpeRatio = calculatePortfolioSharpeRatio(testAllocations, 100000, 2.0);
-    if (Number.isFinite(sharpeRatio)) {
-      console.log('✅ Fix #5: Dynamic expected returns - WORKING');
-    } else {
-      console.error('❌ Fix #5: Dynamic expected returns - FAILED');
-      allPassed = false;
-    }
-  } catch (error) {
-    console.error('❌ Fix #5 test failed:', error);
-    allPassed = false;
-  }
+
   
   // Test 6: Dynamic correlation matrix
   try {
@@ -790,19 +665,7 @@ export const validateAndNormalizeBigNumbers = (value: number, context: string): 
     allPassed = false;
   }
   
-  // Test 11: Sharpe ratio edge cases
-  try {
-    const zeroVolatilityTest = calculatePortfolioSharpeRatio({ cash: 100000 }, 100000, 2.0);
-    if (Number.isFinite(zeroVolatilityTest)) {
-      console.log('✅ Fix #11: Sharpe ratio edge cases - WORKING');
-    } else {
-      console.error('❌ Fix #11: Sharpe ratio edge cases - FAILED');
-      allPassed = false;
-    }
-  } catch (error) {
-    console.error('❌ Fix #11 test failed:', error);
-    allPassed = false;
-  }
+
   
   // Test 12: SWR calculation enhancements
   try {
@@ -1495,18 +1358,7 @@ export const calculateEmergencyFundMetrics = (
   };
 };
 
-// ✅ HELPER FUNCTIONS
-const validateFiniteNumber = (value: any, context: string, defaultValue: number = 0): number => {
-  if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
-    return value;
-  }
-  
-  if (value !== 0 && value !== defaultValue) { // Don't warn for explicit 0 or default
-    console.warn(`validateFiniteNumber: Invalid ${context}: ${value}, using ${defaultValue}`);
-  }
-  
-  return defaultValue;
-};
+
 
 const getSafeEmergencyFundDefaults = () => ({
   value: 0,
@@ -1519,27 +1371,7 @@ const getSafeEmergencyFundDefaults = () => ({
   percentage: 0
 });
 
-const validateEmergencyFundResult = (result: any): boolean => {
-  const requiredFields = ['value', 'months', 'monthsFormatted', 'status', 'isAdequate', 'isOptimal', 'missingForOptimal', 'percentage'];
-  
-  for (const field of requiredFields) {
-    if (!(field in result)) {
-      console.error(`validateEmergencyFundResult: Missing field ${field}`);
-      return false;
-    }
-  }
 
-  // Validate numeric fields
-  const numericFields = ['value', 'months', 'missingForOptimal', 'percentage'];
-  for (const field of numericFields) {
-    if (!Number.isFinite(result[field]) || result[field] < 0) {
-      console.error(`validateEmergencyFundResult: Invalid ${field}: ${result[field]}`);
-      return false;
-    }
-  }
-
-  return true;
-};
 
 /**
  * Validate financial input with comprehensive error checking

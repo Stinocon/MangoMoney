@@ -141,42 +141,8 @@ export const validateLeverageMultiplier = (multiplier: number, leverageRatio: nu
   }
 };
 
-/**
- * Validazione sharpe ratio
- * 
- * @description
- * Verifica che il Sharpe Ratio sia in un range ragionevole.
- * Valori estremi potrebbero indicare errori di calcolo.
- * 
- * @param {number} sharpeRatio - Il Sharpe Ratio calcolato
- * @param {string} context - Contesto del calcolo per debug
- * 
- * @interpretation
- * > 1.0: Excellent
- * 0.5-1.0: Good
- * 0-0.5: Poor
- * < 0: Very poor
- * 
- * @example
- * validateSharpeRatio(0.8, 'portfolio efficiency'); // OK
- * validateSharpeRatio(5.0, 'portfolio efficiency'); // Warning (too high)
- */
-export const validateSharpeRatio = (sharpeRatio: number, context: string): void => {
-  // Range ragionevole per Sharpe Ratio: -3 to +3
-  if (sharpeRatio < -3 || sharpeRatio > 3) {
-    console.warn(
-      `⚠️ Sharpe Ratio out of typical range in ${context}: ${sharpeRatio.toFixed(3)}. ` +
-      `Typical range: -3.0 to +3.0. Check return and volatility calculations.`
-    );
-  }
-  
-  if (!isFinite(sharpeRatio) || isNaN(sharpeRatio)) {
-    console.error(
-      `❌ Invalid Sharpe Ratio in ${context}: ${sharpeRatio}. ` +
-      `Check for division by zero in volatility calculation.`
-    );
-  }
-};
+
+
 
 /**
  * Validazione capital gains tax rate
@@ -288,10 +254,7 @@ export const validatePortfolioStatistics = (stats: any, context: string): void =
       validateRiskScore(parseFloat(stats.riskScore), `${context} - risk assessment`);
     }
     
-    // Validazione Sharpe Ratio
-    if (stats.sharpeRatio) {
-      validateSharpeRatio(parseFloat(stats.sharpeRatio), `${context} - efficiency score`);
-    }
+
     
     // Validazione emergency fund
     if (stats.emergencyMonths) {

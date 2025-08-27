@@ -102,24 +102,26 @@ export const DEFAULT_ASSET_RISK_WEIGHTS: AssetRiskWeights = {
 };
 
 // ===== DIVERSIFICATION THRESHOLDS =====
-export interface DiversificationConfig {
-  lowThreshold: number;        // Default: 40
-  highThreshold: number;       // Default: 70
-}
+// ❌ ELIMINATO: DiversificationConfig - non utilizzato negli smart insights
+// export interface DiversificationConfig {
+//   lowThreshold: number;        // Default: 40
+//   highThreshold: number;       // Default: 70
+// }
 
-export const DEFAULT_DIVERSIFICATION_CONFIG: DiversificationConfig = {
-  lowThreshold: 40,
-  highThreshold: 70
-};
+// export const DEFAULT_DIVERSIFICATION_CONFIG: DiversificationConfig = {
+//   lowThreshold: 40,
+//   highThreshold: 70
+// };
 
 // ===== PERFORMANCE THRESHOLDS =====
-export interface PerformanceConfig {
-  significantChangeThreshold: number;  // Default: 5.0%
-}
+// ❌ ELIMINATO: PerformanceConfig - non utilizzato negli smart insights
+// export interface PerformanceConfig {
+//   significantChangeThreshold: number;  // Default: 5.0%
+// }
 
-export const DEFAULT_PERFORMANCE_CONFIG: PerformanceConfig = {
-  significantChangeThreshold: 5.0
-};
+// export const DEFAULT_PERFORMANCE_CONFIG: PerformanceConfig = {
+//   significantChangeThreshold: 5.0
+// };
 
 // ===== DEBT-TO-ASSET THRESHOLDS =====
 export interface DebtToAssetConfig {
@@ -169,8 +171,8 @@ export interface SmartInsightsConfig {
   emergencyFund: EmergencyFundConfig;
   riskScore: RiskScoreConfig;
   assetRiskWeights: AssetRiskWeights;
-  diversification: DiversificationConfig;
-  performance: PerformanceConfig;
+  // ❌ ELIMINATO: diversification: DiversificationConfig;
+  // ❌ ELIMINATO: performance: PerformanceConfig;
   debtToAsset: DebtToAssetConfig;
   taxOptimization: TaxOptimizationConfig;
   swrAdjustment: SwrAdjustmentConfig;
@@ -180,8 +182,8 @@ export const DEFAULT_SMART_INSIGHTS_CONFIG: SmartInsightsConfig = {
   emergencyFund: DEFAULT_EMERGENCY_FUND_CONFIG,
   riskScore: DEFAULT_RISK_SCORE_CONFIG,
   assetRiskWeights: DEFAULT_ASSET_RISK_WEIGHTS,
-  diversification: DEFAULT_DIVERSIFICATION_CONFIG,
-  performance: DEFAULT_PERFORMANCE_CONFIG,
+  // ❌ ELIMINATO: diversification: DEFAULT_DIVERSIFICATION_CONFIG,
+  // ❌ ELIMINATO: performance: DEFAULT_PERFORMANCE_CONFIG,
   debtToAsset: DEFAULT_DEBT_TO_ASSET_CONFIG,
   taxOptimization: DEFAULT_TAX_OPTIMIZATION_CONFIG,
   swrAdjustment: DEFAULT_SWR_ADJUSTMENT_CONFIG
@@ -241,15 +243,15 @@ export const validateSmartInsightsConfig = (config: SmartInsightsConfig): string
     errors.push('Moderate threshold must be less than aggressive threshold');
   }
   
-  // Diversification validation
-  if (config.diversification.lowThreshold >= config.diversification.highThreshold) {
-    errors.push('Diversification low threshold must be less than high threshold');
-  }
+  // ❌ ELIMINATO: Diversification validation - non più utilizzato
+  // if (config.diversification.lowThreshold >= config.diversification.highThreshold) {
+  //   errors.push('Diversification low threshold must be less than high threshold');
+  // }
   
-  // Performance validation
-  if (config.performance.significantChangeThreshold <= 0) {
-    errors.push('Performance threshold must be positive');
-  }
+  // ❌ ELIMINATO: Performance validation - non più utilizzato
+  // if (config.performance.significantChangeThreshold <= 0) {
+  //   errors.push('Performance threshold must be positive');
+  // }
   
   // Debt-to-Asset validation
   if (config.debtToAsset.criticalThreshold <= config.debtToAsset.warningThreshold) {
