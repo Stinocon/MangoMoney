@@ -46,7 +46,7 @@ Il nome viene da "**mangano i money**" → mancano i soldi. Un po' stupido, ma m
 
 Inserisci tutti i tuoi asset: conti bancari, investimenti, immobili, persino i Pokémon se li consideri un investimento.
 
-L'app calcola basandosi sui dati inseriti manualmente:
+L'app elabora i dati inseriti manualmente per calcolare:
 - **Patrimonio Netto** con breakdown per tipologia
 - **Profilo Rischio** semplificato basato su % investimenti  
 - **Safe Withdrawal Rate** per pianificare la pensione
@@ -170,7 +170,7 @@ npm run type-check      # TypeScript validation
 ## 🎯 Funzionalità Avanzate
 
 ### **Smart Insights** 
-L'app include insights di base su portfolio e allocazione:
+L'app fornisce insights essenziali per la gestione del portfolio:
 - **Profilo rischio**: Valutazione semplificata basata su categorie asset
 - **Asset allocation**: Suggerimenti di bilanciamento conservativo/aggressivo  
 - **Emergency fund**: Valutazione adeguatezza del fondo emergenza
@@ -220,6 +220,17 @@ Per utenti italiani:
 - Non ha accesso a dati di mercato in tempo reale
 
 **DISCLAIMER**: MangoMoney è uno strumento di **monitoraggio**, non fornisce consigli di investimento. I calcoli sono indicativi e basati su dati storici. Per decisioni importanti consulta sempre un **consulente finanziario qualificato**.
+
+### 🎯 **Target Utenti**
+MangoMoney è ideale per:
+- **Investitori individuali** che vogliono una panoramica chiara del patrimonio
+- **Professionisti** che cercano uno strumento semplice ma completo
+- **Chiunque** preferisca tenere i dati finanziari privati e offline
+
+Non è adatto per:
+- Analisi quantitative avanzate o modelli accademici
+- Trading ad alta frequenza o strategie algoritmiche
+- Gestione patrimoni istituzionali o fondi di investimento
 
 ### **📄 Licenza**
 Rilasciato sotto **Creative Commons BY-NC-SA 4.0**. 

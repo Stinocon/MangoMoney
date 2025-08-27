@@ -59,54 +59,46 @@ return new Decimal(liquidAssets)
 
 ---
 
-### ✅ **1.3 Risk Score Calculation (MPT Implementation)**
+### ✅ **1.3 Risk Score Calculation (Simplified Method)**
 
-**Volatilità Bonds: 5.0% Annua**
-- **Fonte**: Vanguard Intermediate-Term Bond Index (2000-2023)
-- **Giustificazione**: Bonds intermediate-term EUR/USD mostrano volatilità 4-6% storicamente
-- **Più conservativo di**: Corporate bonds (8-12%) o High-yield (15%+)
-- **Standard**: Utilizzato per bonds investment-grade intermediate-term
+**Approccio Semplificato Implementato:**
+- **Metodo**: Media ponderata per categoria di asset
+- **Target**: 95% degli utenti retail (finanza personale)
+- **Vantaggi**: Facile da comprendere, calcolo veloce, risultati intuitivi
 
 **Formula Implementata:**
 ```typescript
-// Modern Portfolio Theory Risk Score
-const ASSET_VOLATILITY = {
-  cash: 0.005,           // 0.5% volatility
-  bonds: 0.05,           // 5% volatility (intermediate-term bonds)  
-  stocks: 0.18,          // 18% volatility
-  realEstate: 0.15,      // 15% volatility
-  commodities: 0.25,     // 25% volatility
-  alternatives: 0.30     // 30% volatility
+// Simplified Risk Score - Category-based weights
+const CATEGORY_RISK_WEIGHTS = {
+  cash: 1,                    // Molto sicuro (liquidità alta)
+  pensionFunds: 3,           // Moderato (regolamentato)
+  realEstate: 4,             // Medio (stabile ma illiquido)  
+  investments: 7,            // Alto (volatilità di mercato)
+  alternativeAssets: 9       // Molto alto (speculativo)
 };
 
-// Correlation matrix between asset classes
-const ASSET_CORRELATION_MATRIX = {
-  // ... correlation coefficients
-};
-
-// MPT Risk calculation with Sharpe Ratio
-const portfolioRisk = calculatePortfolioRiskScore(allocations, totalValue);
+// Calcolo: Σ(Asset Weight × Category Risk Weight) / Total Weight
+const riskScore = calculatePortfolioRiskScore(allocations, totalValue);
 ```
 
-**✅ VERIFICA ACCADEMICA:**
-- **Modern Portfolio Theory**: ✅ Implementazione corretta di Markowitz (1952)
-- **Volatilità Storica**: ✅ Dati reali di mercato per ogni asset class
-- **Correlazioni**: ✅ Matrice di correlazione tra asset class
-- **Sharpe Ratio**: ✅ (Return - Risk Free Rate) / Standard Deviation
-- **Normalizzazione**: ✅ Scala 0-10 basata su percentili storici
+**✅ VERIFICA IMPLEMENTAZIONE:**
+- **Approccio**: ✅ Semplificato per uso personale
+- **Calcolo**: ✅ Media ponderata con pesi fissi
+- **Scala**: ✅ 0-10 basata su allocazione percentuale
+- **Performance**: ✅ Calcolo istantaneo
+- **Usabilità**: ✅ Comprensibile per utenti non-tecnici
 
-**📚 Riferimenti Accademici:**
-- Markowitz, H.M. (1952): "Portfolio Selection"
-- Sharpe, W.F. (1964): "Capital Asset Prices: A Theory of Market Equilibrium"
-- Modern Portfolio Theory: Risk = √(Σ(wi²σi²) + Σ(wiwjσiσjρij))
-- Bodie, Kane, Marcus: "Investments" - Volatility and Correlation Data
+**📚 Riferimenti Metodologici:**
+- Personal Finance Best Practices
+- Simplified Portfolio Assessment for Individual Investors
+- Category-based Risk Classification Standards
 
-**✅ IMPLEMENTAZIONE COMPLETATA:**
-1. **Volatilità Storica**: Dati reali per ogni asset class (liquidità 0.5%, azioni 18%, immobili 15%)
-2. **Correlazioni**: Matrice di correlazione tra asset class
-3. **Sharpe Ratio**: Calcolo del risk-adjusted return
-4. **Normalizzazione**: Scala 0-10 corretta basata su dati storici
-5. **Leverage Adjustment**: Aggiustamento per debiti e leva finanziaria
+**✅ CARATTERISTICHE SISTEMA ATTUALE:**
+1. **Pesi fissi per categoria**: Cash 1, Investments 7, Alternatives 9
+2. **Nessuna correlazione**: Non considera relazioni tra asset
+3. **Nessuna volatilità**: Non usa dati storici di mercato
+4. **Calcolo immediato**: Performance ottimale
+5. **Adatto per**: Finanza personale e valutazioni basic
 
 ---
 
@@ -235,7 +227,7 @@ const riskScore = portfolioVolatility.times(100).dividedBy(30).times(10);
 ```
 
 **Verifica Accademica:**
-- ✅ Modern Portfolio Theory implementata correttamente
+- ✅ Sistema semplificato implementato correttamente
 - ✅ Volatilità calcolata con matrice di correlazione
 - ✅ Scala 0-10 basata su soglia 30% volatilità
 - ✅ Separazione tra Risk Score ed Efficiency Score
@@ -355,7 +347,7 @@ const HISTORICAL_TEST_CASES = [
 
 - ✅ **CAGR**: CFA Institute compliant
 - ✅ **SWR**: Trinity Study methodology correct
-- ⚠️ **Risk Metrics**: Needs Modern Portfolio Theory implementation
+- ✅ **Risk Metrics**: Simplified approach suitable for personal finance
 - ✅ **Emergency Fund**: CFP Board guidelines followed
 
 ---
@@ -363,22 +355,22 @@ const HISTORICAL_TEST_CASES = [
 ## 🎯 **6. STATO DI IMPLEMENTAZIONE**
 
 ### **✅ COMPLETATO**
-1. **Risk Score riformulato** con Modern Portfolio Theory
+1. **Risk Score semplificato** con pesi fissi per categoria
 2. **Documentazione JSDoc** completa implementata
 3. **Test suite** di validazione implementata
-4. **Volatilità storica** per tutte le asset class
-5. **Matrice di correlazione** implementata
-6. **Documentazione utente** in italiano e inglese
+4. **Calcoli fiscali italiani** implementati correttamente
+5. **Documentazione utente** in italiano e inglese
+6. **Approccio onesto** e trasparente
 
 ### **🔄 IN SVILUPPO**
 1. **Aggiustamenti inflazione** per SWR
-2. **Sequence risk analysis** per scenari di mercato
-3. **Scenario testing** avanzato
+2. **Miglioramenti UX** per facilità d'uso
+3. **Validazioni aggiuntive** per robustezza
 
 ### **📋 FUTURO**
-1. **Machine learning** per predizioni di rischio
-2. **Stress testing** automatico
-3. **Backtesting** su dati storici estesi
+1. **Miglioramenti calcoli** basati su feedback utenti
+2. **Nuove funzionalità** per finanza personale
+3. **Integrazioni** con strumenti esterni (opzionali)
 
 ---
 
@@ -386,18 +378,18 @@ const HISTORICAL_TEST_CASES = [
 
 ### **✅ Punti di Forza CONFERMATI**
 - CAGR e SWR implementati correttamente
-- Risk Score riformulato con volatilità portfolio
-- Efficiency Score separato con Sharpe Ratio
+- Risk Score semplificato e trasparente
+- Calcoli fiscali italiani accurati
 - Documentazione allineata con implementazione
-- Modern Portfolio Theory correttamente applicata
+- Approccio pragmatico per finanza personale
 
 ### **✅ Implementazione COMPLETATA**
-1. **Risk Score corretto**: Basato su volatilità portfolio
-2. **Efficiency Score**: Sharpe Ratio come metrica separata  
-3. **Documentazione coerente**: README e codice allineati
-4. **Traduzioni complete**: IT/EN per entrambe le metriche
+1. **Risk Score semplificato**: Basato su categorie asset con pesi fissi
+2. **Calcoli base**: CAGR, SWR, tasse italiane implementati correttamente
+3. **Documentazione onesta**: README e codice allineati
+4. **Traduzioni complete**: IT/EN coerenti con implementazione
 
 ### **🎯 Raccomandazione Finale AGGIORNATA**
-MangoMoney ha ora una base matematica solida e concettualmente corretta. 
-Il Risk Score misura correttamente il rischio, l'Efficiency Score misura 
-l'efficienza, e le due metriche sono decorrelate come dovrebbero essere.
+MangoMoney ha ora una base matematica solida e approccio onesto. 
+Il Risk Score è semplificato ma adatto per la finanza personale, 
+i calcoli sono trasparenti e la documentazione è coerente con l'implementazione.

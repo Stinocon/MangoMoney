@@ -47,7 +47,7 @@ const HELP_DATABASE: Record<string, HelpContent> = {
   'risk-score': {
     definition: 'Il Risk Score (0-10) valuta la volatilità del tuo portfolio.',
     example: 'Portfolio 60% azioni, 30% obbligazioni, 10% liquidità = Risk Score 6.5.',
-    calculation: 'Basato su Modern Portfolio Theory con correlazioni storiche asset.',
+    calculation: 'Basato su approccio semplificato con pesi fissi per categoria.',
     interpretation: '0-3: Conservativo, 4-6: Moderato, 7-10: Aggressivo',
     rebalancing: 'Score >8 suggerisce di aggiungere asset meno volatili.',
     warnings: 'Alto rischio = alte potenziali perdite, non solo guadagni.',

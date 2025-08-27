@@ -687,7 +687,7 @@ export const it = {
   // Sezioni per calcoli implementati
   improvedCalculations: 'Calcoli Avanzati',
   riskScoreSmarter: 'Risk Score più intelligente',
-  riskScoreSmarterDesc: 'L\'app ora usa volatilità storiche calcolate su dati di mercato reali (invece di pesi inventati) che sono incorporate nell\'app. Per esempio: liquidità 0.5% volatilità, azioni 18%, immobili 15%. Considera anche come si influenzano tra loro i diversi asset. Risultato: un punteggio molto più realistico di prima.',
+  riskScoreSmarterDesc: 'L\'app usa un approccio semplificato con pesi fissi per categoria di asset. Questo rende il calcolo veloce e comprensibile, adatto per la maggior parte degli utenti di finanza personale.',
   cagrTitle: 'CAGR (rendimento annualizzato)',
   cagrDesc: 'Ti dice quanto è cresciuto un investimento "in media" ogni anno. Esempio: se investi €10,000 e dopo 5 anni hai €15,000, il CAGR è 8.45% annuo. Utile per confrontare investimenti su periodi diversi.',
   swrTitle: 'Safe Withdrawal Rate (SWR)',

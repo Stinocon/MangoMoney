@@ -78,7 +78,7 @@ graph TB
 **Key Functions:**
 - `safeCAGR()`: Compound Annual Growth Rate con gestione edge cases
 - `calculateSWR()`: Safe Withdrawal Rate usando metodologia Trinity Study
-- `calculatePortfolioRiskScore()`: Valutazione rischio Modern Portfolio Theory
+- `calculatePortfolioRiskScore()`: Valutazione rischio semplificata con pesi fissi
 - `applyCostBasisMethod()`: Calcoli fiscali FIFO/LIFO/Average Cost
 
 **Design Principles:**

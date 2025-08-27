@@ -8,7 +8,7 @@
  * 
  * @references
  * - Financial Mathematics: Accuracy and Precision Standards
- * - Modern Portfolio Theory: Risk Measurement Validation
+ * - Simplified Risk Score: Risk Measurement Validation
  * - Italian Tax Code: Compliance Validation
  */
 

@@ -564,12 +564,12 @@ export const calculateSharpeRatio = (
 };
 
 /**
- * Calculates portfolio Sharpe Ratio using Modern Portfolio Theory
+ * Calculates portfolio Sharpe Ratio using historical data
  * 
  * @description
  * Calculates Sharpe Ratio for a portfolio based on asset allocations and historical data.
- * Uses the same MPT framework as calculatePortfolioRiskScore but returns Sharpe Ratio.
- * Implements the complete Modern Portfolio Theory calculation with correlation matrix.
+ * Standalone Sharpe Ratio calculation (independent of portfolio risk score).
+ * Implements Sharpe Ratio calculation with historical volatility data.
  * 
  * @formula
  * Portfolio Variance = Σ(wi²σi²) + Σ(wiwjσiσjρij)
@@ -629,7 +629,7 @@ export const calculateSharpeRatio = (
  * - Morningstar Direct: Historical Asset Class Returns (2000-2023)
  * 
  * @compliance
- * - CFA Institute: Modern Portfolio Theory standards
+ * - CFA Institute: Investment Performance Measurement standards
  * - GIPS: Risk measurement methodology
  * 
  * @throws {Error} Returns 0 for invalid inputs (negative total value)

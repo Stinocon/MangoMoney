@@ -2385,7 +2385,7 @@ const NetWorthManager = () => {
       emergencyFundOptimalMonths
     );
 
-    // Modern Portfolio Theory Risk Score Calculation
+    // Simplified Risk Score Calculation (category-based weights)
     const portfolioAllocations = {
       cash: totals.cash,
       pensionFunds: totals.pensionFunds,
@@ -2408,6 +2408,8 @@ const NetWorthManager = () => {
       });
     }
 
+    // 📊 Risk Score: Simplified approach using fixed category weights
+    // Not full MPT - suitable for personal finance use
     const baseRiskScore = calculatePortfolioRiskScore(portfolioAllocations, totalAssets);
     
     // ✅ ELIMINATO: Efficiency Score - era una funzione zombie che returnava 0

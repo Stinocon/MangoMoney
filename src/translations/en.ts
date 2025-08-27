@@ -696,7 +696,7 @@ export const en = {
   // Sections for implemented calculations
   improvedCalculations: 'Advanced Calculations',
   riskScoreSmarter: 'Smarter Risk Score',
-  riskScoreSmarterDesc: 'The app now uses historical volatilities calculated on real market data (instead of made-up weights) that are built into the app. For example: liquidity 0.5% volatility, stocks 18%, real estate 15%. It also considers how different assets affect each other. Result: a much more realistic score than before.',
+  riskScoreSmarterDesc: 'The app uses a simplified approach with fixed weights per asset category. This makes the calculation fast and understandable, suitable for most personal finance users.',
   cagrTitle: 'CAGR (annualized return)',
   cagrDesc: 'Tells you how much an investment has grown "on average" each year. Example: if you invest €10,000 and after 5 years you have €15,000, the CAGR is 8.45% annually. Useful for comparing investments over different periods.',
   swrTitle: 'Safe Withdrawal Rate (SWR)',
