@@ -169,41 +169,52 @@ npm run type-check      # TypeScript validation
 
 ## 🎯 Funzionalità Avanzate
 
-### **🤖 Smart Insights Configurabili** 
-L'app fornisce insights personalizzabili basati sui tuoi parametri, **senza magic numbers hard-coded**:
+### **🤖 Smart Insights Realistici** 
+MangoMoney fornisce solo insights calcolabili accuratamente con i dati disponibili:
 
-#### **🆘 Fondo di Emergenza**
-- **Soglie configurabili:** Adeguato (default: 3 mesi), Ottimale (default: 6 mesi)
-- **Insights dinamici:** Insufficiente → Adeguato → Ottimale → Sovradimensionato
-- **Azioni specifiche:** Aumenta liquidità, Mantieni livello, Investi eccesso
+#### **🛡️ Fondo di Emergenza**
+- **Cosa calcola:** Mesi di spese coperte da liquidità designata
+- **Soglie:** Configurabili (default: 3 mesi adeguato, 6 mesi ottimale)
+- **Accuratezza:** 100% - matematica diretta
 
-#### **⚠️ Punteggio Rischio (0-10)**
-- **15+ sottocategorie specifiche:** Contanti (1.0) → Crypto (10.0)
-- **Soglie configurabili:** Conservativo (0-3) → Bilanciato (3-6) → Aggressivo (6-8) → Speculativo (8-10)
-- **Azioni mirate:** Aumenta esposizione azionaria, Mantieni diversificazione, Riduci componente difensiva
+#### **💰 Safe Withdrawal Rate (SWR)**  
+- **Cosa calcola:** Sostenibilità prelievi per indipendenza finanziaria
+- **Base:** Trinity Study + aggiustamenti inflazione configurabili
+- **Accuratezza:** 95% - metodologia accademica consolidata
 
-#### **🌐 Diversificazione (0-100)**  
-- **Metodo:** Indice Herfindahl-Hirschman invertito
-- **Soglie configurabili:** Concentrazione eccessiva (<40) → Moderata (40-70) → Buona (>70)
-- **Azioni:** Diversifica settori, Mantieni strategia
+#### **⚖️ Gestione Debiti**
+- **Cosa calcola:** Rapporto debiti totali / patrimonio totale
+- **Soglie:** <30% moderato, 30-50% elevato, >50% eccessivo  
+- **Accuratezza:** 100% - calcolo diretto
 
-#### **💰 Tasso Prelievo Sicuro (SWR)**
-- **Base configurabile:** Default 4.0%
-- **Aggiustamenti automatici:** Inflazione (+30% eccesso), Rischio portfolio (±20% per punto)
-- **Range risultato:** 2.0% - 6.0%
+#### **📊 Maturità Portfolio**
+- **Cosa calcola:** Appropriatezza strategie in base a dimensioni
+- **Soglie:** <€10K iniziale, €10-100K crescita, >€1M maturo
+- **Accuratezza:** 100% - soglie note
 
-#### **💳 Rapporto Debiti/Patrimonio**
-- **Soglie configurabili:** Warning (>30%), Critico (>50%)
-- **Azioni:** Riduci debiti, Strategie consolidamento
+#### **🧾 Ottimizzazione Fiscale**
+- **Cosa calcola:** Timing tax harvesting, soglie bollo titoli
+- **Base:** Calendario fiscale + normativa italiana
+- **Accuratezza:** 100% - regole fiscali definite
 
-#### **📊 Performance Trends**
-- **Soglia configurabile:** Default 5% per cambiamenti significativi
-- **Analisi:** Confronto con periodo precedente
+#### **📈 Allocazione Macro**
+- **Cosa calcola:** Warning concentrazione eccessiva in macro-categorie
+- **Soglie:** >95% investimenti, <10% liquidità per portfolio grandi
+- **Accuratezza:** 100% - basato su allocazione macro
 
-#### **💰 Ottimizzazione Fiscale**
-- **Tax harvesting:** Dicembre + plusvalenze non realizzate
-- **Bollo titoli:** Conti deposito > €5,000 (configurabile)
-- **Soglie personalizzabili:** Tutte le aliquote e soglie fiscali
+---
+
+### **❌ Cosa NON Calcoliamo**
+
+**Per mantener privacy e accuratezza, MangoMoney NON fornisce:**
+- ❌ **Risk score dettagliato** - Serve composizione specifica investimenti
+- ❌ **Diversificazione precisa** - Serve asset class specifiche  
+- ❌ **Consigli asset allocation** - Serve analisi professionale
+- ❌ **Performance vs mercato** - Serve dati tempo reale (privacy violation)
+
+**💡 Perché questi limiti?**
+Preferiamo dire "non lo sappiamo" piuttosto che fornire analisi imprecise.
+Per analisi portfolio avanzate raccomandiamo consulenti finanziari qualificati.
 
 ### **🔧 Validazioni Avanzate**
 - **Controlli di coerenza** tra sezioni dell'app

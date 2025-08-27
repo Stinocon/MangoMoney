@@ -385,13 +385,14 @@ export const it = {
   dynamicToleranceExplanation: 'Tolleranza variabile: ±10% per importi < €1K, ±5% per importi < €10K, ±3% per importi < €100K, ±2% per importi maggiori',
   
   // Smart Insights Configuration
-  smartInsightsTitle: 'Insights automatici',
-  smartInsightsDescription: 'Suggerimenti di base su portfolio e allocazione',
+  smartInsightsTitle: 'Smart Insights Realistici',
+  smartInsightsDescription: 'Analisi basate sui dati disponibili nell\'app',
   insightsConfiguration: 'Configurazione Insights',
   enableEmergencyInsights: 'Abilita insights fondo emergenza',
+  enableSwrInsights: 'Safe Withdrawal Rate (SWR)',
+  enableDebtInsights: 'Gestione debiti',
+  enableSizeInsights: 'Maturità portfolio',
   enableTaxInsights: 'Abilita insights fiscali',
-  enablePerformanceInsights: 'Abilita insights performance',
-  enableRiskInsights: 'Abilita insights rischio',
   enableAllocationInsights: 'Abilita insights allocazione',
   autolinkTransactions: 'Autolink Transazioni',
   autolinkDescription: 'Strumento per collegare le transazioni alle posizioni individuali basandosi sull\'ISIN',

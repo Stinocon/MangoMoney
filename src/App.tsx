@@ -1517,15 +1517,17 @@ const NetWorthManager = () => {
     const saved = localStorage.getItem('mangomoney-insights-config');
     return saved ? safeParseJSON(saved, {
       emergency: true,
+      swr: true,
+      debt: true,
+      size: true,
       tax: true,
-      performance: true,
-      risk: true,
       allocation: true
     }) : {
       emergency: true,
+      swr: true,
+      debt: true,
+      size: true,
       tax: true,
-      performance: true,
-      risk: true,
       allocation: true
     };
   });
@@ -2583,6 +2585,20 @@ const NetWorthManager = () => {
       }, 0);
 
     const totalPortfolioValue = netWorth;
+    
+    // Calcolo plusvalenze non realizzate per tax insights
+    const unrealizedGains = assets.investments
+      .filter(asset => {
+        const currentValue = (asset.quantity || 0) * (asset.currentPrice || 0);
+        const originalValue = (asset.quantity || 0) * (asset.avgPrice || 0);
+        return currentValue > originalValue;
+      })
+      .reduce((sum, asset) => {
+        const currentValue = (asset.quantity || 0) * (asset.currentPrice || 0);
+        const originalValue = (asset.quantity || 0) * (asset.avgPrice || 0);
+        return sum + (currentValue - originalValue);
+      }, 0);
+    
     const positionsUnder1Percent = assets.investments
       .filter(asset => {
         const positionValue = (asset.quantity || 0) * (asset.currentPrice || 0);
@@ -2615,7 +2631,9 @@ const NetWorthManager = () => {
       liquidityPercentage,
       liquidityHealth,
       investmentPercentage,
-      taxAnalysis
+      taxAnalysis,
+      debtToAssetRatio,
+      unrealizedGains
     };
     
     // Validazione comprehensive finale in development mode
@@ -8365,26 +8383,13 @@ const NetWorthManager = () => {
                    <SmartInsights
                      portfolioData={{
                        totalValue: netWorth,
-                       performance: 0,
-                       riskScore: parseFloat(statistics.riskScore),
                        emergencyFundMonths: parseFloat(statistics.emergencyMonths),
-                       // Diversification score calcolato da allocationPercentages (HHI → 1-HHI)
-                       diversificationScore: (() => {
-                         const ap = statistics.allocationPercentages as { [k: string]: string };
-                         if (!ap) return 0;
-                         const keys = ['cash','investments','realEstate','pensionFunds','alternativeAssets'];
-                         const parts = keys.map(k => {
-                           const pct = parseFloat(ap[k] as string);
-                           const n = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
-                           return n / 100;
-                         });
-                         const hhi = parts.reduce((sum, p) => sum + p * p, 0);
-                         const score = (1 - hhi) * 100;
-                         return Number(score.toFixed(1));
-                       })(),
-                       // unrealizedGains: statistics.unrealizedGains || 0,
                        cashAccounts: totals.cash,
-                       // debtToAssetRatio: statistics.debtToAssetRatio || 0
+                       debtToAssetRatio: statistics.debtToAssetRatio || 0,
+                       unrealizedGains: statistics.unrealizedGains || 0,
+                       realEstateValue: totals.realEstate,
+                       alternativeAssetsValue: totals.alternativeAssets,
+                       pensionFundsValue: totals.pensionFunds
                      }}
                      previousData={undefined}
                      insightsConfig={insightsConfig}
@@ -10611,24 +10616,36 @@ const NetWorthManager = () => {
                       <label className="flex items-center space-x-3">
                         <input
                           type="checkbox"
-                          checked={insightsConfig.performance}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, performance: e.target.checked }))}
+                          checked={insightsConfig.swr}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, swr: e.target.checked }))}
                           className="rounded"
                         />
                         <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enablePerformanceInsights')}
+                          {t('enableSwrInsights')}
                         </span>
                       </label>
                       
                       <label className="flex items-center space-x-3">
                         <input
                           type="checkbox"
-                          checked={insightsConfig.risk}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, risk: e.target.checked }))}
+                          checked={insightsConfig.debt}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, debt: e.target.checked }))}
                           className="rounded"
                         />
                         <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableRiskInsights')}
+                          {t('enableDebtInsights')}
+                        </span>
+                      </label>
+                      
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insightsConfig.size}
+                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, size: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {t('enableSizeInsights')}
                         </span>
                       </label>
                       

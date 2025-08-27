@@ -392,13 +392,14 @@ export const en = {
   dynamicToleranceExplanation: 'Variable tolerance: ±10% for amounts < $1K, ±5% for amounts < $10K, ±3% for amounts < $100K, ±2% for larger amounts',
   
   // Smart Insights Configuration
-  smartInsightsTitle: 'Smart Insights',
-  smartInsightsDescription: 'Basic suggestions on portfolio and allocation',
+  smartInsightsTitle: 'Realistic Smart Insights',
+  smartInsightsDescription: 'Analysis based on available app data',
   insightsConfiguration: 'Insights Configuration',
   enableEmergencyInsights: 'Enable emergency fund insights',
+  enableSwrInsights: 'Safe Withdrawal Rate (SWR)',
+  enableDebtInsights: 'Debt management',
+  enableSizeInsights: 'Portfolio maturity',
   enableTaxInsights: 'Enable tax insights',
-  enablePerformanceInsights: 'Enable performance insights',
-  enableRiskInsights: 'Enable risk insights',
   enableAllocationInsights: 'Enable allocation insights',
   autolinkTransactions: 'Autolink Transactions',
   autolinkDescription: 'Automatically link transactions to individual positions based on ISIN',
