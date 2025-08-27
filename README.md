@@ -169,21 +169,49 @@ npm run type-check      # TypeScript validation
 
 ## 🎯 Funzionalità Avanzate
 
-### **Smart Insights** 
-L'app fornisce insights essenziali per la gestione del portfolio:
-- **Profilo rischio**: Valutazione semplificata basata su categorie asset
-- **Asset allocation**: Suggerimenti di bilanciamento conservativo/aggressivo  
-- **Emergency fund**: Valutazione adeguatezza del fondo emergenza
-- **Risk management**: Alert su concentrazione eccessiva in asset volatili
-- **Concentrazione**: Alert per eccessiva concentrazione in singola categoria
-- **Commissioni**: Monitoraggio costi di gestione portfolio
-- **Ribilanciamento**: Promemoria per mantenere allocazione target
+### **🤖 Smart Insights Configurabili** 
+L'app fornisce insights personalizzabili basati sui tuoi parametri, **senza magic numbers hard-coded**:
 
-### **Validazioni Avanzate**
+#### **🆘 Fondo di Emergenza**
+- **Soglie configurabili:** Adeguato (default: 3 mesi), Ottimale (default: 6 mesi)
+- **Insights dinamici:** Insufficiente → Adeguato → Ottimale → Sovradimensionato
+- **Azioni specifiche:** Aumenta liquidità, Mantieni livello, Investi eccesso
+
+#### **⚠️ Punteggio Rischio (0-10)**
+- **15+ sottocategorie specifiche:** Contanti (1.0) → Crypto (10.0)
+- **Soglie configurabili:** Conservativo (0-3) → Bilanciato (3-6) → Aggressivo (6-8) → Speculativo (8-10)
+- **Azioni mirate:** Aumenta esposizione azionaria, Mantieni diversificazione, Riduci componente difensiva
+
+#### **🌐 Diversificazione (0-100)**  
+- **Metodo:** Indice Herfindahl-Hirschman invertito
+- **Soglie configurabili:** Concentrazione eccessiva (<40) → Moderata (40-70) → Buona (>70)
+- **Azioni:** Diversifica settori, Mantieni strategia
+
+#### **💰 Tasso Prelievo Sicuro (SWR)**
+- **Base configurabile:** Default 4.0%
+- **Aggiustamenti automatici:** Inflazione (+30% eccesso), Rischio portfolio (±20% per punto)
+- **Range risultato:** 2.0% - 6.0%
+
+#### **💳 Rapporto Debiti/Patrimonio**
+- **Soglie configurabili:** Warning (>30%), Critico (>50%)
+- **Azioni:** Riduci debiti, Strategie consolidamento
+
+#### **📊 Performance Trends**
+- **Soglia configurabile:** Default 5% per cambiamenti significativi
+- **Analisi:** Confronto con periodo precedente
+
+#### **💰 Ottimizzazione Fiscale**
+- **Tax harvesting:** Dicembre + plusvalenze non realizzate
+- **Bollo titoli:** Conti deposito > €5,000 (configurabile)
+- **Soglie personalizzabili:** Tutte le aliquote e soglie fiscali
+
+### **🔧 Validazioni Avanzate**
 - **Controlli di coerenza** tra sezioni dell'app
 - **Riconciliazione automatica** tra posizioni globali e individuali  
 - **Verifica integrità** transazioni vs posizioni
 - **Alert discrepanze** con soglie configurabili
+- **Validazione configurazione** Smart Insights
+- **Controlli terminologia** consistente IT/EN
 
 ### **Riconciliazione dei Dati**
 - **Strumenti per verificare** corrispondenza tra posizioni e transazioni

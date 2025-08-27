@@ -8389,6 +8389,13 @@ const NetWorthManager = () => {
                      previousData={undefined}
                      insightsConfig={insightsConfig}
                      darkMode={darkMode}
+                     userSettings={{
+                       emergencyFundOptimalMonths,
+                       emergencyFundAdequateMonths,
+                       swrRate,
+                       inflationRate,
+                       monthlyExpenses
+                     }}
                    />
                  </div>
                </>

@@ -477,6 +477,7 @@ interface Insight {
   actionable?: string;
   value?: number;
   trend?: 'up' | 'down' | 'neutral';
+  category?: 'emergency' | 'risk' | 'tax' | 'performance' | 'allocation';
 }
 
 interface SmartInsightsProps {
@@ -502,15 +503,23 @@ interface SmartInsightsProps {
     allocation?: boolean;
   };
   darkMode?: boolean;
+  userSettings?: {
+    emergencyFundOptimalMonths?: number;
+    emergencyFundAdequateMonths?: number;
+    swrRate?: number;
+    inflationRate?: number;
+    monthlyExpenses?: number;
+  };
 }
 
 export const SmartInsights: React.FC<SmartInsightsProps> = ({
   portfolioData,
   previousData,
   insightsConfig,
-  darkMode
+  darkMode,
+  userSettings
 }) => {
-  const insights = generateInsights(portfolioData, previousData, insightsConfig);
+  const insights = generateInsights(portfolioData, previousData, insightsConfig, userSettings);
 
   const Icon = ({ severity }: { severity: string }) => {
     const common = 'w-4 h-4';
@@ -624,6 +633,13 @@ interface SmartInsight {
   trend?: 'up' | 'down' | 'stable';
 }
 
+import { 
+  DEFAULT_SMART_INSIGHTS_CONFIG, 
+  calculateEmergencyFundThresholds,
+  calculateRiskScoreThresholds,
+  type SmartInsightsConfig 
+} from '../utils/smartInsightsConfig';
+
 export const generateInsights = (
   current: SmartInsightsProps['portfolioData'],
   previous?: SmartInsightsProps['previousData'],
@@ -633,74 +649,128 @@ export const generateInsights = (
     performance?: boolean;
     risk?: boolean;
     allocation?: boolean;
+  },
+  userSettings?: {
+    emergencyFundOptimalMonths?: number;
+    emergencyFundAdequateMonths?: number;
+    swrRate?: number;
+    inflationRate?: number;
+    monthlyExpenses?: number;
   }
 ): Insight[] => {
   const insights: SmartInsight[] = [];
   
-  // Emergency Fund Analysis (context-aware)
+  // Usa configurazione utente o default
+  const settings = {
+    emergencyFundOptimalMonths: userSettings?.emergencyFundOptimalMonths ?? DEFAULT_SMART_INSIGHTS_CONFIG.emergencyFund.optimalMonths,
+    emergencyFundAdequateMonths: userSettings?.emergencyFundAdequateMonths ?? DEFAULT_SMART_INSIGHTS_CONFIG.emergencyFund.adequateMonths,
+    swrRate: userSettings?.swrRate ?? 4.0,
+    inflationRate: userSettings?.inflationRate ?? 2.0,
+    monthlyExpenses: userSettings?.monthlyExpenses ?? 0
+  };
+  
+  // Emergency Fund Analysis - LOGICA COMPLETA E CONFIGURABILE
   if (config?.emergency !== false && current.emergencyFundMonths > 0) {
-    const emergencyRatio = current.emergencyFundMonths / 6; // Target: 6 months
+    const emergencyConfig = {
+      optimalMonths: settings.emergencyFundOptimalMonths,
+      adequateMonths: settings.emergencyFundAdequateMonths,
+      excessiveRatio: DEFAULT_SMART_INSIGHTS_CONFIG.emergencyFund.excessiveRatio
+    };
     
-    if (emergencyRatio < 0.5) {
+    const thresholds = calculateEmergencyFundThresholds(emergencyConfig);
+    const emergencyRatio = current.emergencyFundMonths / settings.emergencyFundOptimalMonths;
+    
+    if (emergencyRatio < thresholds.criticalThreshold) {
       insights.push({
         type: 'critical',
         category: 'emergency',
-        message: `Fondo emergenza critico: ${(emergencyRatio * 100).toFixed(0)}% dell'obiettivo minimo`,
+        message: `Fondo emergenza insufficiente: ${current.emergencyFundMonths.toFixed(1)} mesi (obiettivo: ${settings.emergencyFundAdequateMonths}-${settings.emergencyFundOptimalMonths} mesi)`,
         action: 'Aumenta liquidità immediatamente',
         priority: 10,
         value: current.emergencyFundMonths
       });
-    } else if (emergencyRatio > 2.5) {
+    } else if (emergencyRatio < thresholds.warningThreshold) {
+      insights.push({
+        type: 'warning',
+        category: 'emergency',
+        message: `Fondo emergenza adeguato ma non ottimale: ${current.emergencyFundMonths.toFixed(1)} mesi (obiettivo: ${settings.emergencyFundOptimalMonths} mesi)`,
+        action: 'Considera di aumentare gradualmente il fondo di emergenza',
+        priority: 6,
+        value: current.emergencyFundMonths
+      });
+    } else if (emergencyRatio <= thresholds.successThreshold) {
+      insights.push({
+        type: 'success',
+        category: 'emergency',
+        message: `Fondo emergenza ottimale: ${current.emergencyFundMonths.toFixed(1)} mesi di copertura`,
+        action: 'Mantieni il livello attuale',
+        priority: 1,
+        value: current.emergencyFundMonths
+      });
+    } else {
       insights.push({
         type: 'info',
         category: 'emergency',
-        message: `Fondo emergenza sovradimensionato: ${(emergencyRatio * 6).toFixed(1)} mesi di spese`,
-        action: 'Considera investimenti più redditizi',
+        message: `Fondo emergenza sovradimensionato: ${current.emergencyFundMonths.toFixed(1)} mesi. Considera investimenti per l'eccesso`,
+        action: 'Valuta di investire l\'eccesso in asset più redditizi',
         priority: 3,
         value: current.emergencyFundMonths
       });
     }
   }
   
-  // Risk Analysis - Based on real portfolio composition
+  // Risk Analysis - SOGLIE LOGICHE E CONFIGURABILI
   if (config?.risk !== false) {
     const riskScore = current.riskScore;
+    const riskConfig = DEFAULT_SMART_INSIGHTS_CONFIG.riskScore;
+    const thresholds = calculateRiskScoreThresholds(riskConfig);
     
-    // High risk portfolio warning (based on actual allocations)
-    if (riskScore > 7.5) {
-      insights.push({
-        type: 'warning',
-        category: 'risk',
-        message: 'Portfolio ad alto rischio - elevata concentrazione in asset volatili',
-        action: 'Considera di bilanciare con asset più stabili',
-        priority: 7,
-        value: riskScore
-      });
-    } else if (riskScore < 2.5) {
+    if (riskScore <= thresholds.conservative) {
       insights.push({
         type: 'info',
         category: 'risk',
-        message: 'Portfolio molto conservativo - potenziale per crescita limitata',
-        action: 'Valuta di includere asset con rendimenti più elevati',
+        message: `Portfolio conservativo (${riskScore.toFixed(1)}/10): crescita potenzialmente limitata`,
+        action: 'Considera di aumentare gradualmente l\'esposizione azionaria per obiettivi di lungo termine',
         priority: 4,
         value: riskScore
       });
-    } else if (riskScore >= 4 && riskScore <= 6) {
+    } else if (riskScore <= thresholds.moderate) {
       insights.push({
         type: 'success',
         category: 'risk',
-        message: 'Portfolio ben bilanciato - rischio moderato e diversificato',
-        action: 'Mantieni l\'equilibrio attuale',
+        message: `Portfolio bilanciato (${riskScore.toFixed(1)}/10): buon equilibrio rischio-rendimento`,
+        action: 'Mantieni diversificazione e monitora periodicamente',
         priority: 2,
+        value: riskScore
+      });
+    } else if (riskScore <= thresholds.aggressive) {
+      insights.push({
+        type: 'warning',
+        category: 'risk',
+        message: `Portfolio aggressivo (${riskScore.toFixed(1)}/10): alta volatilità attesa`,
+        action: 'Considera di aumentare componente difensiva se vicino al pensionamento',
+        priority: 7,
+        value: riskScore
+      });
+    } else {
+      insights.push({
+        type: 'critical',
+        category: 'risk',
+        message: `Portfolio speculativo (${riskScore.toFixed(1)}/10): rischio molto elevato`,
+        action: 'Rivedi asset allocation - concentrazione eccessiva in asset volatili',
+        priority: 9,
         value: riskScore
       });
     }
   }
   
-  // Tax Optimization (per utenti italiani)
+  // Tax Optimization - CONFIGURABILE
   if (config?.tax !== false) {
+    const taxConfig = DEFAULT_SMART_INSIGHTS_CONFIG.taxOptimization;
     const currentMonth = new Date().getMonth() + 1; // 1-12
-    if (currentMonth === 12 && (current.unrealizedGains ?? 0) > 0) {
+    
+    // Tax harvesting reminder
+    if (currentMonth === taxConfig.harvestMonth && (current.unrealizedGains ?? 0) > 0) {
       insights.push({
         type: 'info',
         category: 'tax',
@@ -712,23 +782,26 @@ export const generateInsights = (
     }
     
     // Bollo titoli reminder (per conti deposito)
-    if ((current.cashAccounts ?? 0) > 5000) {
+    if ((current.cashAccounts ?? 0) > taxConfig.depositAccountThreshold) {
+      const stampDutyAmount = ((current.cashAccounts ?? 0) * taxConfig.stampDutyRate) / 100;
       insights.push({
         type: 'info',
         category: 'tax',
-        message: 'Conti deposito > €5K: ricorda bollo titoli 0.2%',
+        message: `Conti deposito > €${taxConfig.depositAccountThreshold.toLocaleString()}: ricorda bollo titoli ${taxConfig.stampDutyRate}% (€${stampDutyAmount.toFixed(0)})`,
         action: 'Verifica adempimenti fiscali',
-        priority: 4
+        priority: 4,
+        value: stampDutyAmount
       });
     }
   }
   
-  // Performance trends
+  // Performance trends - CONFIGURABILE
   if (config?.performance !== false && previous && current.performance !== previous.performance) {
+    const performanceConfig = DEFAULT_SMART_INSIGHTS_CONFIG.performance;
     const change = current.performance - previous.performance;
     const trend = change > 0 ? 'up' : change < 0 ? 'down' : 'stable';
     
-    if (Math.abs(change) > 5) {
+    if (Math.abs(change) > performanceConfig.significantChangeThreshold) {
       insights.push({
         type: change > 0 ? 'success' : 'warning',
         category: 'performance',
@@ -741,39 +814,56 @@ export const generateInsights = (
     }
   }
   
-  // Diversification analysis
+  // Diversification analysis - CONFIGURABILE
   if (config?.allocation !== false) {
-    if ((current.diversificationScore ?? 0) < 50) {
+    const diversificationConfig = DEFAULT_SMART_INSIGHTS_CONFIG.diversification;
+    const diversificationScore = current.diversificationScore ?? 0;
+    
+    if (diversificationScore < diversificationConfig.lowThreshold) {
       insights.push({
         type: 'warning',
         category: 'allocation',
-        message: 'Diversificazione limitata: concentrazione eccessiva',
+        message: `Diversificazione limitata (${diversificationScore.toFixed(0)}/100): concentrazione eccessiva`,
         action: 'Diversifica in più settori e asset class',
         priority: 8,
-        value: current.diversificationScore ?? 0
+        value: diversificationScore
       });
-    } else if ((current.diversificationScore ?? 0) > 80) {
+    } else if (diversificationScore > diversificationConfig.highThreshold) {
       insights.push({
         type: 'success',
         category: 'allocation',
-        message: 'Eccellente diversificazione del portafoglio',
+        message: `Eccellente diversificazione del portafoglio (${diversificationScore.toFixed(0)}/100)`,
         action: 'Mantieni la strategia di diversificazione',
         priority: 1,
-        value: current.diversificationScore ?? 0
+        value: diversificationScore
       });
     }
   }
   
-  // Debt-to-asset ratio warning
-  if (config?.risk !== false && (current.debtToAssetRatio ?? 0) > 0.5) {
-    insights.push({
-      type: 'critical',
-      category: 'risk',
-      message: 'Rapporto debiti/patrimonio elevato (>50%)',
-      action: 'Riduci debiti o aumenta patrimonio',
-      priority: 9,
-      value: (current.debtToAssetRatio ?? 0) * 100
-    });
+  // Debt-to-asset ratio warning - CONFIGURABILE
+  if (config?.risk !== false && (current.debtToAssetRatio ?? 0) > 0) {
+    const debtConfig = DEFAULT_SMART_INSIGHTS_CONFIG.debtToAsset;
+    const debtRatio = current.debtToAssetRatio ?? 0;
+    
+    if (debtRatio > debtConfig.criticalThreshold) {
+      insights.push({
+        type: 'critical',
+        category: 'risk',
+        message: `Rapporto debiti/patrimonio critico (${(debtRatio * 100).toFixed(0)}%)`,
+        action: 'Riduci debiti o aumenta patrimonio immediatamente',
+        priority: 9,
+        value: debtRatio * 100
+      });
+    } else if (debtRatio > debtConfig.warningThreshold) {
+      insights.push({
+        type: 'warning',
+        category: 'risk',
+        message: `Rapporto debiti/patrimonio elevato (${(debtRatio * 100).toFixed(0)}%)`,
+        action: 'Considera strategie di riduzione del debito',
+        priority: 7,
+        value: debtRatio * 100
+      });
+    }
   }
 
 
@@ -789,6 +879,7 @@ export const generateInsights = (
     description: insight.message,
     actionable: insight.action || '',
     value: insight.value || 0,
-    trend: (insight.trend === 'stable' ? 'neutral' : insight.trend) as 'up' | 'down' | 'neutral' | undefined
+    trend: (insight.trend === 'stable' ? 'neutral' : insight.trend) as 'up' | 'down' | 'neutral' | undefined,
+    category: insight.category // Aggiungo category per i test
   }));
 };
