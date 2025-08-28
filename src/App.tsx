@@ -43,8 +43,6 @@ import {
   calculateEmergencyFundMetrics, 
   analyzeTaxesByYear, 
   calculateRealEstateNetWorthValue, 
-  calculateSWR, 
-  calculateAdvancedSWR 
 } from './utils/financialCalculations';
 
 // Validation utilities - used for input validation in development mode (lines 2169, 2185, 2194, 2195, 2213, 2330)
@@ -59,13 +57,11 @@ import { initializeSecureStorage } from './utils/secureStorage';
 import { auditTrail, rateLimiter, secureErrorHandler } from './utils/advancedSecurity';
 // ✅ UX/UI: Design system and accessible components
 import './styles/designSystem.css';
-import {
-  Skeleton
-} from './components/AccessibleComponents';
+
 import {
   SmartInsights
 } from './components/AccessibleCharts';
-import { Icon } from './components/IconSystem';
+
 import SwrSimplified from './components/SwrSimplified';
 import SimpleStatistics from './components/SimpleStatistics';
 import { SwipeHint } from './components/MobileOptimizations';
@@ -898,26 +894,7 @@ interface AssetWithPerformance extends AssetItem {
   };
 }
 
-// Interface per calcolo fiscale conti deposito
-interface DepositTaxCalculation {
-  grossInterest: number;    // Interessi lordi annui
-  interestTax: number;      // Imposta sui rendimenti  
-  netInterest: number;      // Interessi al netto tasse
-  bollo: number;            // Bollo
-  totalTaxes: number;       // Totale imposte
-  netYield: number;         // Rendimento finale netto
-  effectiveRate: number;    // Tasso effettivo %
-}
 
-// Interface per aggregazione conti deposito
-interface DepositTaxesSummary {
-  totalGrossInterest: number;
-  totalInterestTax: number;
-  totalBollo: number;
-  totalTaxes: number;
-  totalNetYield: number;
-  accountCount: number;
-}
 
 interface ChartDataItem {
   name: string;
@@ -2890,7 +2867,7 @@ const NetWorthManager = () => {
   }, [assets, t, showNotification]);
 
   // Add missing functions
-  const handleEditRow = (section: string, id: number) => {
+  const handleEditRow = useCallback((section: string, id: number) => {
     let itemToEdit: AssetItem | InvestmentPosition | Transaction | RealEstate | undefined;
     
     if (section === 'investmentPositions') {
@@ -2906,9 +2883,9 @@ const NetWorthManager = () => {
     if (itemToEdit) {
       setEditingItem({ section, id, data: itemToEdit });
     }
-  };
+  }, [assets, setEditingItem]);
 
-  const handleCopyRow = (section: string, itemId: number) => {
+  const handleCopyRow = useCallback((section: string, itemId: number) => {
           let itemToCopy: AssetItem | InvestmentPosition | Transaction | RealEstate | undefined;
     
     if (section === 'investmentPositions') {
@@ -2978,7 +2955,7 @@ const NetWorthManager = () => {
         });
       }
     }
-  };
+  }, [assets, setAssets, setTransactionFilters, setCurrentTransactionPage, showNotification, t]);
 
   // Function to save edited row with error handling and schema validation
   const handleSaveEdit = () => {
@@ -3690,14 +3667,7 @@ const NetWorthManager = () => {
     return defaultValue;
   };
 
-  // ✅ TYPE GUARD PER ASSET
-  const isValidAsset = (asset: any): asset is AssetItem => {
-    return asset && 
-           typeof asset === 'object' && 
-           typeof asset.id === 'number' && 
-           typeof asset.name === 'string' && 
-           asset.name.length > 0;
-  };
+
 
 
   // Memoized assets with performance for better performance
@@ -3962,50 +3932,9 @@ const NetWorthManager = () => {
     };
   }, [assetsWithPerformance]); // Removed investmentTransactions dependency, inline calculation
 
-  // ✅ PERFORMANCE OPTIMIZATION: SWR calculations with minimal dependencies
-  const swrData = useMemo(() => {
-    // Helper function for translation with parameter substitution
-    const translateWithParams = (key: string, params?: Record<string, string | number>): string => {
-      let translation = t(key as any);
-      if (params) {
-        Object.entries(params).forEach(([param, value]) => {
-          translation = translation.replace(`{${param}}`, String(value));
-        });
-      }
-      return translation;
-    };
-    
-    return calculateSWR(totals, swrRate, inflationRate, monthlyExpenses, translateWithParams);
-  }, [totals, swrRate, inflationRate, monthlyExpenses, t]);
 
-  // ✅ PERFORMANCE OPTIMIZATION: Advanced SWR calculation with minimal dependencies
-  const advancedSwrData = useMemo(() => {
-      // 🎯 SEMPLIFICAZIONE 1: Calcola asset prelevabili (withdrawable assets)
-  // Esclusi sempre: realEstate (illiquid), pensionFunds (locked until retirement)
-  const withdrawableAssets = safeAdd(
-    totals.cash || 0, totals.investments || 0
-  );
-    
-    // Helper function for translation with parameter substitution
-    const translateWithParams = (key: string, params?: Record<string, string | number>): string => {
-      let translation = t(key as any);
-      if (params) {
-        Object.entries(params).forEach(([param, value]) => {
-          translation = translation.replace(`{${param}}`, String(value));
-        });
-      }
-      return translation;
-    };
-    
-    return calculateAdvancedSWR(
-      withdrawableAssets,
-      monthlyExpenses,
-      inflationRate,
-      coreFinancialCalculations.adjustedRiskScore,
-      { baseSWRRate: swrRate, riskFreeRate: 2.0, timeHorizon: 30 },
-      translateWithParams
-    );
-  }, [totals, swrRate, inflationRate, monthlyExpenses, coreFinancialCalculations.adjustedRiskScore, t]);
+
+
 
   // ✅ CURRENCY FORMATTING JPY CONSISTENCY FIXED
   const formatCurrency = (amount: number): string => {
@@ -4029,61 +3958,13 @@ const NetWorthManager = () => {
     return formatCurrency(amount);
   };
 
-  // Funzioni calcolo fiscale conti deposito e remunerati
-  const calculateDepositTaxes = (
-    account: AssetItem, 
-    settings: { 
-      capitalGainsTaxRate: number;
-      depositAccountStampDutyRate: number;
-    }
-  ): DepositTaxCalculation => {
-    if ((account.accountType !== 'deposit' && account.accountType !== 'remunerated') || !account.interestRate || Number(account.interestRate) <= 0) {
-      return {
-        grossInterest: 0,
-        interestTax: 0, 
-        netInterest: 0,
-        bollo: account.bollo || 0,
-        totalTaxes: account.bollo || 0,
-        netYield: -(account.bollo || 0),
-        effectiveRate: 0
-      };
-    }
 
-    const principal = account.amount;
-    const interestRate = typeof account.interestRate === 'string' ? parseFloat(account.interestRate) : account.interestRate;
-    const grossInterest = principal * (interestRate / 100);
-    const interestTax = grossInterest * (settings.capitalGainsTaxRate / 100);
-    const netInterest = grossInterest - interestTax;
-    const bollo = account.bollo || (principal * (settings.depositAccountStampDutyRate / 100));
-    const totalTaxes = interestTax + bollo;
-    const netYield = netInterest - bollo;
-    const effectiveRate = principal > 0 ? (netYield / principal) * 100 : 0;
-
-    return {
-      grossInterest,
-      interestTax,
-      netInterest, 
-      bollo,
-      totalTaxes,
-      netYield,
-      effectiveRate
-    };
-  };
 
   // Funzione per aggregare tutti i conti deposito
   // Semplificato: niente aggregazioni su interessi/bollo
   const calculateAllDepositTaxes = (_accounts: AssetItem[]) => null;
 
-  // UI breakdown fiscale per singolo conto deposito (versione completa per modal)
-  const renderDepositBreakdown = (account: AssetItem) => {
-    if (account.accountType !== 'deposit' && account.accountType !== 'remunerated') return null;
-    const due = isStampDutyDue(account.accountType, account.amount);
-      return (
-      <div className={`mt-2 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-        <span className={due ? 'text-red-600 font-medium' : (darkMode ? 'text-gray-400' : 'text-gray-500')}>{due ? 'SI' : 'NO'}</span>
-      </div>
-    );
-  };
+
 
   // UI breakdown fiscale compatto per tabella - STANDARDIZZATO
   const renderCompactFiscalBreakdown = (account: AssetItem) => {
