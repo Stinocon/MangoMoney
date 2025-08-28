@@ -74,14 +74,14 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   return (
     <div className={`p-6 rounded-lg border border-gray-300 dark:border-gray-700 transition-all hover:shadow-md shadow-sm ${className}`}>
       <div className="flex items-start space-x-4">
-        <div className="flex-shrink-0 p-2 rounded-lg bg-blue-100 dark:bg-blue-900 shadow-sm">
+        <div className="flex-shrink-0 p-2 rounded-lg bg-blue-200 dark:bg-blue-900 shadow-sm">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {title}
           </h3>
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
+          <p className="text-gray-800 dark:text-gray-300 mb-4">
             {description}
           </p>
           {action && (
@@ -90,7 +90,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({
                 href={action.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
               >
                 {action.label}
                 <ExternalLink className="ml-1 w-4 h-4" />
@@ -98,7 +98,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({
             ) : (
               <button
                 onClick={action.onClick}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
               >
                 {action.label}
                 <ExternalLink className="ml-1 w-4 h-4" />
@@ -124,7 +124,7 @@ export const QuickStartStep: React.FC<QuickStartStepProps> = ({
       onClick={onClick}
     >
       <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shadow-sm">
+        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-200 dark:bg-blue-900 flex items-center justify-center shadow-sm">
           <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
             {step}
           </span>
@@ -136,7 +136,7 @@ export const QuickStartStep: React.FC<QuickStartStepProps> = ({
               {title}
             </h3>
           </div>
-          <p className="text-gray-700 dark:text-gray-300">
+          <p className="text-gray-800 dark:text-gray-300">
             {description}
           </p>
         </div>
@@ -166,9 +166,9 @@ export const AccordionSection: React.FC<AccordionSectionProps> = ({
           </h3>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          <ChevronUp className="w-5 h-5 text-gray-700 dark:text-gray-400" />
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          <ChevronDown className="w-5 h-5 text-gray-700 dark:text-gray-400" />
         )}
       </button>
       
@@ -189,7 +189,7 @@ export const FeatureGrid: React.FC<FeatureGridProps> = ({ features }) => {
       {features.map((feature, index) => (
         <div key={index} className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900 shadow-sm">
+            <div className="p-2 rounded-lg bg-green-200 dark:bg-green-900 shadow-sm">
               {feature.icon}
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -268,7 +268,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header Accogliente */}
-      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-100 to-indigo-100'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-200'}`}>
+      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-200 to-indigo-200'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-300'}`}>
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <img 
@@ -329,10 +329,10 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
           defaultExpanded={true}
         >
           <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-700 dark:text-gray-300 mb-4">
+            <p className="text-gray-800 dark:text-gray-300 mb-4">
               MangoMoney è progettato per essere semplice e intuitivo. Inizia dalla sezione Liquidità per inserire i tuoi conti correnti e depositi, poi passa agli Investimenti per il tuo portafoglio.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc list-inside space-y-2 text-gray-800 dark:text-gray-300">
               <li>Inserisci i dati una volta sola</li>
               <li>L'app calcola tutto automaticamente</li>
               <li>Esporta i dati quando vuoi</li>
@@ -349,19 +349,19 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">CAGR (Compound Annual Growth Rate)</h4>
-                <p className="text-gray-700 dark:text-gray-300">
+                <p className="text-gray-800 dark:text-gray-300">
                   Tasso di crescita annuale composto. Mostra quanto cresce il tuo investimento in media ogni anno.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">SWR (Safe Withdrawal Rate)</h4>
-                <p className="text-gray-700 dark:text-gray-300">
+                <p className="text-gray-800 dark:text-gray-300">
                   Basato sul Trinity Study. Quanto puoi prelevare annualmente senza esaurire il capitale in 30 anni.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-300 mb-2">Risk Score</h4>
-                <p className="text-gray-700 dark:text-gray-300">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Risk Score</h4>
+                <p className="text-gray-800 dark:text-gray-300">
                   Punteggio di rischio semplificato basato sulla composizione del portafoglio.
                 </p>
               </div>
@@ -374,10 +374,10 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
           icon={<Shield className="w-5 h-5 text-purple-700 dark:text-purple-600" />}
         >
           <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-700 dark:text-gray-300 mb-4">
+            <p className="text-gray-800 dark:text-gray-300 mb-4">
               I tuoi dati sono sempre al sicuro perché rimangono solo sul tuo dispositivo.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc list-inside space-y-2 text-gray-800 dark:text-gray-300">
               <li>Nessun server, nessun database esterno</li>
               <li>Dati crittografati nel browser</li>
               <li>Backup automatico ogni 5 minuti</li>
@@ -392,13 +392,13 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
           icon={<Globe className="w-5 h-5 text-orange-700 dark:text-orange-600" />}
         >
           <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-700 dark:text-gray-300 mb-4">
+            <p className="text-gray-800 dark:text-gray-300 mb-4">
               MangoMoney supporta utenti da tutto il mondo con valute e tasse configurabili.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Valute Supportate</h4>
-                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <ul className="list-disc list-inside text-gray-800 dark:text-gray-300">
                   <li>EUR (Euro)</li>
                   <li>USD (Dollaro USA)</li>
                   <li>GBP (Sterlina)</li>
@@ -408,7 +408,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Tasse Configurabili</h4>
-                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <ul className="list-disc list-inside text-gray-800 dark:text-gray-300">
                   <li>Aliquote personalizzabili</li>
                   <li>Regimi fiscali diversi</li>
                   <li>Calcoli universali</li>
@@ -426,19 +426,19 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">I miei dati sono al sicuro?</h4>
-                <p className="text-gray-700 dark:text-gray-300">
+                <p className="text-gray-800 dark:text-gray-300">
                   Sì, i tuoi dati rimangono solo sul tuo dispositivo. Non vengono mai inviati a server esterni.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Come faccio il backup?</h4>
-                <p className="text-gray-700 dark:text-gray-300">
+                <p className="text-gray-800 dark:text-gray-300">
                   L'app fa backup automatici ogni 5 minuti. Puoi anche esportare manualmente in JSON, CSV o PDF.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Posso usare l'app offline?</h4>
-                <p className="text-gray-700 dark:text-gray-300">
+                <p className="text-gray-800 dark:text-gray-300">
                   Sì, una volta caricata l'app funziona completamente offline.
                 </p>
               </div>
