@@ -188,7 +188,7 @@ MangoMoney fornisce calcoli indicativi. Per decisioni fiscali consulta sempre un
 
 ### **Bug App**
 - **GitHub Issues**: [Segnala problema](https://github.com/Stinocon/MangoMoney/issues)
-- **Email**: [stefano@mbp.local](mailto:stefano@mbp.local)
+- **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
 ---
 

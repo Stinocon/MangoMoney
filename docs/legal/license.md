@@ -64,7 +64,7 @@ Se remixi, trasformi o costruisci sul materiale, devi distribuire i tuoi contrib
 
 ### **Se Hai Bisogno di Licenza Commerciale**
 Per uso commerciale, contatta:
-- **Email**: [stefano@mbp.local](mailto:stefano@mbp.local)
+- **GitHub**: [@Stinocon](https://github.com/Stinocon)
 - **GitHub**: [Discussions](https://github.com/Stinocon/MangoMoney/discussions)
 
 ### **Casi d'Uso Commerciali**

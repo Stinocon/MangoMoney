@@ -80,7 +80,7 @@
 ### **Supporto**
 - **GitHub Issues**: [Segnala bug](https://github.com/Stinocon/MangoMoney/issues)
 - **GitHub Discussions**: [Domande generali](https://github.com/Stinocon/MangoMoney/discussions)
-- **Email**: [stefano@mbp.local](mailto:stefano@mbp.local)
+- **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
 ---
 

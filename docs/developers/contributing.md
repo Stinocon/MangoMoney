@@ -329,7 +329,7 @@ npm run lint:fix
 ### **Domande Tecniche**
 - **GitHub Discussions**: [Domande generali](https://github.com/Stinocon/MangoMoney/discussions)
 - **Issues**: [Bug e feature requests](https://github.com/Stinocon/MangoMoney/issues)
-- **Email**: [stefano@mbp.local](mailto:stefano@mbp.local)
+- **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
 ### **Risorse**
 - **[Architecture](architecture.md)**: Decisioni tecniche

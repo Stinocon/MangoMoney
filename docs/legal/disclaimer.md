@@ -112,7 +112,7 @@ L'utente è responsabile per:
 ### **Supporto Tecnico**
 - **GitHub Issues**: [Segnala bug](https://github.com/Stinocon/MangoMoney/issues)
 - **GitHub Discussions**: [Domande generali](https://github.com/Stinocon/MangoMoney/discussions)
-- **Email**: [stefano@mbp.local](mailto:stefano@mbp.local)
+- **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
 ### **Questioni Legali**
 Per questioni legali specifiche, consulta un avvocato qualificato.
