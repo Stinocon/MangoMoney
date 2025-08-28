@@ -607,8 +607,9 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
       
       {/* Footer con disclaimer */}
       <div className={`mt-4 pt-3 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          💡 Gli insights si basano solo sui dati inseriti nell'app. Per analisi dettagliate e personalizzate consulta un consulente finanziario qualificato.
+        <p className={`text-xs flex items-center gap-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <Icon name="lightbulb" size="xs" className={darkMode ? 'text-amber-300' : 'text-amber-600'} />
+          Gli insights si basano solo sui dati inseriti nell'app. Per analisi dettagliate e personalizzate consulta un consulente finanziario qualificato.
         </p>
       </div>
     </div>
