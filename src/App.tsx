@@ -22,7 +22,7 @@ import {
   Calculator, Home, Building, Wallet, PiggyBank,
   Settings, Download, Upload, RefreshCw,
   Circle, Clock, Calendar, Star, Heart, Eye, EyeOff,
-  Database, FileText, Share2, Copy
+  Database, FileText, Share2, Copy, Smartphone, Monitor
 } from 'lucide-react';
 // Chart components - used in MemoizedBarChart component (lines 6280-6309)
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -2018,10 +2018,7 @@ const NetWorthManager = () => {
             }
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+          <Copy size={16} aria-hidden="true" />
         </button>
         <button 
           onClick={() => handleEditRow('transactions', item.id)}
@@ -6463,10 +6460,7 @@ const NetWorthManager = () => {
                 } 
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
+              <Edit size={14} aria-hidden="true" />
             </button>
             <button 
               onClick={() => handleCopyRow('transactions', transaction.id)} 
@@ -6481,10 +6475,7 @@ const NetWorthManager = () => {
                 } 
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h2"></path>
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-              </svg>
+              <Copy size={14} aria-hidden="true" />
             </button>
             <button 
               onClick={() => handleDeleteItem('transactions', transaction.id)} 
@@ -6519,13 +6510,13 @@ const NetWorthManager = () => {
           >
             {t('assetType')}
             {sortField === 'assetType' ? (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
-              </svg>
+              sortDirection === 'asc' ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )
             ) : (
-              <svg className="w-3 h-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
+              <ArrowUpDown className="w-3 h-3 opacity-30" />
             )}
           </button>
           <span className={`${darkMode ? 'text-gray-100' : 'text-gray-900'} px-1 py-1`}>Ticker</span>
@@ -6538,13 +6529,13 @@ const NetWorthManager = () => {
           >
             Quantità
             {sortField === 'quantity' ? (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
-              </svg>
+              sortDirection === 'asc' ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )
             ) : (
-              <svg className="w-3 h-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
+              <ArrowUpDown className="w-3 h-3 opacity-30" />
             )}
           </button>
           <button 
@@ -6554,13 +6545,13 @@ const NetWorthManager = () => {
           >
             Importo
             {sortField === 'amount' ? (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
-              </svg>
+              sortDirection === 'asc' ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )
             ) : (
-              <svg className="w-3 h-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
+              <ArrowUpDown className="w-3 h-3 opacity-30" />
             )}
           </button>
           <span className={`text-right ${darkMode ? 'text-gray-100' : 'text-gray-900'} px-1 py-1`}>Commissioni</span>
@@ -7706,21 +7697,11 @@ const NetWorthManager = () => {
                 }`}
               >
                 {forceMobileLayout ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                  </svg>
+                  <Smartphone className="w-3.5 h-3.5" />
                 ) : (isMobileView ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                  </svg>
+                  <Smartphone className="w-3.5 h-3.5" />
                 ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                  </svg>
+                  <Monitor className="w-3.5 h-3.5" />
                 ))}
               </button>
 
@@ -7735,16 +7716,9 @@ const NetWorthManager = () => {
                 title={privacyMode ? 'Disattiva modalità privacy' : 'Attiva modalità privacy'}
               >
                 {privacyMode ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <circle cx="12" cy="16" r="1"></circle>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
+                  <EyeOff className="w-3.5 h-3.5" />
                 ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
+                  <Eye className="w-3.5 h-3.5" />
                 )}
               </button>
               
@@ -7801,21 +7775,11 @@ const NetWorthManager = () => {
                 }`}
               >
                 {forceMobileLayout ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                  </svg>
+                  <Smartphone className="w-4 h-4" />
                 ) : (isMobileView ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                  </svg>
+                  <Smartphone className="w-4 h-4" />
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                  </svg>
+                  <Monitor className="w-4 h-4" />
                 ))}
               </button>
 
@@ -7830,16 +7794,9 @@ const NetWorthManager = () => {
                 title={privacyMode ? 'Disattiva modalità privacy' : 'Attiva modalità privacy'}
               >
                 {privacyMode ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <circle cx="12" cy="16" r="1"></circle>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
+                  <EyeOff className="w-4 h-4" />
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
+                  <Eye className="w-4 h-4" />
                 )}
               </button>
               
