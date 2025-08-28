@@ -1453,30 +1453,7 @@ const NetWorthManager = () => {
     return saved ? safeParseJSON(saved, false) : false;
   });
 
-  // Smart Insights configuration
-  const [insightsConfig, setInsightsConfig] = useState(() => {
-    const saved = localStorage.getItem('mangomoney-insights-config');
-    return saved ? safeParseJSON(saved, {
-      emergency: true,
-      swr: true,
-      debt: true,
-      size: true,
-      tax: true,
-      allocation: true
-    }) : {
-      emergency: true,
-      swr: true,
-      debt: true,
-      size: true,
-      tax: true,
-      allocation: true
-    };
-  });
 
-  // Save insights config to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem('mangomoney-insights-config', JSON.stringify(insightsConfig));
-  }, [insightsConfig]);
 
   // Notification system
   const [notification, setNotification] = useState<{
@@ -8278,7 +8255,6 @@ const NetWorthManager = () => {
                        pensionFundsValue: totals.pensionFunds
                      }}
                      previousData={undefined}
-                     insightsConfig={insightsConfig}
                      darkMode={darkMode}
                      userSettings={{
                        emergencyFundOptimalMonths,
@@ -10521,98 +10497,7 @@ const NetWorthManager = () => {
                   </div>
                 </div>
 
-                {/* Smart Insights Configuration */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-2">
-                      <path d="M9 12l2 2 4-4"></path>
-                      <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>
-                      <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"></path>
-                      <path d="M12 3c0 1-1 2-2 2s-2-1-2-2 1-2 2-2 2 1 2 2z"></path>
-                      <path d="M12 21c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z"></path>
-                    </svg>
-                    {t('smartInsightsTitle')}
-                  </h3>
-                  <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
-                    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      Analisi basate sui dati disponibili nell'app
-                    </p>
-                    
-                    <div className="space-y-3">
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insightsConfig.emergency}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, emergency: e.target.checked }))}
-                          className="rounded"
-                        />
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableEmergencyInsights')}
-                        </span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insightsConfig.tax}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, tax: e.target.checked }))}
-                          className="rounded"
-                        />
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableTaxInsights')}
-                        </span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insightsConfig.swr}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, swr: e.target.checked }))}
-                          className="rounded"
-                        />
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableSwrInsights')}
-                        </span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insightsConfig.debt}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, debt: e.target.checked }))}
-                          className="rounded"
-                        />
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableDebtInsights')}
-                        </span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insightsConfig.size}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, size: e.target.checked }))}
-                          className="rounded"
-                        />
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableSizeInsights')}
-                        </span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insightsConfig.allocation}
-                          onChange={(e) => setInsightsConfig((prev: any) => ({ ...prev, allocation: e.target.checked }))}
-                          className="rounded"
-                        />
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('enableAllocationInsights')}
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
+
 
                 {/* Backup Management */}
                 <div>

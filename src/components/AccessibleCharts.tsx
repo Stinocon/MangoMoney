@@ -496,14 +496,6 @@ interface SmartInsightsProps {
     totalValue: number;
     performance: number;
   };
-  insightsConfig?: {
-    emergency?: boolean;
-    swr?: boolean;
-    debt?: boolean;
-    size?: boolean;
-    tax?: boolean;
-    allocation?: boolean;
-  };
   darkMode?: boolean;
   userSettings?: {
     emergencyFundOptimalMonths?: number;
@@ -517,11 +509,10 @@ interface SmartInsightsProps {
 export const SmartInsights: React.FC<SmartInsightsProps> = ({
   portfolioData,
   previousData,
-  insightsConfig,
   darkMode,
   userSettings
 }) => {
-  const insights = generateInsights(portfolioData, previousData, insightsConfig, userSettings);
+  const insights = generateInsights(portfolioData, previousData, userSettings);
 
   const Icon = ({ severity }: { severity: string }) => {
     const common = 'w-4 h-4';
@@ -704,7 +695,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
       {/* Footer con disclaimer */}
       <div className={`mt-4 pt-3 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          💡 Gli insights si basano solo sui dati inseriti. Per analisi dettagliate consulta un consulente finanziario.
+          💡 Gli insights si basano solo sui dati inseriti nell'app. Per analisi dettagliate e personalizzate consulta un consulente finanziario qualificato.
         </p>
       </div>
     </div>
@@ -728,14 +719,6 @@ interface SmartInsight {
 export const generateInsights = (
   current: SmartInsightsProps['portfolioData'],
   previous?: SmartInsightsProps['previousData'],
-  config?: {
-    emergency?: boolean;
-    swr?: boolean;
-    debt?: boolean;
-    size?: boolean;
-    tax?: boolean;
-    allocation?: boolean;
-  },
   settings?: {
     emergencyFundOptimalMonths?: number;
     emergencyFundAdequateMonths?: number;
@@ -747,7 +730,7 @@ export const generateInsights = (
   const insights: SmartInsight[] = [];
   
   // ✅ INSIGHT 1: EMERGENCY FUND - Logica corretta
-  if (config?.emergency !== false && current.emergencyFundMonths >= 0) {
+  if (current.emergencyFundMonths >= 0) {
     const optimalMonths = settings?.emergencyFundOptimalMonths ?? 12; // Cambiato da 6 a 12
     const adequateMonths = settings?.emergencyFundAdequateMonths ?? 6; // Cambiato da 3 a 6
     const currentMonths = current.emergencyFundMonths;
@@ -791,9 +774,12 @@ export const generateInsights = (
     }
   }
   
-  // ✅ INSIGHT 2: SWR SUSTAINABILITY  
-  if (config?.swr !== false && (settings?.monthlyExpenses ?? 0) > 0) {
-    const withdrawableAssets = (current.cashAccounts ?? 0) + (current.totalValue ?? 0) * 0.7; // Stima conservativa
+  // ✅ INSIGHT 2: SWR SUSTAINABILITY - Solo asset liquidi reali
+  if ((settings?.monthlyExpenses ?? 0) > 0) {
+    // Usa solo asset veramente liquidi: liquidità + investimenti
+    // Escludi: immobili, pensioni, alternativi (illiquidi)
+    const illiquidAssets = (current.realEstateValue ?? 0) + (current.pensionFundsValue ?? 0) + (current.alternativeAssetsValue ?? 0);
+    const liquidAssets = (current.cashAccounts ?? 0) + (current.totalValue - illiquidAssets);
     const swrRate = settings?.swrRate ?? 4.0;
     const inflationRate = settings?.inflationRate ?? 2.0;
     
@@ -801,7 +787,7 @@ export const generateInsights = (
     const inflationAdjustment = Math.max(0, (inflationRate - 2.0) * 0.3);
     const adjustedSWR = Math.max(2.5, swrRate - inflationAdjustment);
     
-    const monthlyWithdrawal = (withdrawableAssets * adjustedSWR / 100) / 12;
+    const monthlyWithdrawal = (liquidAssets * adjustedSWR / 100) / 12;
     const coverage = (monthlyWithdrawal / (settings?.monthlyExpenses ?? 1)) * 100;
     
     if (coverage < 70) {
@@ -846,7 +832,7 @@ export const generateInsights = (
   }
   
   // ✅ INSIGHT 3: DEBT-TO-ASSET RATIO - Solo se problematico
-  if (config?.debt !== false && (current.debtToAssetRatio ?? 0) > 0) {
+  if ((current.debtToAssetRatio ?? 0) > 0) {
     const ratio = (current.debtToAssetRatio ?? 0) * 100;
     
     if (ratio > 70) {
@@ -880,7 +866,7 @@ export const generateInsights = (
   }
   
   // ✅ INSIGHT 4: PORTFOLIO SIZE MATURITY - Solo se rilevante
-  if (config?.size !== false) {
+  {
     const totalValue = current.totalValue ?? 0;
     
     // Solo se il portfolio è molto piccolo (bisogno di guida) o molto grande (opportunità)
@@ -904,20 +890,7 @@ export const generateInsights = (
   }
   
   // ✅ INSIGHT 5: TAX OPTIMIZATION - Solo se rilevante
-  if (config?.tax !== false) {
-    const currentMonth = new Date().getMonth() + 1;
-    
-    // Tax loss harvesting in dicembre - solo se ci sono plusvalenze significative
-    if (currentMonth === 12 && (current.unrealizedGains ?? 0) > 1000) {
-      insights.push({
-        type: 'info',
-        category: 'tax',
-        message: `Plusvalenze non realizzate: ${(current.unrealizedGains ?? 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`,
-        action: 'Valuta loss harvesting entro 31 dicembre per ottimizzazione fiscale',
-        priority: 6
-      });
-    }
-    
+  {
     // Bollo conti deposito - solo se liquidità molto elevata
     if ((current.cashAccounts ?? 0) > 10000) {
       insights.push({
@@ -929,40 +902,10 @@ export const generateInsights = (
       });
     }
     
-    // Reminder dichiarazione redditi - solo se plusvalenze significative
-    if ((currentMonth >= 3 && currentMonth <= 5) && (current.unrealizedGains ?? 0) > 2000) {
-      insights.push({
-        type: 'info',
-        category: 'tax',
-        message: `Plusvalenze significative: ${(current.unrealizedGains ?? 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`,
-        action: 'Ricorda di dichiarare eventuali plusvalenze nella dichiarazione dei redditi',
-        priority: 4
-      });
-    }
+
   }
   
-  // ⚠️ WARNING ALLOCAZIONE - Solo se problematico
-  const totalAssets = (current.totalValue ?? 0);
-  const investmentsRatio = totalAssets > 0 ? ((current.totalValue ?? 0) - (current.cashAccounts ?? 0)) / totalAssets : 0;
-  
-  // Solo se estremamente sbilanciato
-  if (investmentsRatio > 0.98) {
-    insights.push({
-      type: 'warning',
-      category: 'allocation',
-      message: 'Concentrazione eccessiva in investimenti (>98%)',
-      action: 'Mantieni almeno 2% in liquidità per flessibilità',
-      priority: 7
-    });
-  } else if (investmentsRatio < 0.05 && totalAssets > 100000) {
-    insights.push({
-      type: 'info', 
-      category: 'allocation',
-      message: 'Portfolio molto liquido (<5% investito)',
-      action: 'Considera investimenti per crescita long-term dopo emergency fund',
-      priority: 4
-    });
-  }
+
   
   // Sort by priority (highest first)
   insights.sort((a, b) => b.priority - a.priority);
