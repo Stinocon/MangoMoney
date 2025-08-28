@@ -15,14 +15,9 @@ import html2canvas from 'html2canvas';
 import { 
   PlusCircle, Trash2, Moon, Sun,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  ArrowUpDown, X, Plus, Edit, Check, Save,
-  AlertCircle, AlertTriangle, CheckCircle, Info, HelpCircle,
-  TrendingUp, TrendingDown, Lightbulb, Shield, Target,
-  DollarSign, CreditCard, Receipt, BarChart3, PieChart,
-  Calculator, Home, Building, Wallet, PiggyBank,
-  Settings, Download, Upload, RefreshCw,
-  Circle, Clock, Calendar, Star, Heart, Eye, EyeOff,
-  Database, FileText, Share2, Copy, Smartphone, Monitor
+  ArrowUpDown, Edit, HelpCircle,
+  DollarSign, Settings, RefreshCw,
+  Eye, EyeOff, FileText, Copy, Smartphone, Monitor
 } from 'lucide-react';
 // Chart components - used in MemoizedBarChart component (lines 6280-6309)
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
