@@ -15,7 +15,7 @@ import {
   PieChart, Pie, Cell, Legend, LineChart, Line
 } from 'recharts';
 import { Card, Collapsible } from './AccessibleComponents';
-import { Icon, SmartInsightsIcon, SeverityIcon } from './IconSystem';
+import { Icon, SeverityIcon } from './IconSystem';
 
 
 // ===== COLORBLIND-FRIENDLY PALETTE =====
@@ -515,23 +515,20 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
 }) => {
   const insights = generateInsights(portfolioData, previousData, userSettings);
 
-  const getCategoryIcon = (category: string) => {
-    const colorClass = darkMode ? 'text-gray-300' : 'text-gray-600';
-    return <SmartInsightsIcon category={category as any} size="sm" className={colorClass} />;
-  };
+
 
   const getContainerClasses = (severity: string) => {
-    const base = 'p-3 border rounded-md';
+    const base = 'p-4 border-l-4 rounded-lg';
     if (darkMode) {
-      if (severity === 'critical') return `${base} border-red-800 bg-red-900/20`;
-      if (severity === 'warning') return `${base} border-yellow-800 bg-yellow-900/20`;
-      if (severity === 'positive') return `${base} border-emerald-800 bg-emerald-900/20`;
-      return `${base} border-blue-800 bg-blue-900/20`;
+      if (severity === 'critical') return `${base} border-red-500 bg-red-900/10`;
+      if (severity === 'warning') return `${base} border-yellow-500 bg-yellow-900/10`;
+      if (severity === 'positive') return `${base} border-emerald-500 bg-emerald-900/10`;
+      return `${base} border-blue-500 bg-blue-900/10`;
     } else {
-      if (severity === 'critical') return `${base} border-red-200 bg-red-50`;
-      if (severity === 'warning') return `${base} border-yellow-200 bg-yellow-50`;
-      if (severity === 'positive') return `${base} border-emerald-200 bg-emerald-50`;
-      return `${base} border-blue-200 bg-blue-50`;
+      if (severity === 'critical') return `${base} border-red-500 bg-red-50`;
+      if (severity === 'warning') return `${base} border-yellow-500 bg-yellow-50`;
+      if (severity === 'positive') return `${base} border-emerald-500 bg-emerald-50`;
+      return `${base} border-blue-500 bg-blue-50`;
     }
   };
 
@@ -578,24 +575,37 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
             role="alert"
             aria-live="polite"
           >
-            <div className="flex items-start gap-2">
-              <SeverityIcon severity={insight.severity as any} size="sm" />
-              <div className="flex-1">
-                <div className={`flex items-center justify-between gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                  <div className="flex items-center gap-1">
-                    {getCategoryIcon(insight.type)}
-                    <h4 className="text-sm font-semibold truncate">{insight.title}</h4>
-                  </div>
+            <div className="flex items-start gap-3">
+              {/* Icona severity solo per critical/warning */}
+              {(insight.severity === 'critical' || insight.severity === 'warning') && (
+                <SeverityIcon severity={insight.severity as any} size="sm" />
+              )}
+              
+              {/* Content area */}
+              <div className="flex-1 space-y-2">
+                {/* Title + value inline */}
+                <div className="flex items-baseline justify-between">
+                  <h4 className={`text-sm font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                    {insight.title}
+                  </h4>
                   {insight.value !== undefined && (
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${darkMode ? 'bg-white/10 text-gray-200' : 'bg-white/70 text-gray-800'}`}>
+                    <span className={`text-xs tabular-nums ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       {formatValue(insight)}
                     </span>
                   )}
                 </div>
-                <p className={`text-xs mt-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{insight.description}</p>
+                
+                {/* Description */}
+                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {insight.description}
+                </p>
+                
+                {/* Action footer */}
                 {insight.actionable && (
-                  <div className={`mt-2 text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <span className={`mr-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Azione:</span>{insight.actionable}
+                  <div className={`pt-2 mt-2 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      💡 {insight.actionable}
+                    </p>
                   </div>
                 )}
               </div>
