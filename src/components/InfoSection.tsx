@@ -85,13 +85,25 @@ export const InfoCard: React.FC<InfoCardProps> = ({
             {description}
           </p>
           {action && (
-            <button
-              onClick={action.onClick}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
-            >
-              {action.label}
-              <ExternalLink className="ml-1 w-4 h-4" />
-            </button>
+            action.href ? (
+              <a
+                href={action.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+              >
+                {action.label}
+                <ExternalLink className="ml-1 w-4 h-4" />
+              </a>
+            ) : (
+              <button
+                onClick={action.onClick}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+              >
+                {action.label}
+                <ExternalLink className="ml-1 w-4 h-4" />
+              </button>
+            )
           )}
         </div>
       </div>
@@ -108,12 +120,12 @@ export const QuickStartStep: React.FC<QuickStartStepProps> = ({
 }) => {
   return (
     <div 
-      className="p-6 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all cursor-pointer"
+      className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-all cursor-pointer hover:border-blue-300 dark:hover:border-blue-600"
       onClick={onClick}
     >
       <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shadow-sm">
+          <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
             {step}
           </span>
         </div>
@@ -124,7 +136,7 @@ export const QuickStartStep: React.FC<QuickStartStepProps> = ({
               {title}
             </h3>
           </div>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-gray-700 dark:text-gray-300">
             {description}
           </p>
         </div>
@@ -142,7 +154,7 @@ export const AccordionSection: React.FC<AccordionSectionProps> = ({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div className="border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm">
       <button
         className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -154,14 +166,14 @@ export const AccordionSection: React.FC<AccordionSectionProps> = ({
           </h3>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
+          <ChevronUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
+          <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         )}
       </button>
       
       {isExpanded && (
-        <div className="px-6 pb-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-6 pb-4 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div className="pt-4">
             {children}
           </div>
@@ -175,16 +187,16 @@ export const FeatureGrid: React.FC<FeatureGridProps> = ({ features }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {features.map((feature, index) => (
-        <div key={index} className="p-6 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div key={index} className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900">
+            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900 shadow-sm">
               {feature.icon}
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {feature.title}
             </h3>
           </div>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-gray-700 dark:text-gray-300">
             {feature.description}
           </p>
         </div>
@@ -256,7 +268,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header Accogliente */}
-      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-200'}`}>
+      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-100 to-indigo-100'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-300'}`}>
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <img 
@@ -270,7 +282,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             MangoMoney
           </h1>
           
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">
             Il tuo patrimonio, i tuoi dati, il tuo controllo
           </p>
           
@@ -279,7 +291,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               href="https://github.com/Stinocon/MangoMoney" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-md"
             >
               <Github className="w-5 h-5 mr-2" />
               <Star className="w-4 h-4 mr-1" />
@@ -445,7 +457,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             label: 'Leggi la documentazione',
             href: 'https://github.com/Stinocon/MangoMoney/blob/main/docs/UserDocumentation.md'
           }}
-          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
         />
         
         <InfoCard
@@ -456,7 +468,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             label: 'Dona su PayPal',
             href: 'https://www.paypal.com/paypalme/stefanoconter'
           }}
-          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
         />
         
         <InfoCard
@@ -467,7 +479,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             label: 'Apri una issue',
             href: 'https://github.com/Stinocon/MangoMoney/issues'
           }}
-          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
         />
       </div>
     </div>
