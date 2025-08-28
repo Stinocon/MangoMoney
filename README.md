@@ -111,7 +111,7 @@ npm install && npm start
 - Decimal.js (precisione finanziaria)
 - Bundle: 443kB (ottimizzato)
 
-[📚 Developer Docs Complete →](https://github.com/Stinocon/MangoMoney/blob/main/docs/developers/README.md)
+[📚 Developer Docs →](https://github.com/Stinocon/MangoMoney/blob/main/docs/developers/README.md)
 
 ---
 
@@ -124,7 +124,7 @@ npm install && npm start
 - 📣 **Condividi** con chi può interessare
 
 ### 🆘 **Serve Aiuto?**
-- 📖 **[Guida Utente Completa](https://github.com/Stinocon/MangoMoney/blob/main/docs/UserDocumentation.md)** (tutti i dettagli)
+- 📖 **[Documentazione Completa](https://github.com/Stinocon/MangoMoney/blob/main/docs/README.md)** (tutti i dettagli)
 - 💬 **[GitHub Discussions](https://github.com/Stinocon/MangoMoney/discussions)** (community)
 - 🐛 **[GitHub Issues](https://github.com/Stinocon/MangoMoney/issues)** (problemi tecnici)
 
