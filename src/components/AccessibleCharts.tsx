@@ -15,6 +15,7 @@ import {
   PieChart, Pie, Cell, Legend, LineChart, Line
 } from 'recharts';
 import { Card, Collapsible } from './AccessibleComponents';
+import { Icon, SmartInsightsIcon, SeverityIcon } from './IconSystem';
 
 
 // ===== COLORBLIND-FRIENDLY PALETTE =====
@@ -514,95 +515,9 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
 }) => {
   const insights = generateInsights(portfolioData, previousData, userSettings);
 
-  const Icon = ({ severity }: { severity: string }) => {
-    const common = 'w-4 h-4';
-    const color = severity === 'critical' ? (darkMode ? 'text-red-300' : 'text-red-600')
-      : severity === 'warning' ? (darkMode ? 'text-yellow-300' : 'text-yellow-600')
-      : severity === 'positive' ? (darkMode ? 'text-emerald-300' : 'text-emerald-600')
-      : (darkMode ? 'text-blue-300' : 'text-blue-600');
-    return (
-      <svg className={`${common} ${color}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        {severity === 'critical' && (<>
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </>)}
-        {severity === 'warning' && (<>
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-          <line x1="12" y1="9" x2="12" y2="13"></line>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </>)}
-        {severity === 'positive' && (<>
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </>)}
-        {severity !== 'critical' && severity !== 'warning' && severity !== 'positive' && (<>
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          <path d="M12 12a4 4 0 1 0-4-4"></path>
-        </>)}
-      </svg>
-    );
-  };
-
   const getCategoryIcon = (category: string) => {
-    const iconClass = 'w-4 h-4';
     const colorClass = darkMode ? 'text-gray-300' : 'text-gray-600';
-    
-    switch(category) {
-      case 'emergency':
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
-        );
-      case 'swr':
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2v20"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-        );
-      case 'debt':
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2v20"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-        );
-      case 'size':
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 3v18h18"/>
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-          </svg>
-        );
-      case 'tax':
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M9 14l6-6"/>
-            <path d="M9.5 8.5h5"/>
-            <path d="M9.5 11.5h5"/>
-            <path d="M9.5 14.5h5"/>
-          </svg>
-        );
-      case 'allocation':
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 3v18h18"/>
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-          </svg>
-        );
-      default:
-        return (
-          <svg className={`${iconClass} ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 16v-4"/>
-            <path d="M12 8h.01"/>
-          </svg>
-        );
-    }
+    return <SmartInsightsIcon category={category as any} size="sm" className={colorClass} />;
   };
 
   const getContainerClasses = (severity: string) => {
@@ -641,9 +556,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
     <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow-sm border p-6`}>
       <div className="mb-3">
         <h3 className={`text-base font-semibold flex items-center gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={darkMode ? 'text-amber-300' : 'text-amber-600'}>
-            <path d="M9 18h6M10 22h4M2 12a10 10 0 1 1 20 0c0 3-2 5-5 6H7c-3-1-5-3-5-6Z" />
-          </svg>
+          <Icon name="lightbulb" size="md" className={darkMode ? 'text-amber-300' : 'text-amber-600'} />
           Smart Insights
         </h3>
         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -666,7 +579,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
             aria-live="polite"
           >
             <div className="flex items-start gap-2">
-              <Icon severity={insight.severity} />
+              <SeverityIcon severity={insight.severity as any} size="sm" />
               <div className="flex-1">
                 <div className={`flex items-center justify-between gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                   <div className="flex items-center gap-1">
@@ -866,43 +779,37 @@ export const generateInsights = (
   }
   
   // ✅ INSIGHT 4: PORTFOLIO SIZE MATURITY - Solo se rilevante
-  {
-    const totalValue = current.totalValue ?? 0;
-    
-    // Solo se il portfolio è molto piccolo (bisogno di guida) o molto grande (opportunità)
-    if (totalValue < 5000) {
-      insights.push({
-        type: 'info',
-        category: 'size',
-        message: 'Portfolio in fase iniziale: concentrati su risparmio costante',
-        action: 'Priorità: emergency fund e risparmio regolare',
-        priority: 3
-      });
-    } else if (totalValue > 1000000) {
-      insights.push({
-        type: 'success',
-        category: 'size', 
-        message: 'Portfolio maturo: considera consulenza professionale',
-        action: 'Valuta strategie avanzate e ottimizzazione fiscale',
-        priority: 1
-      });
-    }
+  const totalValue = current.totalValue ?? 0;
+  
+  // Solo se il portfolio è molto piccolo (bisogno di guida) o molto grande (opportunità)
+  if (totalValue < 5000) {
+    insights.push({
+      type: 'info',
+      category: 'size',
+      message: 'Portfolio in fase iniziale: concentrati su risparmio costante',
+      action: 'Priorità: emergency fund e risparmio regolare',
+      priority: 3
+    });
+  } else if (totalValue > 1000000) {
+    insights.push({
+      type: 'success',
+      category: 'size', 
+      message: 'Portfolio maturo: considera consulenza professionale',
+      action: 'Valuta strategie avanzate e ottimizzazione fiscale',
+      priority: 1
+    });
   }
   
   // ✅ INSIGHT 5: TAX OPTIMIZATION - Solo se rilevante
-  {
-    // Bollo conti deposito - solo se liquidità molto elevata
-    if ((current.cashAccounts ?? 0) > 10000) {
-      insights.push({
-        type: 'info',
-        category: 'tax', 
-        message: 'Liquidità >€10K: bollo 0.2% su conti deposito',
-        action: 'Verifica applicazione bollo e considera ottimizzazioni',
-        priority: 3
-      });
-    }
-    
-
+  // Bollo conti deposito - solo se liquidità molto elevata
+  if ((current.cashAccounts ?? 0) > 10000) {
+    insights.push({
+      type: 'info',
+      category: 'tax', 
+      message: 'Liquidità >€10K: bollo 0.2% su conti deposito',
+      action: 'Verifica applicazione bollo e considera ottimizzazioni',
+      priority: 3
+    });
   }
   
 
