@@ -1,5 +1,7 @@
 # 📚 **DOCUMENTAZIONE UTENTE - MangoMoney**
 
+**Ultimo aggiornamento:** 28 Agosto 2025 - Versione 4.0.0
+
 ## 🎯 **Guida ai Calcoli Finanziari Semplici e Onesti**
 
 ### 📊 **1. Patrimonio Netto**

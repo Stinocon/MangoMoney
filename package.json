@@ -1,7 +1,7 @@
 {
   "_comment": "MangoMoney - Portfolio Tracker - Copyright (c) 2025 Stefano Conter - Licensed under CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/",
   "name": "mangomoney",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",

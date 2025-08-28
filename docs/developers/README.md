@@ -492,4 +492,4 @@ npm run deploy:production
 
 ---
 
-*Ultimo aggiornamento: 23 Agosto 2025*
+*Ultimo aggiornamento: 28 Agosto 2025 - Versione 4.0.0*

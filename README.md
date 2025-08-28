@@ -11,7 +11,20 @@
 
 ---
 
-## Chi può usare MangoMoney?
+## 🎯 **Per Chi è MangoMoney**
+
+### ✅ **PERFETTO PER:**
+- **Investitori privati** che vogliono controllo totale sui dati
+- **Chiunque cerchi** un tracker semplice ma completo
+- **Utenti italiani** con calcoli fiscali automatici
+- **Investitori internazionali** con multi-currency support
+- **Chi preferisce** privacy assoluta e zero tracking
+
+### ⚠️ **NON ADATTO PER:**
+- **Gestori di fondi istituzionali** (troppo semplice)
+- **Trading ad alta frequenza** (non ha dati real-time)
+- **Chi ha bisogno** di dati di mercato real-time
+- **Pignolazzi** (cit.) - preferiamo l'onestà alla perfezione
 
 ### 🇮🇹 **Per investitori italiani (target principale)**
 Progettato specificamente per il sistema fiscale italiano: calcolo automatico delle plusvalenze (26% standard, 12.5% obbligazioni whitelist), bollo titoli e valuta EUR. Setup rapido con configurazioni preimpostate per l'Italia.
@@ -19,10 +32,35 @@ Progettato specificamente per il sistema fiscale italiano: calcolo automatico de
 ### 🇬🇧 **For international investors (full support)**  
 Complete English interface, multiple currencies (USD, GBP, CHF, JPY, EUR), universal calculations (SWR, Risk Profile, Emergency Fund), customizable tax rates for any country. All features available with international market standards.
 
+### 🌍 **International Users**
+**Valute Supportate**: EUR, USD, GBP, CHF, JPY con conversioni automatiche
+**Tasse Configurabili**: Imposta le tue aliquote nazionali nelle impostazioni
+**Calcoli Universali**: SWR, Risk Profile, Emergency Fund funzionano ovunque
+**Privacy Globale**: I tuoi dati restano sempre sul tuo dispositivo
+
 ---
 
-## 🚀 **[Prova subito l'app](https://stinocon.github.io/MangoMoney/)**
-*Niente registrazioni, niente server, i tuoi dati restano sul tuo dispositivo*
+## ⚡ **Inizia in 2 Minuti**
+
+### 🚀 **[→ Apri MangoMoney](https://stinocon.github.io/MangoMoney/)**
+
+1. **🌍 Scegli lingua**: Italiano/English
+2. **💰 Primo asset**: Aggiungi il tuo conto principale  
+3. **📊 Patrimonio**: Vedi subito il tuo net worth
+4. **⚙️ Esplora**: Investimenti, immobili, calcoli avanzati
+
+**✨ Niente registrazione, tutto funziona offline, dati al sicuro.**
+
+---
+
+### 🎯 **Cosa Fa per Te**
+
+| Feature | Descrizione | Utilità |
+|---------|-------------|---------|
+| 📈 **Smart Calculations** | CAGR, SWR, Risk Score | Pianifica pensionamento |
+| 🇮🇹 **Tasse Italia** | Calcoli automatici plusvalenze | Risparmia con commercialista |
+| 🔒 **Privacy Assoluta** | Zero server, zero tracking | I tuoi dati restano tuoi |
+| 💱 **Multi-Currency** | EUR, USD, GBP, CHF, JPY | Per investitori globali |
 
 ---
 
@@ -264,6 +302,8 @@ Per utenti italiani:
 - 🛠️ **[Developer docs](docs/developers/README.md)** - Per gli smanettoni
 - ⚖️ **[Privacy Policy](docs/legal/privacy-policy.md)** - Trasparenza totale
 
+> **💡 Nota**: I link alla documentazione puntano ai file nel repository GitHub. Per visualizzarli, clicca su "Raw" o scarica il file.
+
 ## 🔗 Risorse Utili
 
 **[📚 AwesomeFinanceITA](https://github.com/Stinocon/AwesomeFinanceITA)** - Raccolta di risorse finanziarie per investitori italiani
@@ -317,4 +357,4 @@ Rilasciato sotto **Creative Commons BY-NC-SA 4.0**.
 
 ---
 
-*Ultimo aggiornamento: 25 Agosto 2025 - Versione 3.3.0*
+*Ultimo aggiornamento: 28 Agosto 2025 - Versione 4.0.0*

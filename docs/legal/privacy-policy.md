@@ -1,7 +1,7 @@
 # 🔒 Privacy Policy - MangoMoney
 
-**Ultimo aggiornamento:** 24 Agosto 2025  
-**Versione:** 1.1 
+**Ultimo aggiornamento:** 28 Agosto 2025  
+**Versione:** 4.0.0 
 
 ---
 
