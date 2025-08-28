@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useRef, useEffect, ReactNode, ButtonHTMLAttributes, InputHTMLAttributes } from 'react';
+import { Icon, ChevronIcon, CloseIcon, HelpIcon, TrendingIcon } from './IconSystem';
 
 // ===== BUTTON COMPONENT =====
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -802,11 +803,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 };
 
 // ===== ICON COMPONENTS =====
-interface IconProps {
-  className?: string;
-  direction?: 'up' | 'down' | 'left' | 'right' | 'asc' | 'desc';
-}
-
+// Manteniamo solo Spinner che è custom (non disponibile in lucide-react)
 export const Spinner: React.FC<{ className?: string; size?: 'sm' | 'md' | 'lg' }> = ({ 
   className = '', 
   size = 'md' 
@@ -841,61 +838,27 @@ export const Spinner: React.FC<{ className?: string; size?: 'sm' | 'md' | 'lg' }
   );
 };
 
-export const ChevronIcon: React.FC<IconProps> = ({ className = '', direction = 'down' }) => {
-  const rotations = {
-    up: 'rotate-180',
-    down: 'rotate-0',
-    left: 'rotate-90',
-    right: '-rotate-90'
-  };
+// Re-export delle icone dal sistema unificato per compatibilità
+export { ChevronIcon, CloseIcon, HelpIcon } from './IconSystem';
 
-  return (
-    <svg 
-      className={`${className} transform ${rotations[direction as keyof typeof rotations]}`}
-      fill="none" 
-      stroke="currentColor" 
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  );
+// SortIcon sostituito con Icon system
+export const SortIcon: React.FC<{ className?: string; direction?: 'asc' | 'desc' }> = ({ 
+  className = '', 
+  direction 
+}) => {
+  if (direction === 'asc') {
+    return <Icon name="chevron-up" className={className} />;
+  } else if (direction === 'desc') {
+    return <Icon name="chevron-down" className={className} />;
+  } else {
+    return <Icon name="arrow-up-down" className={className} />;
+  }
 };
 
-export const SortIcon: React.FC<IconProps> = ({ className = '', direction }) => {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      {direction === 'asc' ? (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-      ) : direction === 'desc' ? (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      ) : (
-        <>
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 10l7-7 7 7" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 14l-7 7-7-7" />
-        </>
-      )}
-    </svg>
-  );
+// TrendIcon sostituito con TrendingIcon dal sistema unificato
+export const TrendIcon: React.FC<{ className?: string; direction?: 'up' | 'down' }> = ({ 
+  className = '', 
+  direction = 'up' 
+}) => {
+  return <TrendingIcon direction={direction} className={className} />;
 };
-
-export const CloseIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-export const HelpIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-export const TrendIcon: React.FC<IconProps> = ({ className = '', direction = 'up' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    {direction === 'up' ? (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-    ) : (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-    )}
-  </svg>
-);

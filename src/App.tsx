@@ -12,7 +12,18 @@ import jsPDF from 'jspdf';
 // Screenshot capture utility - used in exportToPDF function (line 5198)
 import html2canvas from 'html2canvas';
 // UI Icons - used throughout the application for buttons and indicators
-import { PlusCircle, Trash2, Moon, Sun } from 'lucide-react';
+import { 
+  PlusCircle, Trash2, Moon, Sun,
+  ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
+  ArrowUpDown, X, Plus, Edit, Check, Save,
+  AlertCircle, AlertTriangle, CheckCircle, Info, HelpCircle,
+  TrendingUp, TrendingDown, Lightbulb, Shield, Target,
+  DollarSign, CreditCard, Receipt, BarChart3, PieChart,
+  Calculator, Home, Building, Wallet, PiggyBank,
+  Settings, Download, Upload, RefreshCw,
+  Circle, Clock, Calendar, Star, Heart, Eye, EyeOff,
+  Database, FileText, Share2, Copy
+} from 'lucide-react';
 // Chart components - used in MemoizedBarChart component (lines 6280-6309)
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 // Virtualized table component - used for large data sets (line 10567)
@@ -59,6 +70,7 @@ import {
 import {
   SmartInsights
 } from './components/AccessibleCharts';
+import { Icon } from './components/IconSystem';
 import SwrSimplified from './components/SwrSimplified';
 import SimpleStatistics from './components/SimpleStatistics';
 import { SwipeHint } from './components/MobileOptimizations';
@@ -1207,10 +1219,7 @@ const validateAssets = (data: unknown): Assets | null => {
             aria-label="Prima pagina"
             className={`px-2 py-1 text-xs border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-300 disabled:bg-gray-800 disabled:text-gray-500 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 hover:bg-gray-50'}`}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="11,17 6,12 11,7"></polyline>
-              <polyline points="17,17 12,12 17,7"></polyline>
-            </svg>
+            <ChevronLeft className="w-3 h-3" />
           </button>
           
           {/* Pagina precedente */}
@@ -1220,9 +1229,7 @@ const validateAssets = (data: unknown): Assets | null => {
             aria-label="Pagina precedente"
             className={`px-2 py-1 text-xs border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-300 disabled:bg-gray-800 disabled:text-gray-500 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 hover:bg-gray-50'}`}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15,18 9,12 15,6"></polyline>
-            </svg>
+            <ChevronLeft className="w-3 h-3" />
           </button>
           
           {/* Numeri pagina */}
@@ -1257,9 +1264,7 @@ const validateAssets = (data: unknown): Assets | null => {
             aria-label="Pagina successiva"
             className={`px-2 py-1 text-xs border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-300 disabled:bg-gray-800 disabled:text-gray-500 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 hover:bg-gray-50'}`}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
+            <ChevronRight className="w-3 h-3" />
           </button>
           
           {/* Ultima pagina */}
@@ -1269,10 +1274,7 @@ const validateAssets = (data: unknown): Assets | null => {
             aria-label="Ultima pagina"
             className={`px-2 py-1 text-xs border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-300 disabled:bg-gray-800 disabled:text-gray-500 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 hover:bg-gray-50'}`}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="13,17 18,12 13,7"></polyline>
-              <polyline points="7,17 12,12 7,7"></polyline>
-            </svg>
+            <ChevronRight className="w-3 h-3" />
           </button>
         </div>
         
@@ -2034,10 +2036,7 @@ const NetWorthManager = () => {
             }
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
+          <Edit size={16} aria-hidden="true" />
         </button>
         <button
           onClick={() => handleDeleteItem('transactions', item.id)}
@@ -2103,10 +2102,7 @@ const NetWorthManager = () => {
             }
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
+          <Edit size={16} aria-hidden="true" />
         </button>
         <button 
           onClick={() => handleCopyRow('investmentPositions', item.id)}
@@ -2121,10 +2117,7 @@ const NetWorthManager = () => {
             }
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+          <Copy size={16} aria-hidden="true" />
         </button>
         <button
           onClick={() => handleDeleteItem('investmentPositions', item.id)}
