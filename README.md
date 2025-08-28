@@ -4,16 +4,15 @@
  * Licensed under CC BY-NC-SA 4.0
  * https://creativecommons.org/licenses/by-nc-sa/4.0/
 -->
-
 <div align="center">
 
-# 🥭 MangoMoney
+<img width="1229" height="365" alt="logo" src="https://github.com/user-attachments/assets/00a6e5dc-0151-42c5-bdb8-85457ed33104" />
 
-### Il tuo patrimonio, i tuoi dati, il tuo controllo
+### Il tuo patrimonio e i tuoi dati, sotto il tuo controllo
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://stinocon.github.io/MangoMoney/) [![Privacy](https://img.shields.io/badge/privacy-100%25%20offline-brightgreen)](https://github.com/Stinocon/MangoMoney/blob/main/docs/legal/privacy-policy.md) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) [![Made in Italy](https://img.shields.io/badge/Made%20in-Italy-green)](https://github.com/Stinocon/MangoMoney)
 
-**TL;DR**: Tracker patrimonio offline con calcoli fiscali italiani integrati.  
+Tracker patrimonio offline con calcoli fiscali italiani integrati.  
 Zero server, zero tracking, massima privacy.
 
 [🚀 **PROVA SUBITO L'APP**](https://stinocon.github.io/MangoMoney/) | [⭐ Lascia una Stella](https://github.com/Stinocon/MangoMoney)
@@ -33,23 +32,22 @@ Zero server, zero tracking, massima privacy.
 
 ---
 
-## 🎯 Per Chi è Fatto
+## 🎯 Per chi è pensato
 
 ### ✅ **PERFETTO PER:**
 - 🇮🇹 **Investitori italiani** (tasse automatiche)
-- 🌍 **Utenti internazionali** (multi-currency)
 - 🔒 **Privacy-conscious** (zero tracking)
-- 📊 **Semplici ma precisi** (calcoli onesti)
 
 ### ⚠️ **NON PER:**
-- 🏦 Gestori fondi istituzionali
-- ⚡ Trading ad alta frequenza  
-- 📡 Chi vuole dati real-time automatici
-- 🎯 Chi cerca perfezione assoluta
+- Gestori fondi istituzionali
+- Trading ad alta frequenza  
+- Chi vuole dati real-time automatici
+- Chi cerca perfezione assoluta
+- Pignolazzi (cit.)
 
 ---
 
-## 🚀 Caratteristiche Principali
+## 🚀 Caratteristiche principali
 
 | 🏆 Caratteristica | 💡 Cosa Fa | 🎯 Perché Utile |
 |-------------------|-------------|------------------|
@@ -64,8 +62,8 @@ Zero server, zero tracking, massima privacy.
 ## 🔧 Come Funziona
 
 ### 📝 **Input**: Inserisci i tuoi asset manualmente
-- Conti correnti, investimenti, immobili, crypto
-- Import CSV da broker principali
+- Conti correnti, investimenti, immobili, crypto e fondi pensione
+- Import CSV
 - Template predefiniti inclusi
 
 ### 🧮 **Processing**: Calcoli automatici
@@ -77,13 +75,13 @@ Zero server, zero tracking, massima privacy.
 ### 📊 **Output**: Dashboard completa
 - Grafici interattivi
 - Alert e suggerimenti
-- Export PDF per commercialista
+- Export PDF per commercialista 
 
 ---
 
 ## 🛡️ Privacy & Sicurezza
 
-### ✅ **COSA GARANTIAMO**
+### ✅ **COSA FACCIAMO**
 - **100% Offline**: Dati solo nel tuo browser
 - **Zero Tracking**: Nessun analytics o cookie
 - **Open Source**: Codice verificabile da tutti
@@ -113,6 +111,8 @@ npm install && npm start
 
 [📚 Developer Docs →](https://github.com/Stinocon/MangoMoney/blob/main/docs/developers/README.md)
 
+Nota di servizio: non sono uno sviluppatore, quindi c'è tanto, tantissimo "vibe coding". Piaccia o no, questo è.
+
 ---
 
 ## 💪 Supporto Progetto
@@ -120,12 +120,10 @@ npm install && npm start
 ### 💝 **Ti Piace MangoMoney?**
 - ⭐ **[Stella su GitHub](https://github.com/Stinocon/MangoMoney)** (gratuito, 2 secondi)
 - ☕ **[Offri un Caffè](https://www.paypal.com/paypalme/stefanoconter)** (supporto sviluppo)
-- 🐛 **[Segnala Bug](https://github.com/Stinocon/MangoMoney/issues)** (aiuta a migliorare)
-- 📣 **Condividi** con chi può interessare
+- 📣 **Condividi** con le persone a cui può interessare
 
 ### 🆘 **Serve Aiuto?**
 - 📖 **[Documentazione Completa](https://github.com/Stinocon/MangoMoney/blob/main/docs/README.md)** (tutti i dettagli)
-- 💬 **[GitHub Discussions](https://github.com/Stinocon/MangoMoney/discussions)** (community)
 - 🐛 **[GitHub Issues](https://github.com/Stinocon/MangoMoney/issues)** (problemi tecnici)
 
 ---
@@ -141,6 +139,8 @@ Non dà consigli investimento • Non aggiorna prezzi • Non sostituisce consul
 ### 📜 **Licenza**
 **CC BY-NC-SA 4.0** - Gratuito per uso personale
 [Testo completo licenza](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+Il progetto è stato creato ad uso personale e non professionale, con tutti i limiti che questo può comportare.
 
 ---
 

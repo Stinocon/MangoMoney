@@ -72,16 +72,16 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   className = '' 
 }) => {
   return (
-    <div className={`p-6 rounded-lg border transition-all hover:shadow-md ${className}`}>
+    <div className={`p-6 rounded-lg border border-gray-300 dark:border-gray-700 transition-all hover:shadow-md shadow-sm ${className}`}>
       <div className="flex items-start space-x-4">
-        <div className="flex-shrink-0 p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
+        <div className="flex-shrink-0 p-2 rounded-lg bg-blue-100 dark:bg-blue-900 shadow-sm">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
             {description}
           </p>
           {action && (
@@ -120,7 +120,7 @@ export const QuickStartStep: React.FC<QuickStartStepProps> = ({
 }) => {
   return (
     <div 
-      className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-all cursor-pointer hover:border-blue-300 dark:hover:border-blue-600"
+      className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-all cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 shadow-sm"
       onClick={onClick}
     >
       <div className="flex items-center space-x-4">
@@ -221,21 +221,21 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   const quickStartSteps = [
     {
       step: 1,
-      icon: <Rocket className="w-5 h-5 text-blue-600" />,
+      icon: <Rocket className="w-5 h-5 text-blue-700 dark:text-blue-600" />,
       title: 'Liquidità',
       description: 'Inizia dai conti correnti e depositi',
       onClick: () => onNavigateToSection('cash')
     },
     {
       step: 2,
-      icon: <Calculator className="w-5 h-5 text-green-600" />,
+      icon: <Calculator className="w-5 h-5 text-green-700 dark:text-green-600" />,
       title: 'Investimenti',
       description: 'Aggiungi il tuo portafoglio',
       onClick: () => onNavigateToSection('investments')
     },
     {
       step: 3,
-      icon: <Shield className="w-5 h-5 text-purple-600" />,
+      icon: <Shield className="w-5 h-5 text-purple-700 dark:text-purple-600" />,
       title: 'Immobili',
       description: 'Inserisci le tue proprietà',
       onClick: () => onNavigateToSection('realEstate')
@@ -244,22 +244,22 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
 
   const mainFeatures = [
     {
-      icon: <Calculator className="w-6 h-6 text-blue-600" />,
+      icon: <Calculator className="w-6 h-6 text-blue-700 dark:text-blue-600" />,
       title: 'Calcoli Smart',
       description: 'CAGR, SWR, Risk Score per pianificare il pensionamento'
     },
     {
-      icon: <Shield className="w-6 h-6 text-green-600" />,
+      icon: <Shield className="w-6 h-6 text-green-700 dark:text-green-600" />,
       title: 'Privacy Totale',
       description: 'Dati solo sul tuo browser, zero server, zero tracking'
     },
     {
-      icon: <Globe className="w-6 h-6 text-purple-600" />,
+      icon: <Globe className="w-6 h-6 text-purple-700 dark:text-purple-600" />,
       title: 'Tasse Italia',
       description: 'Calcoli automatici plusvalenze e bollo titoli'
     },
     {
-      icon: <Smartphone className="w-6 h-6 text-orange-600" />,
+      icon: <Smartphone className="w-6 h-6 text-orange-700 dark:text-orange-600" />,
       title: 'Multi-Device',
       description: 'Desktop e mobile, sempre sincronizzato'
     }
@@ -268,7 +268,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header Accogliente */}
-      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-100 to-indigo-100'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-300'}`}>
+      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-100 to-indigo-100'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-200'}`}>
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <img 
@@ -282,7 +282,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             MangoMoney
           </h1>
           
-          <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">
+          <p className="text-xl text-gray-800 dark:text-gray-300 mb-6">
             Il tuo patrimonio, i tuoi dati, il tuo controllo
           </p>
           
@@ -325,14 +325,14 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       <div className="space-y-4">
         <AccordionSection 
           title="Come Usare l'App" 
-          icon={<BookOpen className="w-5 h-5 text-blue-600" />}
+          icon={<BookOpen className="w-5 h-5 text-blue-700 dark:text-blue-600" />}
           defaultExpanded={true}
         >
           <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               MangoMoney è progettato per essere semplice e intuitivo. Inizia dalla sezione Liquidità per inserire i tuoi conti correnti e depositi, poi passa agli Investimenti per il tuo portafoglio.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+            <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
               <li>Inserisci i dati una volta sola</li>
               <li>L'app calcola tutto automaticamente</li>
               <li>Esporta i dati quando vuoi</li>
@@ -343,25 +343,25 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
 
         <AccordionSection 
           title="Spiegazione Calcoli" 
-          icon={<Calculator className="w-5 h-5 text-green-600" />}
+          icon={<Calculator className="w-5 h-5 text-green-700 dark:text-green-600" />}
         >
           <div className="prose dark:prose-invert max-w-none">
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">CAGR (Compound Annual Growth Rate)</h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-700 dark:text-gray-300">
                   Tasso di crescita annuale composto. Mostra quanto cresce il tuo investimento in media ogni anno.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">SWR (Safe Withdrawal Rate)</h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-700 dark:text-gray-300">
                   Basato sul Trinity Study. Quanto puoi prelevare annualmente senza esaurire il capitale in 30 anni.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Risk Score</h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-300 mb-2">Risk Score</h4>
+                <p className="text-gray-700 dark:text-gray-300">
                   Punteggio di rischio semplificato basato sulla composizione del portafoglio.
                 </p>
               </div>
@@ -371,13 +371,13 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
 
         <AccordionSection 
           title="Privacy & Sicurezza" 
-          icon={<Shield className="w-5 h-5 text-purple-600" />}
+          icon={<Shield className="w-5 h-5 text-purple-700 dark:text-purple-600" />}
         >
           <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               I tuoi dati sono sempre al sicuro perché rimangono solo sul tuo dispositivo.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+            <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
               <li>Nessun server, nessun database esterno</li>
               <li>Dati crittografati nel browser</li>
               <li>Backup automatico ogni 5 minuti</li>
@@ -389,16 +389,16 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
 
         <AccordionSection 
           title="Configurazione Internazionale" 
-          icon={<Globe className="w-5 h-5 text-orange-600" />}
+          icon={<Globe className="w-5 h-5 text-orange-700 dark:text-orange-600" />}
         >
           <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               MangoMoney supporta utenti da tutto il mondo con valute e tasse configurabili.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Valute Supportate</h4>
-                <ul className="list-disc list-inside text-gray-600 dark:text-gray-300">
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300">
                   <li>EUR (Euro)</li>
                   <li>USD (Dollaro USA)</li>
                   <li>GBP (Sterlina)</li>
@@ -408,7 +408,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Tasse Configurabili</h4>
-                <ul className="list-disc list-inside text-gray-600 dark:text-gray-300">
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300">
                   <li>Aliquote personalizzabili</li>
                   <li>Regimi fiscali diversi</li>
                   <li>Calcoli universali</li>
@@ -420,25 +420,25 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
 
         <AccordionSection 
           title="FAQ & Problemi Comuni" 
-          icon={<HelpCircle className="w-5 h-5 text-red-600" />}
+          icon={<HelpCircle className="w-5 h-5 text-red-700 dark:text-red-600" />}
         >
           <div className="prose dark:prose-invert max-w-none">
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">I miei dati sono al sicuro?</h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-700 dark:text-gray-300">
                   Sì, i tuoi dati rimangono solo sul tuo dispositivo. Non vengono mai inviati a server esterni.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Come faccio il backup?</h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-700 dark:text-gray-300">
                   L'app fa backup automatici ogni 5 minuti. Puoi anche esportare manualmente in JSON, CSV o PDF.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Posso usare l'app offline?</h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-700 dark:text-gray-300">
                   Sì, una volta caricata l'app funziona completamente offline.
                 </p>
               </div>
@@ -450,18 +450,18 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       {/* Footer Utile */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <InfoCard
-          icon={<BookOpen className="w-6 h-6 text-blue-600" />}
+          icon={<BookOpen className="w-6 h-6 text-blue-700 dark:text-blue-600" />}
           title="Documentazione Completa"
           description="Guida dettagliata ai calcoli finanziari e all'uso dell'app"
           action={{
             label: 'Leggi la documentazione',
-            href: 'https://github.com/Stinocon/MangoMoney/blob/main/docs/UserDocumentation.md'
+            href: 'https://github.com/Stinocon/MangoMoney/blob/main/docs/README.md'
           }}
           className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
         />
         
         <InfoCard
-          icon={<Coffee className="w-6 h-6 text-orange-600" />}
+          icon={<Coffee className="w-6 h-6 text-orange-700 dark:text-orange-600" />}
           title="Offri un Caffè"
           description="Supporta lo sviluppo di MangoMoney"
           action={{
@@ -472,7 +472,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
         />
         
         <InfoCard
-          icon={<Bug className="w-6 h-6 text-red-600" />}
+          icon={<Bug className="w-6 h-6 text-red-700 dark:text-red-600" />}
           title="Segnala Bug"
           description="Aiutaci a migliorare MangoMoney"
           action={{
