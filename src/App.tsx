@@ -7878,10 +7878,7 @@ const NetWorthManager = () => {
                   : `border-transparent ${darkMode ? 'text-gray-400 hover:text-gray-300 hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
               }`}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
+              <Settings className="w-4 h-4" />
             </button>
             <button
               onClick={() => setActiveSection('info')}
@@ -8236,9 +8233,7 @@ const NetWorthManager = () => {
             {capitalGainsData.summary.totalSales > 0 && (
               <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-lg shadow-lg border p-6 hover:shadow-xl transition-shadow`}>
                 <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'} flex items-center gap-2`}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                  </svg>
+                  <DollarSign className="w-5 h-5" />
                   {t('capitalGains')}
                 </h3>
                 
@@ -8419,10 +8414,7 @@ const NetWorthManager = () => {
                                 }
                               }}
                             >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                              </svg>
+                              <Edit size={14} aria-hidden="true" />
                             </button>
                             <button 
                               onClick={() => handleCopyRow('investmentPositions', item.id)}
@@ -8437,10 +8429,7 @@ const NetWorthManager = () => {
                                 }
                               }}
                             >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                              </svg>
+                              <Copy size={14} aria-hidden="true" />
                             </button>
                             <button 
                               onClick={() => handleDeleteItem('investmentPositions', item.id)}
@@ -8583,10 +8572,7 @@ const NetWorthManager = () => {
                                   }
                                 }}
                               >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
+                                <Copy size={14} aria-hidden="true" />
                               </button>
 
                               <button 
@@ -9446,10 +9432,7 @@ const NetWorthManager = () => {
                                 }
                               }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                              </svg>
+                              <Copy size={16} aria-hidden="true" />
                             </button>
                             <button 
                               onClick={() => handleEditRow('investments', item.id)}
@@ -9464,9 +9447,7 @@ const NetWorthManager = () => {
                                 }
                               }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                              </svg>
+                              <RefreshCw size={16} aria-hidden="true" />
                             </button>
                             <button 
                               onClick={() => handleDeleteItem('investments', item.id)}
@@ -9572,9 +9553,7 @@ const NetWorthManager = () => {
                                   className={`${darkMode ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-500 hover:text-yellow-700'}`}
                                   title="Aggiorna Prezzo"
                                 >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                                  </svg>
+                                  <RefreshCw size={14} />
                                 </button>
                                 <button 
                                   onClick={() => handleDeleteItem('investments', item.id)}
@@ -10114,11 +10093,7 @@ const NetWorthManager = () => {
                 {/* Tax Settings */}
                 <div>
                   <h3 className="text-xl font-semibold mb-4">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-2">
-                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                      <line x1="8" y1="21" x2="16" y2="21"></line>
-                      <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
+                    <FileText className="w-5 h-5 inline mr-2" />
                     {t('taxSettings')}
                   </h3>
                   <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 space-y-4`}>
@@ -10127,9 +10102,7 @@ const NetWorthManager = () => {
                         <label className={`flex items-center text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                           {t('capitalGainsTaxRate')}
                           <div className="ml-1 cursor-help" title={t('capitalGainsTaxRateHelp')}>
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <HelpCircle className="w-4 h-4 text-gray-400" />
                           </div>
                         </label>
                         <input
