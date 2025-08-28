@@ -19,7 +19,8 @@ import {
   Bug,
   Github,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  Coffee
 } from 'lucide-react';
 
 // ===== TYPES =====
@@ -351,6 +352,23 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
                 <div>
                   <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">Documentazione</h5>
                   <p className="text-base text-slate-600 dark:text-slate-400">Guide complete e FAQ</p>
+                </div>
+              </div>
+            </a>
+            
+            <a 
+              href="https://www.paypal.com/paypalme/stefanoconter" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-4 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <Coffee className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">Offri un Caffè</h5>
+                  <p className="text-base text-slate-600 dark:text-slate-400">Supporta lo sviluppo di MangoMoney</p>
                 </div>
               </div>
             </a>
