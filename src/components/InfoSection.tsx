@@ -3,178 +3,149 @@
  * 
  * @description
  * Modern, user-friendly info section with progressive disclosure
- * and action-oriented design
+ * and action-oriented design optimized for light theme
  * 
  * @version 4.0.0
  */
 
 import React, { useState } from 'react';
 import { 
-  Rocket, 
   Shield, 
   Calculator, 
   Globe, 
-  Smartphone, 
   BookOpen, 
   HelpCircle, 
-  ExternalLink, 
   ChevronDown, 
-  ChevronUp,
-  Star,
-  Coffee,
   Bug,
-  Github
+  Github,
+  CheckCircle,
+  ArrowRight
 } from 'lucide-react';
 
 // ===== TYPES =====
 interface InfoCardProps {
-  icon: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
-  description: string;
-  action?: {
-    label: string;
-    onClick?: () => void;
-    href?: string;
-  };
-  className?: string;
-}
-
-interface QuickStartStepProps {
-  step: number;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick?: () => void;
-}
-
-interface AccordionSectionProps {
-  title: string;
-  icon: React.ReactNode;
   children: React.ReactNode;
-  defaultExpanded?: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+  iconColor: string;
 }
 
-interface FeatureGridProps {
-  features: Array<{
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-  }>;
+interface HeroSectionProps {
+  darkMode: boolean;
+}
+
+interface InfoSectionProps {
+  darkMode: boolean;
+  onNavigateToSection: (section: string) => void;
+  t: (key: any) => string;
 }
 
 // ===== COMPONENTS =====
 
-export const InfoCard: React.FC<InfoCardProps> = ({ 
-  icon, 
-  title, 
-  description, 
-  action, 
-  className = '' 
-}) => {
+// Hero Section with Gradient Background
+const HeroSection: React.FC<HeroSectionProps> = ({ darkMode }) => {
   return (
-    <div className={`p-6 rounded-lg border border-gray-300 dark:border-gray-700 transition-all hover:shadow-md shadow-sm ${className}`}>
-      <div className="flex items-start space-x-4">
-        <div className="flex-shrink-0 p-2 rounded-lg bg-blue-200 dark:bg-blue-900 shadow-sm">
-          {icon}
+    <div className={`relative overflow-hidden rounded-xl p-6 mb-6 border ${
+      darkMode 
+        ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700' 
+        : 'bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200/50'
+    }`}>
+      {/* Background Pattern */}
+      <div className={`absolute inset-0 opacity-5 ${
+        darkMode ? 'bg-slate-600' : 'bg-blue-600'
+      }`} style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+        backgroundSize: '20px 20px'
+      }}></div>
+      
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className={`text-xl font-semibold ${
+              darkMode ? 'text-slate-100' : 'text-slate-800'
+            }`}>
+              Benvenuto in MangoMoney
+            </h2>
+            <p className={`text-sm ${
+              darkMode ? 'text-slate-400' : 'text-slate-600'
+            }`}>
+              Il tuo patrimonio, i tuoi dati, il tuo controllo
+            </p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            {title}
-          </h3>
-          <p className="text-gray-800 dark:text-gray-300 mb-4">
-            {description}
-          </p>
-          {action && (
-            action.href ? (
-              <a
-                href={action.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
-              >
-                {action.label}
-                <ExternalLink className="ml-1 w-4 h-4" />
-              </a>
-            ) : (
-              <button
-                onClick={action.onClick}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
-              >
-                {action.label}
-                <ExternalLink className="ml-1 w-4 h-4" />
-              </button>
-            )
-          )}
+        
+        <div className={`prose prose-sm ${
+          darkMode ? 'text-slate-300' : 'text-slate-700'
+        }`}>
+          <p>MangoMoney è progettato per essere semplice e intuitivo. Inizia dalla sezione Liquidità per inserire i tuoi conti correnti e depositi, poi passa agli Investimenti per il tuo portafoglio.</p>
+          
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4 text-sm">
+            <li className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              Inserisci i dati una volta sola
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              L'app calcola tutto automaticamente  
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              Esporta i dati quando vuoi
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              Backup automatico ogni 5 minuti
+            </li>
+          </ul>
         </div>
       </div>
     </div>
   );
 };
 
-export const QuickStartStep: React.FC<QuickStartStepProps> = ({ 
-  step, 
-  icon, 
+// Modern Card Design
+const InfoCard: React.FC<InfoCardProps> = ({ 
+  icon: Icon, 
   title, 
-  description, 
-  onClick 
+  children, 
+  isExpanded, 
+  onToggle, 
+  iconColor 
 }) => {
   return (
-    <div 
-      className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-all cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 shadow-sm"
-      onClick={onClick}
-    >
-      <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-200 dark:bg-blue-900 flex items-center justify-center shadow-sm">
-          <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
-            {step}
-          </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-2">
-            {icon}
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <div className="group rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconColor}`}>
+            <Icon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="font-medium text-slate-900 dark:text-slate-100">
               {title}
             </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Click per espandere
+            </p>
           </div>
-          <p className="text-gray-800 dark:text-gray-300">
-            {description}
-          </p>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export const AccordionSection: React.FC<AccordionSectionProps> = ({ 
-  title, 
-  icon, 
-  children, 
-  defaultExpanded = false 
-}) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-
-  return (
-    <div className="border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm">
-      <button
-        className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center space-x-3">
-          {icon}
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {title}
-          </h3>
-        </div>
-        {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-700 dark:text-gray-400" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-700 dark:text-gray-400" />
-        )}
+        <ChevronDown 
+          className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
+            isExpanded ? 'rotate-180' : ''
+          }`} 
+        />
       </button>
       
       {isExpanded && (
-        <div className="px-6 pb-4 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <div className="pt-4">
+        <div className="px-4 pb-4 pt-0 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/20">
+          <div className="prose prose-sm max-w-none text-slate-600 dark:text-slate-300">
             {children}
           </div>
         </div>
@@ -183,304 +154,238 @@ export const AccordionSection: React.FC<AccordionSectionProps> = ({
   );
 };
 
-export const FeatureGrid: React.FC<FeatureGridProps> = ({ features }) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {features.map((feature, index) => (
-        <div key={index} className="p-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="p-2 rounded-lg bg-green-200 dark:bg-green-900 shadow-sm">
-              {feature.icon}
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {feature.title}
-            </h3>
-          </div>
-          <p className="text-gray-700 dark:text-gray-300">
-            {feature.description}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ===== MAIN INFO SECTION =====
-
-interface InfoSectionProps {
-  darkMode: boolean;
-  onNavigateToSection: (section: string) => void;
-  t: (key: any) => string;
-}
-
+// Main Info Section Component
 export const InfoSection: React.FC<InfoSectionProps> = ({ 
   darkMode, 
   onNavigateToSection, 
   t 
 }) => {
-  const quickStartSteps = [
-    {
-      step: 1,
-      icon: <Rocket className="w-5 h-5 text-blue-700 dark:text-blue-600" />,
-      title: 'Liquidità',
-      description: 'Inizia dai conti correnti e depositi',
-      onClick: () => onNavigateToSection('cash')
-    },
-    {
-      step: 2,
-      icon: <Calculator className="w-5 h-5 text-green-700 dark:text-green-600" />,
-      title: 'Investimenti',
-      description: 'Aggiungi il tuo portafoglio',
-      onClick: () => onNavigateToSection('investments')
-    },
-    {
-      step: 3,
-      icon: <Shield className="w-5 h-5 text-purple-700 dark:text-purple-600" />,
-      title: 'Immobili',
-      description: 'Inserisci le tue proprietà',
-      onClick: () => onNavigateToSection('realEstate')
-    }
-  ];
+  const [expandedSections, setExpandedSections] = useState<string[]>(['quick-start']);
 
-  const mainFeatures = [
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => 
+      prev.includes(sectionId) 
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
+  const navigateToAssets = () => {
+    onNavigateToSection('assets');
+  };
+
+  // Visual Hierarchy with Colors
+  const INFO_SECTIONS = [
     {
-      icon: <Calculator className="w-6 h-6 text-blue-700 dark:text-blue-600" />,
-      title: 'Calcoli Smart',
-      description: 'CAGR, SWR, Risk Score per pianificare il pensionamento'
+      id: 'quick-start',
+      icon: BookOpen,
+      title: 'Come Iniziare',
+      iconColor: 'bg-blue-600',
+      content: (
+        <div className="space-y-3">
+          <h4 className="font-medium text-slate-800 dark:text-slate-200">Setup in 3 step:</h4>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Aggiungi il tuo primo conto corrente nella sezione <strong>Liquidità</strong></li>
+            <li>Inserisci investimenti principali nella sezione <strong>Investimenti</strong></li>  
+            <li>Configura le impostazioni fiscali per l'Italia (già preimpostate)</li>
+          </ol>
+          
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              💡 <strong>Tip:</strong> Inizia sempre dalla liquidità, ti aiuta a capire come funziona l'app
+            </p>
+          </div>
+        </div>
+      )
     },
+    
     {
-      icon: <Shield className="w-6 h-6 text-green-700 dark:text-green-600" />,
-      title: 'Privacy Totale',
-      description: 'Dati solo sul tuo browser, zero server, zero tracking'
+      id: 'calculations',
+      icon: Calculator,
+      title: 'Calcoli e Metriche',
+      iconColor: 'bg-green-600',
+      content: (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <h5 className="font-medium text-green-800 dark:text-green-200">CAGR</h5>
+              <p className="text-sm text-green-700 dark:text-green-300">Crescita annua composta dei tuoi investimenti</p>
+            </div>
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <h5 className="font-medium text-green-800 dark:text-green-200">SWR</h5>
+              <p className="text-sm text-green-700 dark:text-green-300">Quanto puoi prelevare per il pensionamento</p>
+            </div>
+          </div>
+          <p className="text-sm">Tutti i calcoli sono trasparenti e basati su formule finanziarie standard. Non facciamo "magia", solo matematica onesta.</p>
+        </div>
+      )
     },
+    
     {
-      icon: <Globe className="w-6 h-6 text-purple-700 dark:text-purple-600" />,
-      title: 'Tasse Italia',
-      description: 'Calcoli automatici plusvalenze e bollo titoli'
+      id: 'privacy',
+      icon: Shield,
+      title: 'Privacy e Sicurezza',
+      iconColor: 'bg-orange-600',
+      content: (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <CheckCircle className="w-4 h-4" />
+              100% Offline
+            </div>
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <CheckCircle className="w-4 h-4" />
+              Zero Tracking
+            </div>
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <CheckCircle className="w-4 h-4" />
+              Open Source
+            </div>
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <CheckCircle className="w-4 h-4" />
+              Crittografia Locale
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+            <p className="text-sm text-orange-800 dark:text-orange-200">
+              🔒 I tuoi dati finanziari restano SEMPRE nel tuo browser. Mai inviati a server esterni.
+            </p>
+          </div>
+        </div>
+      )
     },
+    
     {
-      icon: <Smartphone className="w-6 h-6 text-orange-700 dark:text-orange-600" />,
-      title: 'Multi-Device',
-      description: 'Desktop e mobile, sempre sincronizzato'
+      id: 'international',
+      icon: Globe,
+      title: 'Configurazione Internazionale',
+      iconColor: 'bg-purple-600',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm">MangoMoney supporta utenti da tutto il mondo con valute e tasse configurabili.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-2">Valute Supportate</h4>
+              <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-300">
+                <li>EUR (Euro)</li>
+                <li>USD (Dollaro USA)</li>
+                <li>GBP (Sterlina)</li>
+                <li>CHF (Franco Svizzero)</li>
+                <li>JPY (Yen Giapponese)</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-2">Tasse Configurabili</h4>
+              <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-300">
+                <li>Aliquote personalizzabili</li>
+                <li>Regimi fiscali diversi</li>
+                <li>Calcoli automatici</li>
+                <li>Report per commercialisti</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    
+    {
+      id: 'support',
+      icon: HelpCircle,
+      title: 'Supporto e Risorse',
+      iconColor: 'bg-red-600',
+      content: (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3">
+            <a 
+              href="https://github.com/Stinocon/MangoMoney/issues" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Bug className="w-5 h-5 text-red-600" />
+                <div>
+                  <h5 className="font-medium text-slate-900 dark:text-slate-100">Segnala un Bug</h5>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">GitHub Issues per problemi tecnici</p>
+                </div>
+              </div>
+            </a>
+            
+            <a 
+              href="https://github.com/Stinocon/MangoMoney" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Github className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                <div>
+                  <h5 className="font-medium text-slate-900 dark:text-slate-100">Codice Sorgente</h5>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Open source su GitHub</p>
+                </div>
+              </div>
+            </a>
+            
+            <a 
+              href="https://github.com/Stinocon/MangoMoney/blob/main/docs/README.md" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <BookOpen className="w-5 h-5 text-blue-600" />
+                <div>
+                  <h5 className="font-medium text-slate-900 dark:text-slate-100">Documentazione</h5>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Guide complete e FAQ</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      )
     }
   ];
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Header Accogliente */}
-      <div className={`${darkMode ? 'bg-gradient-to-br from-slate-800 to-gray-800' : 'bg-gradient-to-br from-blue-200 to-indigo-200'} rounded-lg shadow-lg p-8 border ${darkMode ? 'border-slate-700' : 'border-blue-300'}`}>
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <img 
-              src={require('../images/mango.png')} 
-              alt="MangoMoney" 
-              className="h-20 md:h-24 w-auto object-contain"
-            />
-          </div>
-          
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            MangoMoney
-          </h1>
-          
-          <p className="text-xl text-gray-800 dark:text-gray-300 mb-6">
-            Il tuo patrimonio, i tuoi dati, il tuo controllo
-          </p>
-          
-          <div className="flex items-center justify-center space-x-4">
-            <a 
-              href="https://github.com/Stinocon/MangoMoney" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-md"
+    <div className="max-w-4xl mx-auto p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+      <div className="space-y-4">
+        {/* Hero Section */}
+        <HeroSection darkMode={darkMode} />
+        
+        {/* Accordion Sections */}
+        <div className="space-y-3">
+          {INFO_SECTIONS.map((section) => (
+            <InfoCard
+              key={section.id}
+              icon={section.icon}
+              title={section.title}
+              iconColor={section.iconColor}
+              isExpanded={expandedSections.includes(section.id)}
+              onToggle={() => toggleSection(section.id)}
             >
-              <Github className="w-5 h-5 mr-2" />
-              <Star className="w-4 h-4 mr-1" />
-              4.0.0
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Start Visuale */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Inizia in 2 Minuti
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickStartSteps.map((step) => (
-            <QuickStartStep key={step.step} {...step} />
+              {section.content}
+            </InfoCard>
           ))}
         </div>
-      </div>
-
-      {/* Funzionalità Principali */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Cosa Fa per Te
-        </h2>
-        <FeatureGrid features={mainFeatures} />
-      </div>
-
-      {/* Sezioni Espandibili */}
-      <div className="space-y-4">
-        <AccordionSection 
-          title="Come Usare l'App" 
-          icon={<BookOpen className="w-5 h-5 text-blue-700 dark:text-blue-600" />}
-          defaultExpanded={true}
-        >
-          <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-800 dark:text-gray-300 mb-4">
-              MangoMoney è progettato per essere semplice e intuitivo. Inizia dalla sezione Liquidità per inserire i tuoi conti correnti e depositi, poi passa agli Investimenti per il tuo portafoglio.
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-800 dark:text-gray-300">
-              <li>Inserisci i dati una volta sola</li>
-              <li>L'app calcola tutto automaticamente</li>
-              <li>Esporta i dati quando vuoi</li>
-              <li>Backup automatico ogni 5 minuti</li>
-            </ul>
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Spiegazione Calcoli" 
-          icon={<Calculator className="w-5 h-5 text-green-700 dark:text-green-600" />}
-        >
-          <div className="prose dark:prose-invert max-w-none">
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">CAGR (Compound Annual Growth Rate)</h4>
-                <p className="text-gray-800 dark:text-gray-300">
-                  Tasso di crescita annuale composto. Mostra quanto cresce il tuo investimento in media ogni anno.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">SWR (Safe Withdrawal Rate)</h4>
-                <p className="text-gray-800 dark:text-gray-300">
-                  Basato sul Trinity Study. Quanto puoi prelevare annualmente senza esaurire il capitale in 30 anni.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Risk Score</h4>
-                <p className="text-gray-800 dark:text-gray-300">
-                  Punteggio di rischio semplificato basato sulla composizione del portafoglio.
-                </p>
-              </div>
-            </div>
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Privacy & Sicurezza" 
-          icon={<Shield className="w-5 h-5 text-purple-700 dark:text-purple-600" />}
-        >
-          <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-800 dark:text-gray-300 mb-4">
-              I tuoi dati sono sempre al sicuro perché rimangono solo sul tuo dispositivo.
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-800 dark:text-gray-300">
-              <li>Nessun server, nessun database esterno</li>
-              <li>Dati crittografati nel browser</li>
-              <li>Backup automatico ogni 5 minuti</li>
-              <li>Export completo in JSON, CSV, PDF</li>
-              <li>Zero tracking, zero analytics</li>
-            </ul>
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Configurazione Internazionale" 
-          icon={<Globe className="w-5 h-5 text-orange-700 dark:text-orange-600" />}
-        >
-          <div className="prose dark:prose-invert max-w-none">
-            <p className="text-gray-800 dark:text-gray-300 mb-4">
-              MangoMoney supporta utenti da tutto il mondo con valute e tasse configurabili.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Valute Supportate</h4>
-                <ul className="list-disc list-inside text-gray-800 dark:text-gray-300">
-                  <li>EUR (Euro)</li>
-                  <li>USD (Dollaro USA)</li>
-                  <li>GBP (Sterlina)</li>
-                  <li>CHF (Franco Svizzero)</li>
-                  <li>JPY (Yen Giapponese)</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Tasse Configurabili</h4>
-                <ul className="list-disc list-inside text-gray-800 dark:text-gray-300">
-                  <li>Aliquote personalizzabili</li>
-                  <li>Regimi fiscali diversi</li>
-                  <li>Calcoli universali</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="FAQ & Problemi Comuni" 
-          icon={<HelpCircle className="w-5 h-5 text-red-700 dark:text-red-600" />}
-        >
-          <div className="prose dark:prose-invert max-w-none">
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">I miei dati sono al sicuro?</h4>
-                <p className="text-gray-800 dark:text-gray-300">
-                  Sì, i tuoi dati rimangono solo sul tuo dispositivo. Non vengono mai inviati a server esterni.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Come faccio il backup?</h4>
-                <p className="text-gray-800 dark:text-gray-300">
-                  L'app fa backup automatici ogni 5 minuti. Puoi anche esportare manualmente in JSON, CSV o PDF.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Posso usare l'app offline?</h4>
-                <p className="text-gray-800 dark:text-gray-300">
-                  Sì, una volta caricata l'app funziona completamente offline.
-                </p>
-              </div>
-            </div>
-          </div>
-        </AccordionSection>
-      </div>
-
-      {/* Footer Utile */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <InfoCard
-          icon={<BookOpen className="w-6 h-6 text-blue-700 dark:text-blue-600" />}
-          title="Documentazione Completa"
-          description="Guida dettagliata ai calcoli finanziari e all'uso dell'app"
-          action={{
-            label: 'Leggi la documentazione',
-            href: 'https://github.com/Stinocon/MangoMoney/blob/main/docs/README.md'
-          }}
-          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
-        />
         
-        <InfoCard
-          icon={<Coffee className="w-6 h-6 text-orange-700 dark:text-orange-600" />}
-          title="Offri un Caffè"
-          description="Supporta lo sviluppo di MangoMoney"
-          action={{
-            label: 'Dona su PayPal',
-            href: 'https://www.paypal.com/paypalme/stefanoconter'
-          }}
-          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
-        />
-        
-        <InfoCard
-          icon={<Bug className="w-6 h-6 text-red-700 dark:text-red-600" />}
-          title="Segnala Bug"
-          description="Aiutaci a migliorare MangoMoney"
-          action={{
-            label: 'Apri una issue',
-            href: 'https://github.com/Stinocon/MangoMoney/issues'
-          }}
-          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
-        />
+        {/* Footer CTA */}
+        <div className="mt-8 text-center p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-2">
+            Pronto per iniziare?
+          </h3>
+          <p className="text-slate-600 dark:text-slate-400 mb-4">
+            Aggiungi il tuo primo asset e vedi MangoMoney in azione
+          </p>
+          <button 
+            onClick={navigateToAssets}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+          >
+            Aggiungi Primo Asset
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
