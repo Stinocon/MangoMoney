@@ -10,7 +10,8 @@
  */
 
 import React, { useState, useRef, useEffect, ReactNode, ButtonHTMLAttributes, InputHTMLAttributes } from 'react';
-import { Icon, ChevronIcon, CloseIcon, HelpIcon, TrendingIcon } from './IconSystem';
+import { Icon, TrendingIcon } from './IconSystem';
+import { ChevronDown, ChevronUp, X, HelpCircle } from 'lucide-react';
 
 // ===== BUTTON COMPONENT =====
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -266,10 +267,15 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
                     aria-label={`Ordina per ${column.label}`}
                   >
                     {column.label}
-                    <SortIcon 
-                      direction={sortBy === column.key ? sortDirection : undefined}
-                      className="w-4 h-4"
-                    />
+                    {sortBy === column.key ? (
+                      sortDirection === 'asc' ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )
+                    ) : (
+                      <Icon name="arrow-up-down" className="w-4 h-4" />
+                    )}
                   </button>
                 ) : (
                   column.label
@@ -360,11 +366,11 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           )}
         </div>
         
-        <ChevronIcon 
-          direction={isExpanded ? 'up' : 'down'}
-          className="w-5 h-5 text-gray-400"
-          aria-hidden="true"
-        />
+        {isExpanded ? (
+          <ChevronUp className="w-5 h-5 text-gray-400" aria-hidden="true" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-400" aria-hidden="true" />
+        )}
       </button>
       
       <div
@@ -465,7 +471,7 @@ export const Modal: React.FC<ModalProps> = ({
             onClick={onClose}
             aria-label="Chiudi modal"
           >
-            <CloseIcon className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
         </div>
         
@@ -629,7 +635,7 @@ export const ContextualHelp: React.FC<ContextualHelpProps> = ({
         aria-label={`Spiegazione di ${term}`}
       >
         {children}
-        <HelpIcon className="w-4 h-4" />
+        <HelpCircle className="w-4 h-4" />
       </button>
     </Tooltip>
   );
@@ -704,7 +710,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             {change && (
               <div className={`text-sm flex items-center gap-1 ${getTrendColor(trend)}`}>
                 {trend && trend !== 'neutral' && (
-                  <TrendIcon 
+                  <TrendingIcon 
                     direction={trend} 
                     className="w-4 h-4" 
                     aria-hidden="true"
@@ -838,27 +844,6 @@ export const Spinner: React.FC<{ className?: string; size?: 'sm' | 'md' | 'lg' }
   );
 };
 
-// Re-export delle icone dal sistema unificato per compatibilità
-export { ChevronIcon, CloseIcon, HelpIcon } from './IconSystem';
 
-// SortIcon sostituito con Icon system
-export const SortIcon: React.FC<{ className?: string; direction?: 'asc' | 'desc' }> = ({ 
-  className = '', 
-  direction 
-}) => {
-  if (direction === 'asc') {
-    return <Icon name="chevron-up" className={className} />;
-  } else if (direction === 'desc') {
-    return <Icon name="chevron-down" className={className} />;
-  } else {
-    return <Icon name="arrow-up-down" className={className} />;
-  }
-};
 
-// TrendIcon sostituito con TrendingIcon dal sistema unificato
-export const TrendIcon: React.FC<{ className?: string; direction?: 'up' | 'down' }> = ({ 
-  className = '', 
-  direction = 'up' 
-}) => {
-  return <TrendingIcon direction={direction} className={className} />;
-};
+

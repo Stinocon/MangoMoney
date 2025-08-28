@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { Card, Collapsible } from './AccessibleComponents';
 import { Icon, SeverityIcon } from './IconSystem';
+import { PORTFOLIO_THRESHOLDS, TAX_CONSTANTS, INSIGHTS_DEFAULTS, PERFORMANCE_THRESHOLDS } from '../utils/appConstants';
 
 
 // ===== COLORBLIND-FRIENDLY PALETTE =====
@@ -655,8 +656,8 @@ export const generateInsights = (
   
   // ✅ INSIGHT 1: EMERGENCY FUND - Logica corretta
   if (current.emergencyFundMonths >= 0) {
-    const optimalMonths = settings?.emergencyFundOptimalMonths ?? 12; // Cambiato da 6 a 12
-    const adequateMonths = settings?.emergencyFundAdequateMonths ?? 6; // Cambiato da 3 a 6
+    const optimalMonths = settings?.emergencyFundOptimalMonths ?? INSIGHTS_DEFAULTS.EMERGENCY_OPTIMAL_MONTHS;
+    const adequateMonths = settings?.emergencyFundAdequateMonths ?? INSIGHTS_DEFAULTS.EMERGENCY_ADEQUATE_MONTHS;
     const currentMonths = current.emergencyFundMonths;
     
     if (currentMonths < adequateMonths) {
@@ -704,8 +705,8 @@ export const generateInsights = (
     // Escludi: immobili, pensioni, alternativi (illiquidi)
     const illiquidAssets = (current.realEstateValue ?? 0) + (current.pensionFundsValue ?? 0) + (current.alternativeAssetsValue ?? 0);
     const liquidAssets = (current.cashAccounts ?? 0) + (current.totalValue - illiquidAssets);
-    const swrRate = settings?.swrRate ?? 4.0;
-    const inflationRate = settings?.inflationRate ?? 2.0;
+    const swrRate = settings?.swrRate ?? INSIGHTS_DEFAULTS.SWR_RATE;
+    const inflationRate = settings?.inflationRate ?? INSIGHTS_DEFAULTS.INFLATION_RATE;
     
     // Aggiustamento inflazione basato su ricerca
     const inflationAdjustment = Math.max(0, (inflationRate - 2.0) * 0.3);
@@ -714,7 +715,7 @@ export const generateInsights = (
     const monthlyWithdrawal = (liquidAssets * adjustedSWR / 100) / 12;
     const coverage = (monthlyWithdrawal / (settings?.monthlyExpenses ?? 1)) * 100;
     
-    if (coverage < 70) {
+    if (coverage < PERFORMANCE_THRESHOLDS.SWR_CRITICAL) {
       insights.push({
         type: 'critical',
         category: 'swr',
@@ -723,7 +724,7 @@ export const generateInsights = (
         priority: 9,
         value: coverage
       });
-    } else if (coverage < 100) {
+    } else if (coverage < PERFORMANCE_THRESHOLDS.SWR_WARNING) {
       insights.push({
         type: 'warning',
         category: 'swr', 
@@ -759,7 +760,7 @@ export const generateInsights = (
   if ((current.debtToAssetRatio ?? 0) > 0) {
     const ratio = (current.debtToAssetRatio ?? 0) * 100;
     
-    if (ratio > 70) {
+    if (ratio > PERFORMANCE_THRESHOLDS.DEBT_CRITICAL) {
       insights.push({
         type: 'critical',
         category: 'debt',
@@ -768,7 +769,7 @@ export const generateInsights = (
         priority: 10,
         value: ratio
       });
-    } else if (ratio > 50) {
+    } else if (ratio > PERFORMANCE_THRESHOLDS.DEBT_WARNING) {
       insights.push({
         type: 'warning',
         category: 'debt', 
@@ -777,7 +778,7 @@ export const generateInsights = (
         priority: 8,
         value: ratio
       });
-    } else if (ratio > 30) {
+    } else if (ratio > PERFORMANCE_THRESHOLDS.DEBT_MODERATE) {
       insights.push({
         type: 'info',
         category: 'debt',
@@ -793,7 +794,7 @@ export const generateInsights = (
   const totalValue = current.totalValue ?? 0;
   
   // Solo se il portfolio è molto piccolo (bisogno di guida) o molto grande (opportunità)
-  if (totalValue < 5000) {
+  if (totalValue < PORTFOLIO_THRESHOLDS.SMALL) {
     insights.push({
       type: 'info',
       category: 'size',
@@ -801,7 +802,7 @@ export const generateInsights = (
       action: 'Priorità: emergency fund e risparmio regolare',
       priority: 3
     });
-  } else if (totalValue > 1000000) {
+  } else if (totalValue > PORTFOLIO_THRESHOLDS.LARGE) {
     insights.push({
       type: 'success',
       category: 'size', 
@@ -813,7 +814,7 @@ export const generateInsights = (
   
   // ✅ INSIGHT 5: TAX OPTIMIZATION - Solo se rilevante
   // Bollo conti deposito - solo se liquidità molto elevata
-  if ((current.cashAccounts ?? 0) > 10000) {
+  if ((current.cashAccounts ?? 0) > TAX_CONSTANTS.STAMP_DUTY_CASH_THRESHOLD) {
     insights.push({
       type: 'info',
       category: 'tax', 
