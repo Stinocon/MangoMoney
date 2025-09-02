@@ -38,7 +38,7 @@ import {
   safePercentage, 
   safeCAGR,
   calculatePortfolioRiskScore, 
-  // calculatePortfolioEfficiencyScore, // ✅ ELIMINATO: funzione zombie 
+  // calculatePortfolioEfficiencyScore rimossa - funzione zombie 
   calculateCapitalGainsTax, 
   calculateEmergencyFundMetrics, 
   analyzeTaxesByYear, 
@@ -2274,7 +2274,7 @@ const NetWorthManager = () => {
     // Not full MPT - suitable for personal finance use
     const baseRiskScore = calculatePortfolioRiskScore(portfolioAllocations, totalAssets);
     
-    // ✅ ELIMINATO: Efficiency Score - era una funzione zombie che returnava 0
+    // Efficiency Score rimosso - funzione zombie
     
     // Tax Analysis - Analisi fiscale per anno
     if (process.env.NODE_ENV === 'development') {
@@ -2378,7 +2378,7 @@ const NetWorthManager = () => {
     return {
       emergencyFundMetrics,
       baseRiskScore,
-      // efficiencyScore, // ✅ ELIMINATO: funzione zombie
+      // efficiencyScore rimossa - funzione zombie
       taxAnalysis,
       debtToAssetRatio,
       adjustedRiskScore,
@@ -2404,14 +2404,14 @@ const NetWorthManager = () => {
     
     // ✅ ACCESSO DIRETTO AI VALORI PRE-CALCOLATI senza creare dipendenza circolare
     const emergencyFundMetrics = coreFinancialCalculations.emergencyFundMetrics;
-    // const efficiencyScore = coreFinancialCalculations.efficiencyScore; // ✅ ELIMINATO: funzione zombie
+    // efficiencyScore rimossa - funzione zombie
     const taxAnalysis = coreFinancialCalculations.taxAnalysis;
     const debtToAssetRatio = coreFinancialCalculations.debtToAssetRatio;
     const adjustedRiskScore = coreFinancialCalculations.adjustedRiskScore;
     const allocationPercentages = coreFinancialCalculations.allocationPercentages;
     // Non serve più calcolare realEstateForPercentage, usa totals.realEstate
     
-    // ✅ ELIMINATO: Sharpe Ratio e Efficiency Score - erano funzioni zombie
+    // Sharpe Ratio e Efficiency Score rimossi - funzioni zombie
     
     // Count total positions across all sections
     const totalPositions = assets.cash.length + assets.debts.length + 
@@ -2496,16 +2496,16 @@ const NetWorthManager = () => {
       totalGlobalPositions,
       uniqueInvestmentPositions,
       riskScore: adjustedRiskScore.toFixed(1),
-      // sharpeRatio: sharpeRatioFormatted, // ✅ ELIMINATO: funzione zombie
-      // efficiencyRating: efficiencyRating.rating, // ✅ ELIMINATO: funzione zombie
-      // efficiencyColor: efficiencyRating.color, // ✅ ELIMINATO: funzione zombie
+      // sharpeRatio rimossa - funzione zombie
+      // efficiencyRating rimossa - funzione zombie
+      // efficiencyColor rimossa - funzione zombie
       // ✅ FATTIBILE: Metriche per Smart Insights
       yearlyCommissions,
       unrealizedLosses,
       numberOfPositions: assets.investments.length,
       positionsUnder1Percent,
       totalPortfolioValue,
-      // efficiencyBgColor: efficiencyRating.bgColor, // ✅ ELIMINATO: funzione zombie
+      // efficiencyBgColor rimossa - funzione zombie
       emergencyMonths: emergencyFundMetrics.monthsFormatted,
       emergencyFundValue: emergencyFundMetrics.value,
       emergencyFundStatus: emergencyFundMetrics.status === 'optimal' ? t('optimal') :

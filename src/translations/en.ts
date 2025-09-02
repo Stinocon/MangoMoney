@@ -91,7 +91,7 @@ export const en = {
   
   // Statistics
   riskScore: 'Simplified Risk Level',
-  // efficiencyScore: 'Efficiency (Sharpe Ratio)', // ✅ ELIMINATO: funzione zombie
+  // efficiencyScore removed - zombie function
   emergencyFund: 'Emergency Fund',
   diversification: 'Diversification',
   concentration: 'Concentration',
@@ -520,8 +520,8 @@ globalPositionsRiskDescription: 'Global Positions: 7.0 (high risk - broker accou
 alternativeAssetsRiskDescription: 'Alternative Assets: 9.0 (very high risk - speculative assets)',
 
 investmentsTransactionsRiskDescription: 'Investments/Transactions: 7.0 (high risk - market volatility)',
-  // riskScoreBasedOnVolatility: 'Based on portfolio volatility calculated with Modern Portfolio Theory.', // ✅ ELIMINATO: funzione zombie
-  // efficiencyBasedOnSharpe: 'Based on risk-adjusted return ratio.', // ✅ ELIMINATO: funzione zombie
+  // riskScoreBasedOnVolatility removed - zombie function
+  // efficiencyBasedOnSharpe removed - zombie function
   transactionAnalysisPerYear: 'Transaction analysis per year',
   verifyLinksBetweenTransactionsAssets: 'Verify links between transactions and individual assets',
   filterByAssetType: 'Filter by asset type',
@@ -805,7 +805,7 @@ investmentsTransactionsRiskDescription: 'Investments/Transactions: 7.0 (high ris
   riskScoreLimit: 'Risk score assumes markets behave "normally" (spoiler: they don\'t always)',
   professionalAdvice: 'For serious stuff like buying a house or planning retirement, always consult a professional. This app helps you see the situation, but doesn\'t replace advice from someone who really knows.',
   
-  // ✅ ELIMINATO: Traduzioni Sharpe Ratio - funzioni zombie rimosse
+  // Sharpe Ratio translations removed - zombie functions
   insufficientData: 'Insufficient data for calculation',
   preliminaryCalculation: 'Preliminary calculation - limited data',
   
@@ -813,7 +813,7 @@ investmentsTransactionsRiskDescription: 'Investments/Transactions: 7.0 (high ris
   theoreticalSources: 'Theoretical Sources',
   theoreticalSourcesDesc: 'The app is based on principles and methodologies recognized by the financial community:',
   markowitz: 'Harry Markowitz - portfolio diversification principles (1952)',
-  // sharpe: 'William Sharpe - Capital Asset Pricing Model and Sharpe Ratio', // ✅ ELIMINATO: funzione zombie
+  // sharpe removed - zombie function
   graham: 'Benjamin Graham - Security Analysis and Value Investing',
   bogle: 'John Bogle - Diversification principles and low costs',
   merton: 'Robert Merton - Financial Planning and Lifecycle Investing',

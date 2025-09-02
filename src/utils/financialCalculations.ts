@@ -434,9 +434,7 @@ export const calculatePortfolioRiskScore = (
  * 
  * @throws {Error} Returns 0 for invalid inputs (negative total value)
  */
-// ✅ ELIMINATO: calculatePortfolioSharpeRatio - era una funzione zombie
-
-// ✅ ELIMINATO: calculatePortfolioEfficiencyScore - era una funzione zombie
+// Funzioni rimosse per ottimizzazione - non utilizzate nell'app
 
 /**
  * Calculate real estate net worth value
@@ -558,11 +556,7 @@ export const validateAndNormalizeBigNumbers = (value: number, context: string): 
   return value;
 };
 
-// ✅ ELIMINATO: runCriticalFixesValidation - test obsoleti per funzioni rimosse
-
-// ✅ ELIMINATO: validateAllCriticalFixes - test obsoleti
-
-// ✅ ELIMINATO: validateAll14CriticalFixes - test obsoleti con funzioni zombie
+// Test obsoleti rimossi per ottimizzazione
 
 /**
   try {
@@ -1810,9 +1804,7 @@ export const calculateSWR = (
   };
 };
 
-// ✅ ELIMINATO: testRiskScoreCalculation - test per funzioni obsolete
-
-// ✅ ELIMINATO: testAssetVolatility - test per funzioni obsolete
+// Test obsoleti rimossi per ottimizzazione
 
 /**
  * Test function to validate Cost Basis Methods

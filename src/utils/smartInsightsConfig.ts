@@ -102,26 +102,10 @@ export const DEFAULT_ASSET_RISK_WEIGHTS: AssetRiskWeights = {
 };
 
 // ===== DIVERSIFICATION THRESHOLDS =====
-// ❌ ELIMINATO: DiversificationConfig - non utilizzato negli smart insights
-// export interface DiversificationConfig {
-//   lowThreshold: number;        // Default: 40
-//   highThreshold: number;       // Default: 70
-// }
-
-// export const DEFAULT_DIVERSIFICATION_CONFIG: DiversificationConfig = {
-//   lowThreshold: 40,
-//   highThreshold: 70
-// };
+// DiversificationConfig rimosso - non utilizzato negli smart insights
 
 // ===== PERFORMANCE THRESHOLDS =====
-// ❌ ELIMINATO: PerformanceConfig - non utilizzato negli smart insights
-// export interface PerformanceConfig {
-//   significantChangeThreshold: number;  // Default: 5.0%
-// }
-
-// export const DEFAULT_PERFORMANCE_CONFIG: PerformanceConfig = {
-//   significantChangeThreshold: 5.0
-// };
+// PerformanceConfig rimosso - non utilizzato negli smart insights
 
 // ===== DEBT-TO-ASSET THRESHOLDS =====
 export interface DebtToAssetConfig {
@@ -171,8 +155,8 @@ export interface SmartInsightsConfig {
   emergencyFund: EmergencyFundConfig;
   riskScore: RiskScoreConfig;
   assetRiskWeights: AssetRiskWeights;
-  // ❌ ELIMINATO: diversification: DiversificationConfig;
-  // ❌ ELIMINATO: performance: PerformanceConfig;
+  // diversification rimosso - non utilizzato
+  // performance rimosso - non utilizzato
   debtToAsset: DebtToAssetConfig;
   taxOptimization: TaxOptimizationConfig;
   swrAdjustment: SwrAdjustmentConfig;
@@ -182,8 +166,8 @@ export const DEFAULT_SMART_INSIGHTS_CONFIG: SmartInsightsConfig = {
   emergencyFund: DEFAULT_EMERGENCY_FUND_CONFIG,
   riskScore: DEFAULT_RISK_SCORE_CONFIG,
   assetRiskWeights: DEFAULT_ASSET_RISK_WEIGHTS,
-  // ❌ ELIMINATO: diversification: DEFAULT_DIVERSIFICATION_CONFIG,
-  // ❌ ELIMINATO: performance: DEFAULT_PERFORMANCE_CONFIG,
+  // diversification rimosso - non utilizzato
+  // performance rimosso - non utilizzato
   debtToAsset: DEFAULT_DEBT_TO_ASSET_CONFIG,
   taxOptimization: DEFAULT_TAX_OPTIMIZATION_CONFIG,
   swrAdjustment: DEFAULT_SWR_ADJUSTMENT_CONFIG
@@ -243,15 +227,8 @@ export const validateSmartInsightsConfig = (config: SmartInsightsConfig): string
     errors.push('Moderate threshold must be less than aggressive threshold');
   }
   
-  // ❌ ELIMINATO: Diversification validation - non più utilizzato
-  // if (config.diversification.lowThreshold >= config.diversification.highThreshold) {
-  //   errors.push('Diversification low threshold must be less than high threshold');
-  // }
-  
-  // ❌ ELIMINATO: Performance validation - non più utilizzato
-  // if (config.performance.significantChangeThreshold <= 0) {
-  //   errors.push('Performance threshold must be positive');
-  // }
+  // Diversification validation rimossa - non più utilizzato
+  // Performance validation rimossa - non più utilizzato
   
   // Debt-to-Asset validation
   if (config.debtToAsset.criticalThreshold <= config.debtToAsset.warningThreshold) {

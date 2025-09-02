@@ -91,7 +91,7 @@ export const it = {
   
   // Statistics
   riskScore: 'Livello di rischio semplificato',
-  // efficiencyScore: 'Efficienza (Sharpe Ratio)', // ✅ ELIMINATO: funzione zombie
+  // efficiencyScore rimossa - funzione zombie
   emergencyFund: 'Fondo emergenza',
   diversification: 'Diversificazione',
   concentration: 'Concentrazione',
@@ -509,8 +509,8 @@ globalPositionsRiskDescription: 'Posizioni globali: 7.0 (rischio alto - conti br
 alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - asset speculativi)',
 
   investmentsTransactionsRiskDescription: 'Investimenti/Transazioni: 7.0 (rischio alto - volatilità di mercato)',
-  // riskScoreBasedOnVolatility: 'Basato sulla volatilità del portafoglio calcolata con Modern Portafoglio Theory.', // ✅ ELIMINATO: funzione zombie
-  // efficiencyBasedOnSharpe: 'Basato sul rapporto rischio-rendimento aggiustato.', // ✅ ELIMINATO: funzione zombie
+  // riskScoreBasedOnVolatility rimossa - funzione zombie
+  // efficiencyBasedOnSharpe rimossa - funzione zombie
   transactionAnalysisPerYear: 'Analisi delle transazioni per anno',
   verifyLinksBetweenTransactionsAssets: 'Verifica collegamenti tra transazioni e asset individuali',
   filterByAssetType: 'Filtra per tipo asset',
@@ -794,7 +794,7 @@ alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - a
   riskScoreLimit: 'Il risk score assume che i mercati si comportino "normalmente" (spoiler: non sempre è così)',
   professionalAdvice: 'Per roba seria tipo comprare casa o pianificare la pensione, consulta sempre un professionista. Quest\'app ti aiuta a vedere la situazione, ma non sostituisce il consiglio di chi ne sa davvero.',
   
-  // ✅ ELIMINATO: Traduzioni Sharpe Ratio - funzioni zombie rimosse
+  // Traduzioni Sharpe Ratio rimosse - funzioni zombie
   insufficientData: 'Dati insufficienti per il calcolo',
   preliminaryCalculation: 'Calcolo preliminare - dati limitati',
   
@@ -802,7 +802,7 @@ alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - a
   theoreticalSources: 'Fonti Teoriche',
   theoreticalSourcesDesc: 'L\'app si basa su principi e metodologie riconosciute dalla comunità finanziaria:',
   markowitz: 'Harry Markowitz - principi di diversificazione del portafoglio (1952)',
-  // sharpe: 'William Sharpe - Capital Asset Pricing Model e Sharpe Ratio', // ✅ ELIMINATO: funzione zombie
+  // sharpe rimossa - funzione zombie
   graham: 'Benjamin Graham - Security Analysis e Value Investing',
   bogle: 'John Bogle - Principi di diversificazione e costi bassi',
   merton: 'Robert Merton - Financial Planning e Lifecycle Investing',
