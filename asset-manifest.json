@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/MangoMoney/static/css/main.b5ed3b26.css",
-    "main.js": "/MangoMoney/static/js/main.75f33608.js",
+    "main.css": "/MangoMoney/static/css/main.3e798685.css",
+    "main.js": "/MangoMoney/static/js/main.7d05dcb6.js",
     "static/js/977.b7eceee5.chunk.js": "/MangoMoney/static/js/977.b7eceee5.chunk.js",
     "static/js/455.c06aca33.chunk.js": "/MangoMoney/static/js/455.c06aca33.chunk.js",
     "static/media/logo.png": "/MangoMoney/static/media/logo.c93f1285849fa85615b3.png",
     "index.html": "/MangoMoney/index.html",
-    "main.b5ed3b26.css.map": "/MangoMoney/static/css/main.b5ed3b26.css.map",
-    "main.75f33608.js.map": "/MangoMoney/static/js/main.75f33608.js.map",
+    "main.3e798685.css.map": "/MangoMoney/static/css/main.3e798685.css.map",
+    "main.7d05dcb6.js.map": "/MangoMoney/static/js/main.7d05dcb6.js.map",
     "977.b7eceee5.chunk.js.map": "/MangoMoney/static/js/977.b7eceee5.chunk.js.map",
     "455.c06aca33.chunk.js.map": "/MangoMoney/static/js/455.c06aca33.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.b5ed3b26.css",
-    "static/js/main.75f33608.js"
+    "static/css/main.3e798685.css",
+    "static/js/main.7d05dcb6.js"
   ]
 }
