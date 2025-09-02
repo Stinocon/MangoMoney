@@ -3,7 +3,7 @@
  * 
  * @description
  * Modern, user-friendly info section with progressive disclosure
- * and action-oriented design optimized for light theme
+ * and action-oriented design with proper dark theme management
  * 
  * @version 4.0.0
  */
@@ -31,6 +31,7 @@ interface InfoCardProps {
   isExpanded: boolean;
   onToggle: () => void;
   iconColor: string;
+  darkMode: boolean; // Added darkMode prop
 }
 
 interface HeroSectionProps {
@@ -86,19 +87,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ darkMode }) => {
           <p className="text-lg mb-6">MangoMoney è progettato per essere semplice e intuitivo. Inizia dalla sezione Liquidità per inserire i tuoi conti correnti e depositi, poi passa agli Investimenti per il tuo portafoglio.</p>
           
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base">
-            <li className="flex items-center gap-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+            <li className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800/50' : 'bg-white/50'
+            }`}>
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
               <span>Inserisci i dati una volta sola</span>
             </li>
-            <li className="flex items-center gap-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+            <li className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800/50' : 'bg-white/50'
+            }`}>
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
               <span>L'app calcola tutto automaticamente</span>
             </li>
-            <li className="flex items-center gap-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+            <li className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800/50' : 'bg-white/50'
+            }`}>
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
               <span>Esporta i dati quando vuoi</span>
             </li>
-            <li className="flex items-center gap-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+            <li className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800/50' : 'bg-white/50'
+            }`}>
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
               <span>Backup automatico ogni 5 minuti</span>
             </li>
@@ -109,44 +118,63 @@ const HeroSection: React.FC<HeroSectionProps> = ({ darkMode }) => {
   );
 };
 
-// Modern Card Design
+// Modern Card Design with proper theme management
 const InfoCard: React.FC<InfoCardProps> = ({ 
   icon: Icon, 
   title, 
   children, 
   isExpanded, 
   onToggle, 
-  iconColor 
+  iconColor,
+  darkMode 
 }) => {
   return (
-    <div className="group rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden">
+    <div className={`group rounded-2xl border shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden ${
+      darkMode 
+        ? 'border-slate-600 bg-slate-800' 
+        : 'border-slate-300 bg-white'
+    }`}>
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+        className={`w-full p-6 flex items-center justify-between text-left transition-colors ${
+          darkMode 
+            ? 'hover:bg-slate-700/50' 
+            : 'hover:bg-slate-100'
+        }`}
       >
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconColor} shadow-lg`}>
             <Icon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <h3 className={`text-lg font-semibold ${
+              darkMode ? 'text-slate-100' : 'text-slate-900'
+            }`}>
               {title}
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className={`text-sm ${
+              darkMode ? 'text-slate-400' : 'text-slate-600'
+            }`}>
               Click per espandere
             </p>
           </div>
         </div>
         <ChevronDown 
-          className={`w-6 h-6 text-slate-500 dark:text-slate-400 transition-transform duration-200 ${
-            isExpanded ? 'rotate-180' : ''
-          }`} 
+          className={`w-6 h-6 transition-transform duration-200 ${
+            darkMode ? 'text-slate-400' : 'text-slate-500'
+          } ${isExpanded ? 'rotate-180' : ''}`} 
         />
       </button>
       
       {isExpanded && (
-        <div className="px-6 pb-6 pt-0 border-t border-slate-200 dark:border-slate-600 bg-slate-100/50 dark:bg-slate-700/20">
-          <div className="prose prose-base max-w-none text-slate-700 dark:text-slate-300 pt-4">
+        <div className={`px-6 pb-6 pt-0 border-t ${
+          darkMode 
+            ? 'border-slate-600 bg-slate-700/20' 
+            : 'border-slate-200 bg-slate-100/50'
+        }`}>
+          <div className={`prose prose-base max-w-none pt-4 ${
+            darkMode ? 'text-slate-300' : 'text-slate-700'
+          }`}>
             {children}
           </div>
         </div>
@@ -175,7 +203,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
     onNavigateToSection('assets');
   };
 
-  // Visual Hierarchy with Colors
+  // Visual Hierarchy with Colors - Fixed theme management
   const INFO_SECTIONS = [
     {
       id: 'quick-start',
@@ -184,21 +212,35 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       iconColor: 'bg-blue-600',
       content: (
         <div className="space-y-6">
-          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Setup in 3 step:</h4>
+          <h4 className={`text-lg font-semibold ${
+            darkMode ? 'text-slate-100' : 'text-slate-900'
+          }`}>Setup in 3 step:</h4>
           <ol className="list-decimal list-inside space-y-4 text-base">
-            <li className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <li className={`p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800' : 'bg-slate-50'
+            }`}>
               Aggiungi il tuo primo conto corrente nella sezione <strong>Liquidità</strong>
             </li>
-            <li className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <li className={`p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800' : 'bg-slate-50'
+            }`}>
               Inserisci investimenti principali nella sezione <strong>Investimenti</strong>
             </li>  
-            <li className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <li className={`p-3 rounded-lg ${
+              darkMode ? 'bg-slate-800' : 'bg-slate-50'
+            }`}>
               Configura le impostazioni fiscali per l'Italia (già preimpostate)
             </li>
           </ol>
           
-          <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl border border-blue-300 dark:border-blue-700">
-            <p className="text-base text-blue-900 dark:text-blue-100">
+          <div className={`p-4 rounded-xl border ${
+            darkMode 
+              ? 'bg-blue-900/30 border-blue-700' 
+              : 'bg-blue-100 border-blue-300'
+          }`}>
+            <p className={`text-base ${
+              darkMode ? 'text-blue-100' : 'text-blue-900'
+            }`}>
               💡 <strong>Tip:</strong> Inizia sempre dalla liquidità, ti aiuta a capire come funziona l'app
             </p>
           </div>
@@ -214,16 +256,34 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       content: (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl border border-green-300 dark:border-green-700">
-              <h5 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">CAGR</h5>
-              <p className="text-base text-green-800 dark:text-green-200">Crescita annua composta dei tuoi investimenti</p>
+            <div className={`p-4 rounded-xl border ${
+              darkMode 
+                ? 'bg-green-900/30 border-green-700' 
+                : 'bg-green-100 border-green-300'
+            }`}>
+              <h5 className={`text-lg font-semibold mb-2 ${
+                darkMode ? 'text-green-100' : 'text-green-900'
+              }`}>CAGR</h5>
+              <p className={`text-base ${
+                darkMode ? 'text-green-200' : 'text-green-800'
+              }`}>Crescita annua composta dei tuoi investimenti</p>
             </div>
-            <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl border border-green-300 dark:border-green-700">
-              <h5 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">SWR</h5>
-              <p className="text-base text-green-800 dark:text-green-200">Quanto puoi prelevare per il pensionamento</p>
+            <div className={`p-4 rounded-xl border ${
+              darkMode 
+                ? 'bg-green-900/30 border-green-700' 
+                : 'bg-green-100 border-green-300'
+            }`}>
+              <h5 className={`text-lg font-semibold mb-2 ${
+                darkMode ? 'text-green-100' : 'text-green-900'
+              }`}>SWR</h5>
+              <p className={`text-base ${
+                darkMode ? 'text-green-200' : 'text-green-800'
+              }`}>Quanto puoi prelevare per il pensionamento</p>
             </div>
           </div>
-          <p className="text-base p-4 bg-slate-100 dark:bg-slate-800 rounded-xl">Tutti i calcoli sono trasparenti e basati su formule finanziarie standard. Non facciamo "magia", solo matematica onesta.</p>
+          <p className={`text-base p-4 rounded-xl ${
+            darkMode ? 'bg-slate-800' : 'bg-slate-100'
+          }`}>Tutti i calcoli sono trasparenti e basati su formule finanziarie standard. Non facciamo "magia", solo matematica onesta.</p>
         </div>
       )
     },
@@ -236,26 +296,48 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       content: (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4 text-base">
-            <div className="flex items-center gap-3 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-700 dark:text-green-300 flex-shrink-0" />
+            <div className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-green-900/30' : 'bg-green-100'
+            }`}>
+              <CheckCircle className={`w-5 h-5 flex-shrink-0 ${
+                darkMode ? 'text-green-300' : 'text-green-700'
+              }`} />
               <span className="font-medium">100% Offline</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-700 dark:text-green-300 flex-shrink-0" />
+            <div className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-green-900/30' : 'bg-green-100'
+            }`}>
+              <CheckCircle className={`w-5 h-5 flex-shrink-0 ${
+                darkMode ? 'text-green-300' : 'text-green-700'
+              }`} />
               <span className="font-medium">Zero Tracking</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-700 dark:text-green-300 flex-shrink-0" />
+            <div className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-green-900/30' : 'bg-green-100'
+            }`}>
+              <CheckCircle className={`w-5 h-5 flex-shrink-0 ${
+                darkMode ? 'text-green-300' : 'text-green-700'
+              }`} />
               <span className="font-medium">Open Source</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-700 dark:text-green-300 flex-shrink-0" />
+            <div className={`flex items-center gap-3 p-3 rounded-lg ${
+              darkMode ? 'bg-green-900/30' : 'bg-green-100'
+            }`}>
+              <CheckCircle className={`w-5 h-5 flex-shrink-0 ${
+                darkMode ? 'text-green-300' : 'text-green-700'
+              }`} />
               <span className="font-medium">Crittografia Locale</span>
             </div>
           </div>
           
-          <div className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-xl border border-orange-300 dark:border-orange-700">
-            <p className="text-base text-orange-900 dark:text-orange-100 font-medium">
+          <div className={`p-4 rounded-xl border ${
+            darkMode 
+              ? 'bg-orange-900/30 border-orange-700' 
+              : 'bg-orange-100 border-orange-300'
+          }`}>
+            <p className={`text-base font-medium ${
+              darkMode ? 'text-orange-100' : 'text-orange-900'
+            }`}>
               🔒 I tuoi dati finanziari restano SEMPRE nel tuo browser. Mai inviati a server esterni.
             </p>
           </div>
@@ -270,12 +352,22 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       iconColor: 'bg-purple-600',
       content: (
         <div className="space-y-6">
-          <p className="text-base p-4 bg-slate-100 dark:bg-slate-800 rounded-xl">MangoMoney supporta utenti da tutto il mondo con valute e tasse configurabili.</p>
+          <p className={`text-base p-4 rounded-xl ${
+            darkMode ? 'bg-slate-800' : 'bg-slate-100'
+          }`}>MangoMoney supporta utenti da tutto il mondo con valute e tasse configurabili.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl border border-purple-300 dark:border-purple-700">
-              <h4 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-3">Valute Supportate</h4>
-              <ul className="list-disc list-inside text-base text-purple-800 dark:text-purple-200 space-y-2">
+            <div className={`p-4 rounded-xl border ${
+              darkMode 
+                ? 'bg-purple-900/30 border-purple-700' 
+                : 'bg-purple-100 border-purple-300'
+            }`}>
+              <h4 className={`text-lg font-semibold mb-3 ${
+                darkMode ? 'text-purple-100' : 'text-purple-900'
+              }`}>Valute Supportate</h4>
+              <ul className={`list-disc list-inside text-base space-y-2 ${
+                darkMode ? 'text-purple-200' : 'text-purple-800'
+              }`}>
                 <li>EUR (Euro)</li>
                 <li>USD (Dollaro USA)</li>
                 <li>GBP (Sterlina)</li>
@@ -283,9 +375,17 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
                 <li>JPY (Yen Giapponese)</li>
               </ul>
             </div>
-            <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl border border-purple-300 dark:border-purple-700">
-              <h4 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-3">Tasse Configurabili</h4>
-              <ul className="list-disc list-inside text-base text-purple-800 dark:text-purple-200 space-y-2">
+            <div className={`p-4 rounded-xl border ${
+              darkMode 
+                ? 'bg-purple-900/30 border-purple-700' 
+                : 'bg-purple-100 border-purple-300'
+            }`}>
+              <h4 className={`text-lg font-semibold mb-3 ${
+                darkMode ? 'text-purple-100' : 'text-purple-900'
+              }`}>Tasse Configurabili</h4>
+              <ul className={`list-disc list-inside text-base space-y-2 ${
+                darkMode ? 'text-purple-200' : 'text-purple-800'
+              }`}>
                 <li>Aliquote personalizzabili</li>
                 <li>Regimi fiscali diversi</li>
                 <li>Calcoli automatici</li>
@@ -309,15 +409,25 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               href="https://github.com/Stinocon/MangoMoney/issues" 
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:shadow-lg"
+              className={`p-4 border rounded-xl transition-all duration-200 hover:shadow-lg ${
+                darkMode 
+                  ? 'border-slate-600 hover:bg-slate-700' 
+                  : 'border-slate-300 hover:bg-slate-100'
+              }`}
             >
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  darkMode ? 'bg-red-900/30' : 'bg-red-100'
+                }`}>
                   <Bug className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">Segnala un Bug</h5>
-                  <p className="text-base text-slate-600 dark:text-slate-400">GitHub Issues per problemi tecnici</p>
+                  <h5 className={`font-semibold text-lg ${
+                    darkMode ? 'text-slate-100' : 'text-slate-900'
+                  }`}>Segnala un Bug</h5>
+                  <p className={`text-base ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>GitHub Issues per problemi tecnici</p>
                 </div>
               </div>
             </a>
@@ -326,15 +436,27 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               href="https://github.com/Stinocon/MangoMoney" 
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:shadow-lg"
+              className={`p-4 border rounded-xl transition-all duration-200 hover:shadow-lg ${
+                darkMode 
+                  ? 'border-slate-600 hover:bg-slate-700' 
+                  : 'border-slate-300 hover:bg-slate-100'
+              }`}
             >
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                  <Github className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  darkMode ? 'bg-slate-800' : 'bg-slate-100'
+                }`}>
+                  <Github className={`w-5 h-5 ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`} />
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">Codice Sorgente</h5>
-                  <p className="text-base text-slate-600 dark:text-slate-400">Open source su GitHub</p>
+                  <h5 className={`font-semibold text-lg ${
+                    darkMode ? 'text-slate-100' : 'text-slate-900'
+                  }`}>Codice Sorgente</h5>
+                  <p className={`text-base ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>Open source su GitHub</p>
                 </div>
               </div>
             </a>
@@ -343,15 +465,25 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               href="https://github.com/Stinocon/MangoMoney/blob/main/docs/README.md" 
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:shadow-lg"
+              className={`p-4 border rounded-xl transition-all duration-200 hover:shadow-lg ${
+                darkMode 
+                  ? 'border-slate-600 hover:bg-slate-700' 
+                  : 'border-slate-300 hover:bg-slate-100'
+              }`}
             >
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  darkMode ? 'bg-blue-900/30' : 'bg-blue-100'
+                }`}>
                   <BookOpen className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">Documentazione</h5>
-                  <p className="text-base text-slate-600 dark:text-slate-400">Guide complete e FAQ</p>
+                  <h5 className={`font-semibold text-lg ${
+                    darkMode ? 'text-slate-100' : 'text-slate-900'
+                  }`}>Documentazione</h5>
+                  <p className={`text-base ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>Guide complete e FAQ</p>
                 </div>
               </div>
             </a>
@@ -360,15 +492,25 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               href="https://www.paypal.com/paypalme/stefanoconter" 
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:shadow-lg"
+              className={`p-4 border rounded-xl transition-all duration-200 hover:shadow-lg ${
+                darkMode 
+                  ? 'border-slate-600 hover:bg-slate-700' 
+                  : 'border-slate-300 hover:bg-slate-100'
+              }`}
             >
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  darkMode ? 'bg-orange-900/30' : 'bg-orange-100'
+                }`}>
                   <Coffee className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">Offri un Caffè</h5>
-                  <p className="text-base text-slate-600 dark:text-slate-400">Supporta lo sviluppo di MangoMoney</p>
+                  <h5 className={`font-semibold text-lg ${
+                    darkMode ? 'text-slate-100' : 'text-slate-900'
+                  }`}>Offri un Caffè</h5>
+                  <p className={`text-base ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>Supporta lo sviluppo di MangoMoney</p>
                 </div>
               </div>
             </a>
@@ -379,7 +521,9 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   ];
 
   return (
-    <div className="max-w-5xl mx-auto p-8 bg-white dark:bg-slate-900 min-h-screen">
+    <div className={`max-w-5xl mx-auto p-8 min-h-screen ${
+      darkMode ? 'bg-slate-900' : 'bg-white'
+    }`}>
       <div className="space-y-8">
         {/* Hero Section */}
         <HeroSection darkMode={darkMode} />
@@ -394,6 +538,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
               iconColor={section.iconColor}
               isExpanded={expandedSections.includes(section.id)}
               onToggle={() => toggleSection(section.id)}
+              darkMode={darkMode}
             >
               {section.content}
             </InfoCard>
@@ -401,11 +546,19 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
         </div>
         
         {/* Footer CTA */}
-        <div className="mt-12 text-center p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl border border-blue-200 dark:border-slate-600 shadow-lg">
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">
+        <div className={`mt-12 text-center p-8 rounded-2xl border shadow-lg ${
+          darkMode 
+            ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
+            : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
+        }`}>
+          <h3 className={`text-xl font-semibold mb-3 ${
+            darkMode ? 'text-slate-100' : 'text-slate-900'
+          }`}>
             Pronto per iniziare?
           </h3>
-          <p className="text-slate-700 dark:text-slate-300 mb-6 text-lg">
+          <p className={`mb-6 text-lg ${
+            darkMode ? 'text-slate-300' : 'text-slate-700'
+          }`}>
             Aggiungi il tuo primo asset e vedi MangoMoney in azione
           </p>
           <button 
