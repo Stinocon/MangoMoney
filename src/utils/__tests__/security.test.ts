@@ -133,7 +133,7 @@ describe('Security Tests - Critical Protection', () => {
       expect(sanitizeCSVCell('')).toBe('');
       expect(sanitizeCSVCell(null as any)).toBe('null');
       expect(sanitizeCSVCell(undefined as any)).toBe('undefined');
-      expect(sanitizeCSVCell(123)).toBe('123');
+      expect(sanitizeCSVCell(123 as any)).toBe('123');
     });
   });
 

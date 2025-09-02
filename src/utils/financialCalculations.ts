@@ -10,6 +10,7 @@
  * Prevents floating-point arithmetic errors in financial calculations
  */
 import Decimal from 'decimal.js';
+import { CALCULATION_THRESHOLDS } from './appConstants';
 
 // Configure decimal.js for conservative financial calculations
 Decimal.set({
@@ -173,16 +174,17 @@ export const safeCAGR = (initialValue: number, finalValue: number, years: number
     return 0;
   }
   
-  // Gestione periodi molto brevi
-  if (years < 0.083) { // Meno di 1 mese
+  // Gestione periodi molto brevi usando costanti standardizzate
+  if (years < (CALCULATION_THRESHOLDS.MIN_MONTHS_FOR_CAGR / 12)) { // Meno di 1 mese
     const simpleReturn = ((finalValue - initialValue) / initialValue) * 100;
     console.warn(`⚠️ CAGR: Period too short (${(years * 365).toFixed(0)} days), returning simple return: ${simpleReturn.toFixed(2)}%`);
     return Number(simpleReturn.toFixed(2));
   }
   
-  if (years < 0.25) { // Meno di 3 mesi
+  if (years < (CALCULATION_THRESHOLDS.MIN_MONTHS_FOR_RELIABLE_CAGR / 12)) { // Meno di 3 mesi
     const simpleReturn = ((finalValue - initialValue) / initialValue) * 100;
-    const annualizedReturn = simpleReturn * (12 / (years * 12));
+    // Fix: Formula corretta per annualizzazione
+    const annualizedReturn = simpleReturn / years;
     console.warn(`⚠️ CAGR: Short period (${(years * 12).toFixed(1)} months). Annualized: ${annualizedReturn.toFixed(1)}% (highly volatile)`);
     return Number(annualizedReturn.toFixed(2));
   }

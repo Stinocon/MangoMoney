@@ -69,6 +69,9 @@ import { InfoSection } from './components/InfoSection';
 // Internationalization utilities - used for multi-language support (lines 1436, 7275, 7370)
 import { translations, languages, type TranslationKey, type Language } from './translations';
 
+// ✅ CALCULATION CONSTANTS: Centralized thresholds for CAGR and performance calculations
+import { CALCULATION_THRESHOLDS } from './utils/appConstants';
+
 // ✅ PERFORMANCE OPTIMIZATION: Extracted constants to prevent recreation
 const CHART_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16', '#a855f7', '#ec4899', '#f97316'] as const;
 
@@ -3858,10 +3861,10 @@ const NetWorthManager = () => {
     const timeInYears = periodInDays / 365.25; // Julian year for precision
     const periodInMonths = timeInYears * 12;
     
-    // SOGLIE MINIME DEFINITE CHIARAMENTE
-    const MIN_DAYS_FOR_CALCULATION = 7;     // 1 settimana minimo
-    const MIN_MONTHS_FOR_ANNUALIZATION = 3; // 3 mesi per annualizzare
-    const MIN_YEARS_FOR_RELIABLE_CAGR = 1;  // 1 anno per CAGR affidabile
+    // SOGLIE MINIME USANDO COSTANTI CENTRALIZZATE
+    const MIN_DAYS_FOR_CALCULATION = CALCULATION_THRESHOLDS.MIN_DAYS_FOR_CALCULATION;
+    const MIN_MONTHS_FOR_ANNUALIZATION = CALCULATION_THRESHOLDS.MIN_MONTHS_FOR_RELIABLE_CAGR;
+    const MIN_YEARS_FOR_RELIABLE_CAGR = CALCULATION_THRESHOLDS.MIN_YEARS_FOR_STABLE_CAGR;
     
     let annualizedReturnPercentage = 0;
     let annualizedReturn = 0;
@@ -3872,20 +3875,20 @@ const NetWorthManager = () => {
     if (periodInDays < MIN_DAYS_FOR_CALCULATION) {
       annualizedReturnPercentage = 0;
       annualizedReturn = 0;
-      cagrWarning = 'Periodo troppo breve per calcolo significativo (minimo 7 giorni)';
+      cagrWarning = 'Periodo troppo breve per calcolo significativo. Inserisci almeno 7 giorni di dati per vedere i risultati.';
       methodology = 'insufficient_period';
     } else if (periodInMonths < MIN_MONTHS_FOR_ANNUALIZATION) {
       // Periodo molto breve: rendimento semplice non annualizzato
       const simpleReturn = totalInvested > 0 ? totalReturn / totalInvested : 0;
       annualizedReturnPercentage = simpleReturn * 100;
       annualizedReturn = safeMultiply(totalInvested, annualizedReturnPercentage / 100);
-      cagrWarning = 'Periodo < 3 mesi: rendimento semplice non annualizzato';
+      cagrWarning = 'Periodo troppo breve per calcolo CAGR affidabile. Mostriamo il rendimento del periodo per maggiore accuratezza.';
       methodology = 'simple_return';
          } else if (timeInYears < MIN_YEARS_FOR_RELIABLE_CAGR) {
              // Periodo medio: usa safeCAGR con warning
       annualizedReturnPercentage = safeCAGR(totalInvested, totalCurrentValue, timeInYears);
        annualizedReturn = safeMultiply(totalInvested, annualizedReturnPercentage / 100);
-       cagrWarning = 'Periodo < 1 anno: annualizzazione indicativa';
+       cagrWarning = 'CAGR calcolato su meno di 1 anno - risultato indicativo ma utile per confronti.';
       methodology = 'safe_cagr_with_warning';
          } else {
       // Periodo lungo: usa safeCAGR per consistenza
@@ -3894,9 +3897,9 @@ const NetWorthManager = () => {
        
        // Validazioni aggiuntive per risultati estremi
        if (Math.abs(annualizedReturnPercentage) > 100) {
-         cagrWarning = 'CAGR estremamente elevato - verificare dati';
+         cagrWarning = 'CAGR estremamente elevato - verifica i dati inseriti per assicurarti che siano corretti.';
        } else if (timeInYears > 20) {
-         cagrWarning = 'Periodo molto lungo - considerare analisi per sotto-periodi';
+         cagrWarning = 'Periodo molto lungo - considera analisi per sotto-periodi per una visione più dettagliata.';
        }
        methodology = 'safe_cagr_improved';
      }

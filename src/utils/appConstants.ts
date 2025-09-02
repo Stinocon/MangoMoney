@@ -48,6 +48,14 @@ export const PERFORMANCE_THRESHOLDS = {
   DEBT_MODERATE: 30    // Debt > 30% = moderate
 } as const;
 
+// Calculation Thresholds for CAGR and Performance
+export const CALCULATION_THRESHOLDS = {
+  MIN_DAYS_FOR_CALCULATION: 7,        // 1 settimana minimo
+  MIN_MONTHS_FOR_CAGR: 1,             // 1 mese per CAGR (0.083 anni)
+  MIN_MONTHS_FOR_RELIABLE_CAGR: 3,    // 3 mesi per CAGR "affidabile"
+  MIN_YEARS_FOR_STABLE_CAGR: 1        // 1 anno per CAGR stabile
+} as const;
+
 // UI Constants
 export const UI_CONSTANTS = {
   MOBILE_BREAKPOINT: 768,    // md breakpoint
