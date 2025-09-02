@@ -5,7 +5,7 @@
  * Interactive help system with contextual tooltips and explanations
  * for financial terms and features.
  * 
- * @version 3.2.0
+ * @version 4.0.0
  * @accessibility WCAG 2.1 AA compliant
  */
 
@@ -30,8 +30,9 @@ const HELP_DATABASE: Record<string, HelpContent> = {
     definition: 'Il CAGR (Compound Annual Growth Rate) misura il rendimento annualizzato di un investimento.',
     example: 'Se investi €1,000 e dopo 3 anni hai €1,331, il CAGR è 10% annuo.',
     formula: 'CAGR = ((Valore Finale / Valore Iniziale)^(1/anni)) - 1',
-    interpretation: 'Un CAGR del 7-10% è considerato buono per investimenti a lungo termine.',
-    warnings: 'Il CAGR è una media: i rendimenti annuali reali varieranno.',
+    methodology: 'Per periodi brevi (< 3 mesi) l\'app usa il rendimento semplice per evitare distorsioni dell\'annualizzazione.',
+    interpretation: 'Un CAGR del 7-10% è considerato buono per investimenti a lungo termine. Per periodi molto brevi mostriamo il rendimento del periodo.',
+    warnings: 'Il CAGR assume crescita costante. Per investimenti di durata < 1 settimana, l\'app non calcola rendimenti per evitare dati fuorvianti.',
     relatedTerms: ['swr', 'risk-score', 'performance']
   },
   

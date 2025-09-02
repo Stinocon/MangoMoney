@@ -25,10 +25,23 @@ CAGR = (Valore Finale / Valore Iniziale)^(1/Anni) - 1
 - Valutare performance passate
 - Stimare crescita futura
 
-### **Limitazioni**
+### **Limitazioni e Soglie**
+- **Periodo minimo per calcoli**: 1 settimana (7 giorni)
+- **Periodo minimo per CAGR**: 1 mese (per periodi < 1 mese usa rendimento semplice)
+- **CAGR affidabile**: 3+ mesi (per periodi < 3 mesi mostra warning volatilità)
+- **CAGR stabile**: 1+ anno (per periodi < 1 anno risultato indicativo)
 - Assume crescita costante (non realistico)
 - Non considera volatilità
+- Non include depositi/prelievi durante il periodo
 - Basato su dati storici
+
+### **Metodologia Automatica**
+L'app sceglie automaticamente il metodo di calcolo più appropriato:
+- **< 1 settimana**: Nessun calcolo (dati insufficienti)
+- **< 1 mese**: Rendimento semplice del periodo
+- **< 3 mesi**: CAGR con warning alta volatilità  
+- **< 1 anno**: CAGR con nota "risultato indicativo"
+- **≥ 1 anno**: CAGR standard affidabile
 
 ---
 

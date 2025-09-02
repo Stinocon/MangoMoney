@@ -135,6 +135,7 @@ export const safePercentage = (part: number, total: number): number => {
  * 
  * @description
  * CAGR measures the mean annual growth rate of an investment over a specified time period.
+ * For very short periods, returns simple return to avoid misleading annualization.
  * Includes intelligent handling of short periods and extreme values.
  * 
  * @formula
@@ -146,9 +147,11 @@ export const safePercentage = (part: number, total: number): number => {
  * 
  * @returns {number} CAGR as percentage (-1000% to +1000%, capped for sanity)
  * 
- * @warnings
+ * @methodology
+ * - Periods < 1 week (7 days): Returns 0 with warning
  * - Periods < 1 month: Returns simple return instead of annualized
- * - Periods < 3 months: Warns about high volatility in annualized result
+ * - Periods < 3 months: Returns CAGR with high volatility warning
+ * - Periods ≥ 3 months: Standard CAGR calculation
  * - Values > ±1000%: Capped and logged as extreme
  * 
  * @example

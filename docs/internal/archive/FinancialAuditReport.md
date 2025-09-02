@@ -14,9 +14,14 @@ const cagr = one.plus(totalReturnRatio)
   .times(100);
 ```
 
-**✅ VERIFICA ACCADEMICA:**
+**✅ VERIFICA ACCADEMICA AGGIORNATA:**
 - **Formula Corretta**: ✅ Confermata dalla CFA Institute
-- **Gestione Periodi**: ✅ Soglia minima 1 mese (1/12 anni) corretta
+- **Gestione Periodi Brevi**: ✅ 
+  - < 7 giorni: Nessun calcolo
+  - 7 giorni - 1 mese: Rendimento semplice
+  - 1-3 mesi: CAGR con warning volatilità  
+  - 3+ mesi: CAGR affidabile
+- **Soglie Implementate**: ✅ CALCULATION_THRESHOLDS centralizzate
 - **Gestione Rendimenti Negativi**: ✅ Capping a -99.9% appropriato
 - **Precisione**: ✅ Decimal.js per evitare errori floating-point
 
@@ -25,9 +30,11 @@ const cagr = one.plus(totalReturnRatio)
 - Bodie, Kane, Marcus, "Investments", 11th Edition
 - Formula standard: CAGR = ((FV/PV)^(1/n)) - 1
 
-**⚠️ RACCOMANDAZIONI:**
-- Aggiungere documentazione per periodi sub-annuali
-- Considerare aggiustamenti per dividendi reinvestiti
+**⚠️ RACCOMANDAZIONI IMPLEMENTATE:**
+- ✅ Documentazione per periodi sub-annuali aggiornata
+- ✅ Warning chiari per utenti finali
+- ✅ Soglie standardizzate in appConstants.ts
+- ✅ Gestione automatica metodologia calcolo
 
 ---
 

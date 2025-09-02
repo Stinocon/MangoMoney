@@ -1,7 +1,7 @@
 # 🛠️ MangoMoney - Developer Documentation
 
-**Versione:** 3.2.0  
-**Data:** 23 Agosto 2025  
+**Versione:** 4.0.0  
+**Data:** 28 Agosto 2025  
 **Target:** Sviluppatori e Contributors  
 
 ---

@@ -263,10 +263,14 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             }`}>
               <h5 className={`text-lg font-semibold mb-2 ${
                 darkMode ? 'text-green-100' : 'text-green-900'
-              }`}>CAGR</h5>
+              }`}>CAGR (Rendimento Annualizzato)</h5>
               <p className={`text-base ${
                 darkMode ? 'text-green-200' : 'text-green-800'
-              }`}>Crescita annua composta dei tuoi investimenti. Per periodi molto brevi (meno di 1 mese) mostriamo il rendimento semplice del periodo per maggiore accuratezza.</p>
+              }`}>
+                Crescita annua composta dei tuoi investimenti. L&apos;app usa automaticamente 
+                il metodo più appropriato: rendimento semplice per periodi molto brevi (&lt; 1 mese), 
+                CAGR standard per periodi lunghi (&ge; 3 mesi).
+              </p>
             </div>
             <div className={`p-4 rounded-xl border ${
               darkMode 
@@ -293,8 +297,9 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
             <p className={`text-sm ${
               darkMode ? 'text-blue-100' : 'text-blue-900'
             }`}>
-              <strong>📊 Metodologia:</strong> L'app usa automaticamente il metodo di calcolo più appropriato 
-              in base al periodo di investimento: rendimento semplice per periodi brevi, CAGR per periodi lunghi.
+              <strong>📊 Metodologia Smart:</strong> L'app sceglie automaticamente il calcolo 
+              più accurato in base alla durata dell'investimento. Per periodi molto brevi 
+              evita l'annualizzazione che potrebbe essere fuorviante.
             </p>
           </div>
         </div>
