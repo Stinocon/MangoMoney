@@ -64,7 +64,7 @@ CC BY-NC-SA 4.0 - Dettagli completi
 ### **Hai problemi?**
 - **Problemi tecnici**: [Troubleshooting](user-guide/troubleshooting.md)
 - **Bug da segnalare**: [GitHub Issues](https://github.com/Stinocon/MangoMoney/issues)
-- **Domande generali**: [GitHub Discussions](https://github.com/Stinocon/MangoMoney/discussions)
+- **Domande generali**: [GitHub Issues](https://github.com/Stinocon/MangoMoney/issues)
 
 ---
 
@@ -72,12 +72,12 @@ CC BY-NC-SA 4.0 - Dettagli completi
 
 - **[App Live](https://stinocon.github.io/MangoMoney/)** - Prova MangoMoney
 - **[Repository GitHub](https://github.com/Stinocon/MangoMoney)** - Codice sorgente
-- **[AwesomeFinanceITA](https://github.com/Stinocon/AwesomeFinanceITA)** - Risorse finanziarie italiane
+- **[Repository GitHub](https://github.com/Stinocon/MangoMoney)** - Codice sorgente
 
 ---
 
 <div align="center">
 
-**💡 Ti serve aiuto?** Apri una [discussion](https://github.com/Stinocon/MangoMoney/discussions) su GitHub!
+**💡 Ti serve aiuto?** Apri una [issue](https://github.com/Stinocon/MangoMoney/issues) su GitHub!
 
 </div>

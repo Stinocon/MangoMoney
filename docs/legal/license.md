@@ -65,7 +65,7 @@ Se remixi, trasformi o costruisci sul materiale, devi distribuire i tuoi contrib
 ### **Se Hai Bisogno di Licenza Commerciale**
 Per uso commerciale, contatta:
 - **GitHub**: [@Stinocon](https://github.com/Stinocon)
-- **GitHub**: [Discussions](https://github.com/Stinocon/MangoMoney/discussions)
+- **GitHub**: [Issues](https://github.com/Stinocon/MangoMoney/issues)
 
 ### **Casi d'Uso Commerciali**
 - **Software proprietario** basato su MangoMoney
@@ -122,6 +122,6 @@ La licenza può essere aggiornata. Controlla sempre la versione più recente.
 
 <div align="center">
 
-**💡 Domande sulla licenza?** Apri una [discussion](https://github.com/Stinocon/MangoMoney/discussions) su GitHub!
+**💡 Domande sulla licenza?** Apri una [issue](https://github.com/Stinocon/MangoMoney/issues) su GitHub!
 
 </div>

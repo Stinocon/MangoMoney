@@ -837,7 +837,7 @@ investmentsTransactionsRiskDescription: 'Investments/Transactions: 7.0 (high ris
   projectSupportDesc: 'If you find MangoMoney useful, you can buy me a coffee via PayPal. Every contribution helps keep the project free and open source.',
   usefulLinks: 'Useful links',
   italianFinanceResources: 'Italian Finance Resources - A collection of tools and resources for personal finance',
-  linkedin: '💼 LinkedIn - My professional profile',
+  // linkedin: '💼 LinkedIn - My professional profile', // Removed - profile not available
   github: '🐙 GitHub - Other projects',
   
   // Error messages

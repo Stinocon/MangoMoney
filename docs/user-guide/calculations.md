@@ -208,6 +208,6 @@ Preferiamo dire "non lo sappiamo" piuttosto che fornire analisi imprecise. Per a
 
 <div align="center">
 
-**💡 Dubbio su un calcolo?** Apri una [discussion](https://github.com/Stinocon/MangoMoney/discussions) su GitHub!
+**💡 Dubbio su un calcolo?** Apri una [issue](https://github.com/Stinocon/MangoMoney/issues) su GitHub!
 
 </div>

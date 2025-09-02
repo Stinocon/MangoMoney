@@ -828,7 +828,7 @@ alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - a
   projectSupportDesc: 'Se trovi utile MangoMoney, puoi offrirmi un caffè tramite PayPal. Ogni contributo aiuta a mantenere il progetto gratuito e open source.',
   usefulLinks: 'Collegamenti utili',
   italianFinanceResources: 'Risorse finanziarie italiane - Una collezione di strumenti e risorse per la finanza personale',
-  linkedin: '💼 LinkedIn - Il mio profilo professionale',
+  // linkedin: '💼 LinkedIn - Il mio profilo professionale', // Rimosso - profilo non disponibile
   github: '🐙 GitHub - Altri progetti',
   
   // Error messages

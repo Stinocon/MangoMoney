@@ -184,7 +184,7 @@ MangoMoney fornisce calcoli indicativi. Per decisioni fiscali consulta sempre un
 ### **Domande Fiscali**
 - **Commercialista**: Per questioni specifiche
 - **Agenzia Entrate**: Per norme ufficiali
-- **GitHub**: [Discussions](https://github.com/Stinocon/MangoMoney/discussions)
+- **GitHub Issues**: [Domande generali](https://github.com/Stinocon/MangoMoney/issues)
 
 ### **Bug App**
 - **GitHub Issues**: [Segnala problema](https://github.com/Stinocon/MangoMoney/issues)

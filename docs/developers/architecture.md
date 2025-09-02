@@ -272,6 +272,6 @@ export const TAX_CONSTANTS = {
 
 <div align="center">
 
-**💡 Domande tecniche?** Apri una [discussion](https://github.com/Stinocon/MangoMoney/discussions) su GitHub!
+**💡 Domande tecniche?** Apri una [issue](https://github.com/Stinocon/MangoMoney/issues) su GitHub!
 
 </div>

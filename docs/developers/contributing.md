@@ -19,7 +19,7 @@
 ### **Prima di Iniziare**
 1. **Leggi** [README](../README.md) e [Architecture](architecture.md)
 2. **Controlla** [Issues](https://github.com/Stinocon/MangoMoney/issues)
-3. **Discuti** su [Discussions](https://github.com/Stinocon/MangoMoney/discussions)
+3. **Apri issue** per discutere feature significative
 
 ---
 
@@ -56,10 +56,10 @@ npm test
 
 ## 📋 Workflow Contribuzione
 
-### **1. Issue o Discussion**
+### **1. Issue**
 - **Bug**: Apri issue con dettagli completi
-- **Feature**: Discuti prima su Discussions
-- **Documentazione**: Proponi miglioramenti
+- **Feature**: Apri issue per discussione prima dello sviluppo
+- **Documentazione**: Apri issue per proporre miglioramenti
 
 ### **2. Branch**
 ```bash
@@ -327,7 +327,7 @@ npm run lint:fix
 ## 📞 Supporto
 
 ### **Domande Tecniche**
-- **GitHub Discussions**: [Domande generali](https://github.com/Stinocon/MangoMoney/discussions)
+- **GitHub Issues**: [Domande generali](https://github.com/Stinocon/MangoMoney/issues)
 - **Issues**: [Bug e feature requests](https://github.com/Stinocon/MangoMoney/issues)
 - **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
@@ -340,6 +340,6 @@ npm run lint:fix
 
 <div align="center">
 
-**💡 Pronto a contribuire?** Inizia da una [issue](https://github.com/Stinocon/MangoMoney/issues) o [discussion](https://github.com/Stinocon/MangoMoney/discussions)!
+**💡 Pronto a contribuire?** Inizia da una [issue](https://github.com/Stinocon/MangoMoney/issues)!
 
 </div>

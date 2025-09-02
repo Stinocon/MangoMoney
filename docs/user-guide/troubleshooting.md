@@ -258,7 +258,7 @@ ETF MSCI World,100,45.50,01/01/2023,Investimento principale
    - Console errori (se disponibile)
 
 ### **Alternative**
-- **GitHub Discussions**: [Domande generali](https://github.com/Stinocon/MangoMoney/discussions)
+- **GitHub Issues**: [Domande generali](https://github.com/Stinocon/MangoMoney/issues)
 - **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
 ---

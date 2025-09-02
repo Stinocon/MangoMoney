@@ -79,7 +79,7 @@
 
 ### **Supporto**
 - **GitHub Issues**: [Segnala bug](https://github.com/Stinocon/MangoMoney/issues)
-- **GitHub Discussions**: [Domande generali](https://github.com/Stinocon/MangoMoney/discussions)
+- **GitHub Issues**: [Domande generali](https://github.com/Stinocon/MangoMoney/issues)
 - **GitHub**: [@Stinocon](https://github.com/Stinocon)
 
 ---

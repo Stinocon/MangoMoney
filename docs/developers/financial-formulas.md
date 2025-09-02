@@ -341,6 +341,6 @@ export function roundToCurrency(value: number, decimals: number = 2): number {
 
 <div align="center">
 
-**💡 Dubbio su una formula?** Apri una [discussion](https://github.com/Stinocon/MangoMoney/discussions) su GitHub!
+**💡 Dubbio su una formula?** Apri una [issue](https://github.com/Stinocon/MangoMoney/issues) su GitHub!
 
 </div>
