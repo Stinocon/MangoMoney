@@ -107,7 +107,7 @@ npm install && npm start
 - React 18 + TypeScript (strict)
 - Tailwind CSS + Recharts
 - Decimal.js (precisione finanziaria)
-- Bundle: 443kB (ottimizzato)
+- Bundle: 444kB (ottimizzato)
 
 [📚 Developer Docs →](https://github.com/Stinocon/MangoMoney/blob/main/docs/developers/README.md)
 

@@ -115,4 +115,4 @@ Questo progetto è open source. Puoi verificare personalmente nel codice che non
 
 ---
 
-*Ultimo aggiornamento: 24 Agosto 2025*
+*Ultimo aggiornamento: 28 Agosto 2025 - Versione 4.0.0*

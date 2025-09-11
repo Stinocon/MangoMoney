@@ -72,7 +72,6 @@ CC BY-NC-SA 4.0 - Dettagli completi
 
 - **[App Live](https://stinocon.github.io/MangoMoney/)** - Prova MangoMoney
 - **[Repository GitHub](https://github.com/Stinocon/MangoMoney)** - Codice sorgente
-- **[Repository GitHub](https://github.com/Stinocon/MangoMoney)** - Codice sorgente
 
 ---
 
