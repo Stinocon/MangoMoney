@@ -3158,7 +3158,8 @@ const NetWorthManager = () => {
   }, []);
 
   const handleEditIntegerChange = useCallback((field: string, value: string) => {
-    const intValue = parseInt(value) || 0;
+    // Non convertire a 0 se il campo è vuoto, mantieni stringa vuota
+    const intValue = value === '' ? '' : (parseInt(value) || 0);
     setEditingItem(prev => {
       if (!prev) return prev;
       return {
@@ -6703,7 +6704,7 @@ const NetWorthManager = () => {
         case 'investments':
           return {
             ...baseSchema,
-            quantity: { required: true },
+            quantity: { required: true, integer: true, positive: true },
             avgPrice: { fieldName: 'Prezzo medio', max: 1000000 },
             currentPrice: { fieldName: 'Prezzo attuale', max: 1000000 },
             fees: { max: 1000000 }
@@ -6760,7 +6761,7 @@ const NetWorthManager = () => {
           const maxId = Math.max(...assets.transactions.map((item: Transaction) => item.id), 0);
           const candidate = {
             id: maxId + 1,
-            name: sanitizeString(formData.name),
+            assetType: (formData.assetType as 'Azione' | 'ETF' | 'Obbligazione whitelist' | 'Obbligazione') || 'ETF',
             amount: Math.abs(sanitizeNumber(formData.amount, 'amount')),
             description: sanitizeString(formData.description),
             quantity: sanitizeInteger(formData.quantity),

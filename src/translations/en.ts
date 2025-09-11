@@ -713,8 +713,13 @@ investmentsTransactionsRiskDescription: 'Investments/Transactions: 7.0 (high ris
   defaultItalianSettings: 'Default Italian Settings',
   
   // Validation messages
+  amountRequired: 'Amount is required',
   amountMustBeValid: 'Amount must be a valid number',
   amountMustBePositive: 'Amount must be positive for assets',
+  amountCannotBeZero: 'Amount cannot be zero',
+  amountTooHigh: 'Amount is too high',
+  debtsMustBeNegative: 'Debts must be negative',
+  debtAmountTooHigh: 'Debt amount is too high',
   quantityMustBeInteger: 'Quantity must be an integer',
   quantityMustBePositive: 'Quantity must be greater than zero',
   fieldRequired: 'Field required',
@@ -722,6 +727,13 @@ investmentsTransactionsRiskDescription: 'Investments/Transactions: 7.0 (high ris
   maxLength: 'Maximum {max} characters',
   minValue: 'Minimum value: {min}',
   maxValue: 'Maximum value: {max}',
+  mustBeValidNumber: 'must be a valid number',
+  cannotBeNegative: 'cannot be negative',
+  tooHigh: 'is too high',
+  invalidDate: 'Invalid date',
+  dateCannotBeFuture: 'Date cannot be in the future',
+  descriptionTooLong: 'Description is too long',
+  notesTooLong: 'Notes are too long',
 
   
   // Account types

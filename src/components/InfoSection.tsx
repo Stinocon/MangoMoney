@@ -539,9 +539,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   ];
 
   return (
-    <div className={`max-w-5xl mx-auto p-8 min-h-screen ${
-      darkMode ? 'bg-slate-900' : 'bg-white'
-    }`}>
+    <div className="max-w-5xl mx-auto p-8 min-h-screen">
       <div className="space-y-8">
         {/* Hero Section */}
         <HeroSection darkMode={darkMode} />

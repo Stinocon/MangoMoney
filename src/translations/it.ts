@@ -700,8 +700,13 @@ alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - a
   defaultItalianSettings: 'Impostazioni predefinite Italia',
   
   // Validation messages
+  amountRequired: 'L\'importo è obbligatorio',
   amountMustBeValid: 'L\'importo deve essere un numero valido',
   amountMustBePositive: 'L\'importo deve essere positivo per gli asset',
+  amountCannotBeZero: 'L\'importo non può essere zero',
+  amountTooHigh: 'L\'importo è troppo alto',
+  debtsMustBeNegative: 'I debiti devono essere negativi',
+  debtAmountTooHigh: 'L\'importo del debito è troppo alto',
   quantityMustBeInteger: 'La quantità deve essere un numero intero',
   quantityMustBePositive: 'La quantità deve essere maggiore di zero',
   fieldRequired: 'Campo obbligatorio',
@@ -709,6 +714,13 @@ alternativeAssetsRiskDescription: 'Beni alternativi: 9.0 (rischio molto alto - a
   maxLength: 'Massimo {max} caratteri',
   minValue: 'Valore minimo: {min}',
   maxValue: 'Valore massimo: {max}',
+  mustBeValidNumber: 'deve essere un numero valido',
+  cannotBeNegative: 'non può essere negativo',
+  tooHigh: 'è troppo alto',
+  invalidDate: 'Data non valida',
+  dateCannotBeFuture: 'La data non può essere futura',
+  descriptionTooLong: 'La descrizione è troppo lunga',
+  notesTooLong: 'Le note sono troppo lunghe',
 
   
   // Account types
